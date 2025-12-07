@@ -1,0 +1,57 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 32,
+  "modules-left": ["hyprland/workspaces", "hyprland/window"],
+  "modules-center": ["clock"],
+  "modules-right": ["cpu", "memory", "pulseaudio", "network", "battery"] ,
+
+  "hyprland/workspaces": {
+    "disable-scroll": false,
+    "on-click": "hyprctl dispatch workspace ${id}",
+    "format": "{name}"
+  },
+
+  "hyprland/window": {
+    "format": "{title}"
+  },
+
+  "clock": {
+"format": "{:%H:%M}",
+    "tooltip-format": "%A, %d %B %Y"
+  },
+
+  "cpu": {
+    "format": " {usage}%",
+    "on-click": "kitty -e htop"
+  },
+
+  "memory": {
+    "format": " {used}GB",
+    "on-click": "kitty -e htop"
+  },
+
+  "pulseaudio": {
+    "format": " {volume}%",
+    "format-muted": "",
+    "on-click": "kitty -e pavucontrol"
+  },
+
+"network": {
+  "format-wifi": " {signal}%",
+  "format-ethernet": "",
+  "format-disconnected": "",
+  "tooltip-format": "{ifname}  {ipaddr}  {gwaddr}",
+  "tooltip": true,
+
+  "on-click": "kitty -e nmtui"
+},
+
+   "battery": {
+  "format": " {capacity}%",
+  "format-charging": " {capacity}%",
+  "on-click": "kitty -e sh -c 'acpi; exec bash'"
+}
+
+
+}

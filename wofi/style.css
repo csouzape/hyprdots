@@ -1,0 +1,46 @@
+window {
+    margin: 0px;
+    padding: 10px;
+    border-radius: 4px;              /* quase quadrado */
+    background-color: rgba(20, 20, 20, 0.55);
+    backdrop-filter: blur(12px);
+    border: transparent; 
+    color: #c6d0f5;
+}
+
+#input {
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #c6d0f5;
+    font-size: 13px;
+}
+
+#inner-box,
+#outer-box,
+#scroll,
+entry,
+listview {
+    background: transparent;
+}
+
+#entry {
+    padding: 6px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+}
+
+#entry:selected {
+    background-color: rgba(255, 255, 255, 0.10);
+}
+
+#text {
+    padding: 4px;
+    color: #ffffff
+}
+
+#text:selected {
+    color: #ffffff;
+}

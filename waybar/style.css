@@ -1,0 +1,44 @@
+/* -------- Waybar Style (clean + moderna) -------- */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+}
+
+window#waybar {
+  background: transparent;
+  padding: 4px 10px;
+}
+
+#workspaces button {
+  padding: 4px 10px;
+  margin: 0 4px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cdd6f4;
+  transition: 0.15s;
+}
+
+#workspaces button.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+#workspaces button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+#clock, #cpu, #memory, #pulseaudio, #network, #battery, #window {
+  padding: 4px 12px;
+  margin: 0 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+#pulseaudio.muted {
+  color: #f38ba8;
+}
+
+#battery.charging {
+  color: #a6e3a1;
+}
