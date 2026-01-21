@@ -1,57 +1,47 @@
 {
-  "layer": "top",
-  "position": "top",
-  "height": 32,
-  "modules-left": ["hyprland/workspaces", "hyprland/window"],
-  "modules-center": ["clock"],
-  "modules-right": ["cpu", "memory", "pulseaudio", "network", "battery"] ,
+    "layer": "top", // Barra no topo
+    "position": "top",
+    "output": "eDP-1",     
+    "height": 24, // Fina como na imagem
+    "spacing": 4, // Espaço entre módulos
+    "modules-left": ["hyprland/workspaces"], // Workspaces à esquerda (números 1-6, como na imagem)
+    "modules-center": ["hyprland/window"], // App/janela no meio (ex: "fastfetch")
+    "modules-right": ["battery", "pulseaudio", "clock", "tray"], // Direita: GPU custom, CPU, RAM, bateria, rede, áudio, relógio, tray
 
-  "hyprland/workspaces": {
-    "disable-scroll": false,
-    "on-click": "hyprctl dispatch workspace ${id}",
-    "format": "{name}"
-  },
-
-  "hyprland/window": {
-    "format": "{title}"
-  },
-
-  "clock": {
-"format": "{:%H:%M}",
-    "tooltip-format": "%A, %d %B %Y"
-  },
-
-  "cpu": {
-    "format": " {usage}%",
-    "on-click": "kitty -e htop"
-  },
-
-  "memory": {
-    "format": " {used}GB",
-    "on-click": "kitty -e htop"
-  },
-
-  "pulseaudio": {
-    "format": " {volume}%",
-    "format-muted": "",
-    "on-click": "kitty -e pavucontrol"
-  },
-
-"network": {
-  "format-wifi": " {signal}%",
-  "format-ethernet": "",
-  "format-disconnected": "",
-  "tooltip-format": "{ifname}  {ipaddr}  {gwaddr}",
-  "tooltip": true,
-
-  "on-click": "kitty -e nmtui"
-},
-
-   "battery": {
-  "format": " {capacity}%",
-  "format-charging": " {capacity}%",
-  "on-click": "kitty -e sh -c 'acpi; exec bash'"
-}
-
-
+    // Módulos detalhados
+    "hyprland/workspaces": {
+        "format": "{name}", // Números simples como "1 2 3 4 5 6"
+        "on-click": "activate",
+        "sort-by-number": true,
+        "persistent-workspaces": {
+            "*": 6 // Mostra até 6 workspaces, como na imagem
+        }
+    },
+    "hyprland/window": {
+        "format": "{title}", // Título da janela/app no centro
+        "separate-outputs": true,
+        "max-length": 50 // Limita pra não estourar
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}", // Bateria como "100%"
+        "format-icons": ["", "", "", "", "", "", "", "", "", "", ""],
+        "tooltip-format": "{timeTo}"
+    },
+    "pulseaudio": {
+        "format": "{volume}% {icon}", // Áudio/volume
+        "format-icons": ["", "", ""],
+        "on-click": "pavucontrol"
+    },
+    "clock": {
+        "format": "{:%H:%M %p}", // Relógio como "01:28 PM"
+        "tooltip-format": "{:%Y-%m-%d | %H:%M}"
+    },
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8 // Ícones da tray (volume, rede extra, etc.)
+    }
 }

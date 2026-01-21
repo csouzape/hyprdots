@@ -1,44 +1,40 @@
-/* -------- Waybar Style (clean + moderna) -------- */
-
 * {
-  font-family: "JetBrainsMono Nerd Font", sans-serif;
-  font-size: 13px;
+    border: none;
+    border-radius: 0;
+    font-family: JetBrainsMono Nerd Font, sans-serif; /* Assuma Nerd Fonts instalado */
+    font-size: 13px;
+    min-height: 0;
 }
 
 window#waybar {
-  background: transparent;
-  padding: 4px 10px;
+    background: rgba(0, 0, 0, 0.6); /* Fundo escuro quase preto */
+    color: #ffffff; /* Texto branco */
 }
 
 #workspaces button {
-  padding: 4px 10px;
-  margin: 0 4px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #cdd6f4;
-  transition: 0.15s;
+    padding: 0 5px;
+    background: transparent;
+    color: #ffffff;
 }
 
 #workspaces button.active {
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+    background: #1c1c1c; /* Destaque pro workspace ativo */
+    color: #ffffff;
 }
 
-#workspaces button:hover {
-  background: rgba(255, 255, 255, 0.18);
+#window {
+    margin: 0 20px; /* Espaço no centro */
 }
 
-#clock, #cpu, #memory, #pulseaudio, #network, #battery, #window {
-  padding: 4px 12px;
-  margin: 0 6px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
+#custom-gpuinfo, #cpu, #memory, #battery, #network, #pulseaudio, #clock, #tray {
+    padding: 0 10px;
+    background: transparent;
 }
 
-#pulseaudio.muted {
-  color: #f38ba8;
-}
+#battery.warning { color: orange; }
+#battery.critical { color: red; }
 
-#battery.charging {
-  color: #a6e3a1;
+#tray menu {
+    background: #282a36;
+    color: #f8f8f2;
 }
