@@ -142,5 +142,5 @@ main() {
     copy_fastfetch_dotfiles
     echo "Hyprland setup completed!"
 }
-
+main
 
