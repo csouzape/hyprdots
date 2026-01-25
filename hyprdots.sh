@@ -132,6 +132,11 @@ copy_fastfetch_dotfiles() {
     cp -r .config/fastfetch/* $HOME/.config/fastfetch/
     echo "Fastfetch dotfiles copied."
 }
+setup_sddm() {
+    echo "Setting up SDDM..."
+    sudo systemctl enable sddm
+    echo "SDDM setup completed."
+}
 # Main function 
 main() {
     root_permision
@@ -148,7 +153,9 @@ main() {
     copy_rofi_dotfiles
     copy_fastfetch_dotfiles
     auto_login
+    setup_sddm
     echo "Hyprland setup completed!"
 }
 main
+reboot
 
