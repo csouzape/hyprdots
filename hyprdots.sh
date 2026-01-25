@@ -39,14 +39,21 @@ configure_tlp() {
 
 install_depencences_pacman() {
     echo "Installing dependencies for Hyprland..."
-    sudo pacman -S --noconfirm hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww
+    sudo pacman -S --noconfirm hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch
 }
 
 install_depences_aur() {
     echo "Installing AUR dependencies for Hyprland..."
     yay -S --noconfirm yay -S google-chrome waypaper
 }
-
+auto_login() {
+    echo "Setting up auto-login for user carlos..."
+    sudo mkdir -p /etc/sddm.conf.d
+    echo "[Autologin]" | sudo tee /etc/sddm.conf.d/autologin.conf
+    echo "User=carlos" | sudo tee -a /etc/sddm.conf.d/autologin.conf
+    echo "Session=hyprland" | sudo tee -a /etc/sddm.conf.d/autologin.conf
+    echo "Auto-login configured for user carlos."
+}
 gaming_dependences() {
     echo "Installing gaming dependencies..."
     sudo pacman -S --noconfirm gnutls lib32-gnutls base-devel gtk3 lib32-gtk3 python-google-auth python-protobuf \
@@ -140,6 +147,7 @@ main() {
     copy_waybar_dotfiles
     copy_rofi_dotfiles
     copy_fastfetch_dotfiles
+    auto_login
     echo "Hyprland setup completed!"
 }
 main
