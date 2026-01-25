@@ -1,5 +1,7 @@
 #!/bin/bash 
 # This script installs the necessary dependences for arch linux hyprland 
+# in next update lets try make the dotfiles to one script not limiting in dependences, lets unifique all in one script 
+
 echo "Root previlages are required to run this script"
 if [ "$EUID" -ne 0 ]
     then echo "Please run as root"
