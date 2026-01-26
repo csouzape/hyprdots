@@ -1,7 +1,7 @@
 #!/bin/bash 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # This script installs the necessary dependences for arch linux hyprland 
 # in next update lets try make the dotfiles to one script not limiting in dependences, lets unifique all in one script 
+flags= -S -q --needed --noconfirm --noprogressbar
 
 #call for root permission
 root_permision() {
@@ -26,13 +26,13 @@ install_yay() {
 install_multilib() {
     echo "Enabling multilib repository..."
     sudo sed -i '/\[multilib\]/,/Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
-    sudo pacman -Syu --noconfirm
+    sudo pacman -Syu
     echo "Multilib repository enabled."
 }
 # tlp configuration function
 configure_tlp() {
     echo "Configuring TLP for power management..."
-    sudo pacman -S --noconfirm tlp tlp-rdw
+    sudo pacman $flags tlp tlp-rdw
     sudo systemctl enable tlp
     sudo systemctl start tlp
     echo "TLP has been configured and started."
@@ -40,7 +40,7 @@ configure_tlp() {
 
 install_depencences_pacman() {
     echo "Installing dependencies for Hyprland..."
-    sudo pacman -S --noconfirm hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch
+    sudo pacman $flags hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch
 }
 
 install_depences_aur() {
@@ -57,7 +57,7 @@ auto_login() {
 }
 gaming_dependences() {
     echo "Installing gaming dependencies..."
-    sudo pacman -S --noconfirm gnutls lib32-gnutls base-devel gtk3 lib32-gtk3 python-google-auth python-protobuf \
+    sudo pacman $flags gnutls lib32-gnutls base-devel gtk3 lib32-gtk3 python-google-auth python-protobuf \
         libpulse lib32-libpulse alsa-lib lib32-alsa-lib alsa-utils alsa-plugins lib32-alsa-plugins \
         giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap openal lib32-openal \
         libxcomposite lib32-libxcomposite libxinerama lib32-libxinerama libgcrypt lib32-libgcrypt \
@@ -98,41 +98,12 @@ setup_terminus() {
     printf "%b\n" "${GREEN}Configuração da fonte concluída!${RC}"
 }
 
-# Make hyprland dotfiles copy 
-copy_hyprland_dotfiles() {
-    echo "Copying Hyprland dotfiles..."
-    mkdir -p $HOME/.config/hypr
-    cp -r "$SCRIPT_DIR/hypr/"* $HOME/.config/hypr/
-    echo "Hyprland dotfiles copied."
+copy_dotfiles() {
+    echo "Copying dotfiles..."
+    cp -r "/home/carlos/hypdots/" /home/carlos/.config/
+    echo "Dotfiles copied."
 }
-# alacritty copy 
-copy_alacritty_dotfiles() {
-    echo "Copying Alacritty dotfiles..."
-    mkdir -p $HOME/.config/alacritty
-    cp -r "$SCRIPT_DIR/alacritty/"* $HOME/.config/alacritty/
-    echo "Alacritty dotfiles copied."
-}
-# waybar copy 
-copy_waybar_dotfiles() {
-    echo "Copying Waybar dotfiles..."
-    mkdir -p $HOME/.config/waybar
-    cp -r "$SCRIPT_DIR/waybar/"* $HOME/.config/waybar/
-    echo "Waybar dotfiles copied."
-}
-# rofi copy 
-copy_rofi_dotfiles() {
-    echo "Copying Rofi dotfiles..."
-    mkdir -p $HOME/.config/rofi
-    cp -r "$SCRIPT_DIR/rofi/"* $HOME/.config/rofi/
-    echo "Rofi dotfiles copied."
-}
-# fastfetch copy
-copy_fastfetch_dotfiles() {
-    echo "Copying Fastfetch dotfiles..."
-    mkdir -p $HOME/.config/fastfetch
-    cp -r "$SCRIPT_DIR/fastfetch/"* $HOME/.config/fastfetch/
-    echo "Fastfetch dotfiles copied."
-}
+
 setup_sddm() {
     echo "Setting up SDDM..."
     sudo systemctl enable sddm
@@ -148,11 +119,7 @@ main() {
     install_depences_aur
     gaming_dependences
     setup_terminus
-    copy_hyprland_dotfiles
-    copy_alacritty_dotfiles
-    copy_waybar_dotfiles
-    copy_rofi_dotfiles
-    copy_fastfetch_dotfiles
+    copy_dotfiles
     auto_login
     setup_sddm
     echo "Hyprland setup completed!"
