@@ -106,6 +106,12 @@
     "keyColor": "green"
     },
     {
+    "type": "command",
+    "key": "󰋄 AGE",
+    "keyColor": "yellow",
+    "text": "birth_install=$(stat -c %W / | tr -d '0-'); [ -z \"$birth_install\" ] && birth_install=$(stat -c %Y /); current=$(date +%s); echo \"$(( ($current - $birth_install) / 86400 )) days\""
+    },
+    {
     "type": "sound",
     "key": " AUDIO",
     "format": "{2}",
