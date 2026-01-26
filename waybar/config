@@ -1,44 +1,52 @@
 {
-    "layer": "top", // Barra no topo
+    "layer": "top", 
     "position": "top",
     "output": "eDP-1",     
-    "height": 24, // Fina como na imagem
-    "spacing": 4, // Espaço entre módulos
-    "modules-left": ["hyprland/workspaces"], // Workspaces à esquerda (números 1-6, como na imagem)
-    "modules-center": ["hyprland/window"], // App/janela no meio (ex: "fastfetch")
-    "modules-right": ["battery", "pulseaudio", "clock", "tray"], // Direita: GPU custom, CPU, RAM, bateria, rede, áudio, relógio, tray
+    "height": 24, 
+    "spacing": 0, 
+    "modules-left": ["hyprland/workspaces"], 
+    "modules-center": ["hyprland/window"], 
+    "modules-right": ["battery", "pulseaudio", "clock", "network" "tray"], 
 
-    // Módulos detalhados
     "hyprland/workspaces": {
-        "format": "{name}", // Números simples como "1 2 3 4 5 6"
+        "format": "{name}", 
         "on-click": "activate",
         "sort-by-number": true,
         "persistent-workspaces": {
-            "*": 6 // Mostra até 6 workspaces, como na imagem
+            "*": 6 
         }
     },
     "hyprland/window": {
-        "format": "{title}", // Título da janela/app no centro
+        "format": "{title}", 
         "separate-outputs": true,
-        "max-length": 50 // Limita pra não estourar
+        "max-length": 50
     },
     "battery": {
         "states": {
             "warning": 30,
             "critical": 15
         },
-        "format": "{capacity}% {icon}", // Bateria como "100%"
+        "format": "{capacity}% {icon}", 
         "format-icons": ["", "", "", "", "", "", "", "", "", "", ""],
         "tooltip-format": "{timeTo}"
     },
     "pulseaudio": {
-        "format": "{volume}% {icon}", // Áudio/volume
+        "format": "{volume}% {icon}", 
         "format-icons": ["", "", ""],
         "on-click": "pavucontrol"
     },
     "clock": {
         "format": "{:%H:%M %p}", // Relógio como "01:28 PM"
         "tooltip-format": "{:%Y-%m-%d | %H:%M}"
+    },
+    "network": {
+    "format-ethernet": "󰈀",  
+    "format-linked": "󰈀 (No IP)",
+    "format-disconnected": "󰲜", 
+    "tooltip-format-wifi": "{essid} ({signaldBm}dBm) ",
+    "tooltip-format-ethernet": "{ifname} 󰈀",
+    "tooltip-format-disconnected": "Desconectado",
+    "on-click": "nm-connection-editor"
     },
     "tray": {
         "icon-size": 16,
