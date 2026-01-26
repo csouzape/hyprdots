@@ -14,7 +14,7 @@ root_permision() {
 # install yay
 install_yay() {
     echo "Installing yay"
-    sudo pacman -S --noconfirm git base-devel
+    pacman -S --noconfirm git base-devel
     git clone https://aur.archlinux.org/yay
     cd yay 
     makepkg -si --noconfirm
@@ -22,7 +22,14 @@ install_yay() {
     mv yay .config
     echo "yay installed"
 }
-
+check_yay() {
+    if ! command -v yay &> /dev/null; then
+        echo "yay could not be found, installing..."
+        install_yay
+    else
+        echo "yay is already installed."
+    fi
+}
 install_multilib() {
     echo "Enabling multilib repository..."
     sudo sed -i '/\[multilib\]/,/Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
@@ -112,7 +119,7 @@ setup_sddm() {
 # Main function 
 main() {
     root_permision
-    install_yay
+    check_yay
     install_multilib
     configure_tlp
     install_depencences_pacman
