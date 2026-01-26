@@ -1,4 +1,5 @@
 #!/bin/bash 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # This script installs the necessary dependences for arch linux hyprland 
 # in next update lets try make the dotfiles to one script not limiting in dependences, lets unifique all in one script 
 
@@ -101,35 +102,35 @@ setup_terminus() {
 copy_hyprland_dotfiles() {
     echo "Copying Hyprland dotfiles..."
     mkdir -p $HOME/.config/hypr
-    cp -r .config/hypr/* $HOME/.config/hypr/
+    cp -r "$SCRIPT_DIR/hypr/"* $HOME/.config/hypr/
     echo "Hyprland dotfiles copied."
 }
 # alacritty copy 
 copy_alacritty_dotfiles() {
     echo "Copying Alacritty dotfiles..."
     mkdir -p $HOME/.config/alacritty
-    cp -r .config/alacritty/* $HOME/.config/alacritty/
+    cp -r "$SCRIPT_DIR/alacritty/"* $HOME/.config/alacritty/
     echo "Alacritty dotfiles copied."
 }
 # waybar copy 
 copy_waybar_dotfiles() {
     echo "Copying Waybar dotfiles..."
     mkdir -p $HOME/.config/waybar
-    cp -r .config/waybar/* $HOME/.config/waybar/
+    cp -r "$SCRIPT_DIR/waybar/"* $HOME/.config/waybar/
     echo "Waybar dotfiles copied."
 }
 # rofi copy 
 copy_rofi_dotfiles() {
     echo "Copying Rofi dotfiles..."
     mkdir -p $HOME/.config/rofi
-    cp -r .config/rofi/* $HOME/.config/rofi/
+    cp -r "$SCRIPT_DIR/rofi/"* $HOME/.config/rofi/
     echo "Rofi dotfiles copied."
 }
 # fastfetch copy
 copy_fastfetch_dotfiles() {
     echo "Copying Fastfetch dotfiles..."
     mkdir -p $HOME/.config/fastfetch
-    cp -r .config/fastfetch/* $HOME/.config/fastfetch/
+    cp -r "$SCRIPT_DIR/fastfetch/"* $HOME/.config/fastfetch/
     echo "Fastfetch dotfiles copied."
 }
 setup_sddm() {
@@ -144,7 +145,7 @@ main() {
     install_multilib
     configure_tlp
     install_depencences_pacman
-    Install_depences_aur
+    install_depences_aur
     gaming_dependences
     setup_terminus
     copy_hyprland_dotfiles
