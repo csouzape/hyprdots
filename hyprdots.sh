@@ -73,7 +73,7 @@ gaming_dependences() {
         gst-plugins-base-libs lib32-gst-plugins-base-libs sdl2 lib32-sdl2 v4l-utils lib32-v4l-utils \
         vulkan-icd-loader lib32-vulkan-icd-loader ocl-icd lib32-ocl-icd opencl-icd-loader lib32-opencl-icd-loader \
         libxslt lib32-libxslt cups samba lib32-mesa vulkan-radeon lib32-vulkan-radeon \
-        gamescope mangohud lib32-mangohud gamemode lib32-gamemode
+        gamescope mangohud lib32-mangohud gamemode lib32-gamemode vulkan-intel lib32-vulkan-intel vulkan-icd-loader lib32-vulkan-icd-loader 
 }
 
 setup_terminus() {
