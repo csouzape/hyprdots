@@ -12,23 +12,23 @@ configuration {
     sidebar-mode: true;
 }
 
-@theme "/dev/null" /* Limpa o tema padrão */
-
-/* Adicione aqui suas cores e estilos (ou importe um tema pronto) */
-
+@theme "/dev/null"
 
 * {
-    /* Cores baseadas no seu #121212 */
+    /* Cores */
     bg-col:  #121212;
     bg-col-light: #1e1e1e;
     border-col: #333333;
     selected-col: #1e1e1e;
-    blue: #89b4fa; /* Cor de destaque (ajuste se preferir outra) */
+    blue: #89b4fa;
     fg-col: #D9D9D9;
     fg-col2: #ff4f4f;
 
     width: 600;
     font: "JetBrainsMono Nerd Font 11";
+    
+    /* Zera o arredondamento globalmente */
+    border-radius: 0px; 
 }
 
 element-text, element-icon , mode-switcher {
@@ -41,7 +41,7 @@ window {
     border: 2px;
     border-color: @border-col;
     background-color: @bg-col;
-    border-radius: 12px;
+    border-radius: 0px; /* Quadrado */
 }
 
 mainbox {
@@ -51,7 +51,7 @@ mainbox {
 inputbar {
     children: [prompt,entry];
     background-color: @bg-col;
-    border-radius: 5px;
+    border-radius: 0px; /* Quadrado */
     padding: 2px;
 }
 
@@ -59,7 +59,7 @@ prompt {
     background-color: #303030;
     padding: 6px;
     text-color: @bg-col;
-    border-radius: 3px;
+    border-radius: 0px; /* Quadrado */
     margin: 20px 0px 0px 20px;
 }
 
@@ -89,6 +89,7 @@ element {
     padding: 5px;
     background-color: @bg-col;
     text-color: @fg-col;
+    border-radius: 0px; /* Quadrado */
 }
 
 element-icon {
@@ -98,12 +99,12 @@ element-icon {
 element selected {
     background-color:  @selected-col;
     text-color: #303030;
-    border-radius: 8px;
+    border-radius: 0px; /* Quadrado */
 }
 
 mode-switcher {
     spacing: 0;
-  }
+}
 
 button {
     padding: 10px;
@@ -111,9 +112,10 @@ button {
     text-color: @fg-col;
     vertical-align: 0.5; 
     horizontal-align: 0.5;
+    border-radius: 0px; /* Quadrado */
 }
 
 button selected {
   background-color: @bg-col;
-  text-color: @blue;
+  text-color: #303030;
 }
