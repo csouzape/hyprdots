@@ -107,7 +107,7 @@ setup_terminus() {
 
 copy_dotfiles() {
     echo "Copying dotfiles..."
-    cp -r /home/carlos/hyprdots/* /home/carlos/.config/
+    su - carlos -c "cp -r /home/carlos/hyprdots/* /home/carlos/.config/"
     echo "Dotfiles copied."
 }
 
