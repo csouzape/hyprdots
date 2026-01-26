@@ -1,4 +1,5 @@
-#!/bin/bash 
+#!/bin/bash
+set -e 
 # This script installs the necessary dependences for arch linux hyprland 
 flags="-S -q --needed --noconfirm --noprogressbar"
 
