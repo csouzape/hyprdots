@@ -1,7 +1,6 @@
 #!/bin/bash 
 # This script installs the necessary dependences for arch linux hyprland 
-# in next update lets try make the dotfiles to one script not limiting in dependences, lets unifique all in one script 
-flags= -S -q --needed --noconfirm --noprogressbar
+flags="-S -q --needed --noconfirm --noprogressbar"
 
 #call for root permission
 root_permision() {
