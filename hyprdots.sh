@@ -47,12 +47,12 @@ configure_tlp() {
 
 install_depencences_pacman() {
     echo "Installing dependencies for Hyprland..."
-    sudo pacman $flags hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch
+    sudo pacman $flags hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch firefox
 }
 
 install_depences_aur() {
     echo "Installing AUR dependencies for Hyprland..."
-    yay -S --noconfirm yay -S google-chrome waypaper
+    yay -S --noconfirm yay -S waypaper
 }
 auto_login() {
     echo "Setting up auto-login for user carlos..."
