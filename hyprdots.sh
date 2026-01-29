@@ -47,7 +47,7 @@ configure_tlp() {
 
 install_depencences_pacman() {
     echo "Installing dependencies for Hyprland..."
-    sudo pacman $flags hyprland waybar alacritty rofi thunar nerd-fonts ttf-jetbrains-mono pavucontrol swww sddm fastfetch
+    sudo pacman $flags hyprland waybar alacritty rofi thunar ttf-jetbrains-mono pavucontrol swww sddm fastfetch
 }
 
 install_depences_aur() {
