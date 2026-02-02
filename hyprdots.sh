@@ -1,16 +1,17 @@
 #!/bin/bash
-set -e 
-#color codes for output
+set -e
+
+# Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 RC='\033[0m'
 
-# get script directory
+# Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# detect distro
+# Function to detect the Linux distribution
 detect_distro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -25,7 +26,7 @@ detect_distro() {
     echo "$DISTRO"
 }
 
-# check script exists
+# Function to check if script exists
 check_script() {
     local script_path="$1"
     if [ ! -f "$script_path" ]; then
@@ -37,7 +38,7 @@ check_script() {
     chmod +x "$script_path"
 }
 
-#copy distro dotfiles
+# Function to copy distro-specific dotfiles
 copy_distro_dotfiles() {
     local distro="$1"
     local source_dir="$SCRIPT_DIR/distro/$distro"
@@ -54,7 +55,7 @@ copy_distro_dotfiles() {
     fi
 }
 
-#main function 
+# Main function
 main() {
     echo -e "${BLUE}========================================${RC}"
     echo -e "${BLUE}       Hyprdots Installation Script    ${RC}"
@@ -75,11 +76,11 @@ main() {
     # Determine which installation script to run
     case "$DISTRO" in
         arch|archarm|manjaro|endeavouros)
-            INSTALL_SCRIPT="$SCRIPT_DIR/distro/arch.sh"
+            INSTALL_SCRIPT="$SCRIPT_DIR/distro/arch/arch.sh"
             echo -e "${GREEN}Using Arch Linux installation script${RC}"
             ;;
         fedora)
-            INSTALL_SCRIPT="$SCRIPT_DIR/distro/fedora.sh"
+            INSTALL_SCRIPT="$SCRIPT_DIR/distro/fedora/fedora.sh"
             echo -e "${GREEN}Using Fedora installation script${RC}"
             ;;
         *)
