@@ -71,11 +71,12 @@ install_dependencies_aur() {
     echo -e "${GREEN}AUR dependencies installed${RC}"
 }
 
-# install pacman dependencies function
-install_depences_aur() {
-    echo "Installing AUR dependencies for Hyprland..."
-    yay -S --noconfirm yay -S waypaper google-chrome-bin 
+install_dependencies_pacman(){
+    echo -e "${YELLOW} Installing pacman dependences ${RC}"
+    pacman $flags hyprland swww sddm alacritty thunar pavucontrol ttf-jetbrains-mono waybar discord xdg-desktop-portal \
+        xdg-desktop-portal-hyprland hyprshot
 }
+
 
 auto_login() {
     echo -e "${YELLOW}Setting up auto-login for user $INSTALL_USER...${RC}"
