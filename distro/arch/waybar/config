@@ -6,7 +6,7 @@
     "spacing": 0, 
     "modules-left": ["hyprland/workspaces"], 
     "modules-center": ["hyprland/window"], 
-    "modules-right": ["battery", "pulseaudio", "clock", "network", "tray"], 
+    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator", "network", "tray"], 
 
     "hyprland/workspaces": {
         "format": "{name}", 
@@ -34,6 +34,11 @@
         "format": "{volume}% {icon}", 
         "format-icons": ["", "", ""],
         "on-click": "pavucontrol"
+    },
+    "custom/separator": {
+    "format": "|",
+    "interval": "once",
+    "tooltip": false
     },
     "clock": {
         "format": "{:%H:%M %p}", // Relógio como "01:28 PM"
