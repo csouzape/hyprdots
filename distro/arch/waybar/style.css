@@ -1,14 +1,14 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: JetBrainsMono Nerd Font, sans-serif; /* Assuma Nerd Fonts instalado */
+    font-family: JetBrainsMono Nerd Font, sans-serif; 
     font-size: 13px;
     min-height: 0;
 }
 
 window#waybar {
-    background: rgba(0, 0, 0, 0.6); /* Fundo escuro quase preto */
-    color: #ffffff; /* Texto branco */
+    background: rgba(0, 0, 0, 0.6); 
+    color: #ffffff;
 }
 
 #workspaces button {
@@ -18,12 +18,12 @@ window#waybar {
 }
 
 #workspaces button.active {
-    background: #1c1c1c; /* Destaque pro workspace ativo */
+    background: #1c1c1c;
     color: #ffffff;
 }
 
 #window {
-    margin: 0 20px; /* Espaço no centro */
+    margin: 0 20px;
 }
 
 #custom-gpuinfo, #cpu, #memory, #battery, #network, #pulseaudio, #clock, #tray {
