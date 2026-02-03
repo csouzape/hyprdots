@@ -74,7 +74,7 @@ install_dependencies_aur() {
 install_dependencies_pacman(){
     echo -e "${YELLOW} Installing pacman dependences ${RC}"
     pacman $flags hyprland swww sddm alacritty thunar pavucontrol ttf-jetbrains-mono waybar discord xdg-desktop-portal \
-        xdg-desktop-portal-hyprland hyprshot mako 
+        xdg-desktop-portal-hyprland hyprshot swaync 
 }
 
 
