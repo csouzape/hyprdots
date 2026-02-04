@@ -38,23 +38,6 @@ check_script() {
     chmod +x "$script_path"
 }
 
-# Function to copy distro-specific dotfiles
-copy_distro_dotfiles() {
-    local distro="$1"
-    local source_dir="$SCRIPT_DIR/distro/$distro"
-    local install_user="${SUDO_USER:-$USER}"
-    local user_home=$(eval echo ~$install_user)
-    
-    if [ -d "$source_dir" ]; then
-        echo -e "${YELLOW}Copying $distro-specific dotfiles...${RC}"
-        sudo -u $install_user mkdir -p "$user_home/.config"
-        sudo -u $install_user cp -r "$source_dir/"* "$user_home/.config/" 2>/dev/null || true
-        echo -e "${GREEN}Distro-specific dotfiles copied${RC}"
-    else
-        echo -e "${YELLOW}No distro-specific dotfiles found for $distro${RC}"
-    fi
-}
-
 # Main function
 main() {
     echo -e "${BLUE}========================================${RC}"
@@ -98,12 +81,11 @@ main() {
     echo ""
     bash "$INSTALL_SCRIPT"
     
-    # Copy distro-specific dotfiles after installation
-    copy_distro_dotfiles "$DISTRO"
-    
     echo ""
     echo -e "${GREEN}========================================${RC}"
     echo -e "${GREEN}   Installation completed successfully!${RC}"
+    echo -e "${GREEN}========================================${RC}"
+    echo -e "${YELLOW}Please reboot your system to start using Hyprland${RC}"
     echo -e "${GREEN}========================================${RC}"
 }
 
