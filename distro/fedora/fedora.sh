@@ -290,8 +290,7 @@ installFont() {
     fi
     
     echo "Instalando fonte '$FONT_NAME'..."
-    
-    # Baixa e instala a fonte
+	
     FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
     FONT_DIR="$HOME/.local/share/fonts/$FONT_NAME"
     TEMP_DIR=$(mktemp -d)
