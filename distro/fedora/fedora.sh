@@ -69,6 +69,8 @@ install_packages() {
 		hyprshot
 		swaync
 		rofi
+		waypaper
+		swww
 	)
 	
 	dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
