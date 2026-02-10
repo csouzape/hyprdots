@@ -71,6 +71,8 @@ install_packages() {
 		rofi
 		waypaper
 		swww
+		pamixer
+		playerctl
 	)
 	
 	dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
