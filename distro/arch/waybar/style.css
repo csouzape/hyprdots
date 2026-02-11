@@ -1,7 +1,7 @@
 * {
     border: none;
     border-radius: 0;
-    font-family: JetBrainsMono Nerd Font, sans-serif; 
+    font-family: JetBrainsMono, sans-serif; 
     font-size: 13px;
     min-height: 0;
 }
@@ -12,7 +12,7 @@ window#waybar {
 }
 
 #workspaces button {
-    padding: 0 2px;
+    padding: 0 4px;
     background: transparent;
     color: #ffffff;
 }
@@ -26,8 +26,13 @@ window#waybar {
     margin: 0 20px;
 }
 
-#custom-gpuinfo, #cpu, #memory, #battery, #network, #pulseaudio, #clock, #tray {
-    padding: 0 2px;
+
+#network{
+    padding: 0 5px
+}
+
+#custom-gpuinfo, #cpu, #memory, #battery, #pulseaudio, #clock, #tray {
+    padding: 0 3px;
     background: transparent;
 }
 
@@ -41,5 +46,6 @@ window#waybar {
 
 #custom-separator {
   color: rgba(125, 125, 125, 0.6);
-  margin: 0 5px;
+  margin: 0 1px;
+  padding: 0 2px;
 }
