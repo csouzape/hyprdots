@@ -22,9 +22,7 @@ root_permission() {
 	echo -e "${GREEN}Running with root privileges${RC}"
 }
 remove_kde() {
-	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"
-
-	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
+	echo -e "${YELLOW}Removing KDE Plasma...${RC}"
 		dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
 		dnf remove -y \
 			--setopt=protected_packages= \
@@ -37,8 +35,6 @@ remove_kde() {
 			konsole dolphin ark gwenview
 
 		echo -e "${GREEN}KDE Plasma removed (SDDM preserved)${RC}"
-	else
-		echo -e "${YELLOW}KDE Plasma not found — skipping${RC}"
 	fi
 }
 enable_hypr_repo() {
