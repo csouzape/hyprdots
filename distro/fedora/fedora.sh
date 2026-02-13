@@ -35,7 +35,8 @@ remove_kde() {
             konsole dolphin ark gwenview
 
         echo -e "${GREEN}KDE Plasma removed (SDDM preserved)${RC}"
-    fi
+    else
+	fi
 }
 
 
