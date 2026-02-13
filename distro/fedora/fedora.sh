@@ -235,7 +235,7 @@ main() {
 
 		2)
 			echo -e "${YELLOW}Removing KDE Plasma only...${RC}"
-			remove_kde
+			remove_kde2
 			echo -e "${GREEN}KDE removal process finished.${RC}"
 			exit 0
 			;;
@@ -253,3 +253,5 @@ main() {
 }
 
 main "$@"
+
+
