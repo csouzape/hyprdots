@@ -98,110 +98,12 @@ configure_tlp() {
 	echo -e "${GREEN}TLP configured${RC}"
 }
 
-verify_dotfiles_copy() {
-	local SOURCE="$1"
-	local DEST="$2"
-	
-	echo -e "${YELLOW}Verifying copied files...${RC}"
-	
-	local CRITICAL_CONFIGS=(
-		"hypr/hyprland.conf"
-		"waybar/config"
-		"rofi/config.rasi"
-	)
-	
-	local MISSING_CRITICAL=0
-	
-	# Verificar arquivos críticos
-	for config in "${CRITICAL_CONFIGS[@]}"; do
-		if [ -f "$SOURCE/$config" ]; then
-			if [ -f "$DEST/$config" ]; then
-				echo -e "${GREEN}  ✓ $config${RC}"
-			else
-				((MISSING_CRITICAL++))
-				echo -e "${RED}  ✗ $config (MISSING)${RC}"
-			fi
-		fi
-	done
-	
-	# Verificar diretórios principais
-	echo -e "${YELLOW}Checking main directories...${RC}"
-	for dir in "$SOURCE"/*; do
-		if [ -d "$dir" ]; then
-			local dirname=$(basename "$dir")
-			if [ -d "$DEST/$dirname" ]; then
-				local src_files=$(find "$dir" -type f 2>/dev/null | wc -l)
-				local dst_files=$(find "$DEST/$dirname" -type f 2>/dev/null | wc -l)
-				
-				if [ "$src_files" -eq "$dst_files" ]; then
-					echo -e "${GREEN}  ✓ $dirname/ ($dst_files files)${RC}"
-				else
-					echo -e "${YELLOW}  ⚠ $dirname/ ($dst_files/$src_files files)${RC}"
-				fi
-			else
-				echo -e "${RED}  ✗ $dirname/ (directory missing)${RC}"
-				((MISSING_CRITICAL++))
-			fi
-		fi
-	done
-	
-	# Resultado final
-	echo -e "${BLUE}========================================${RC}"
-	if [ $MISSING_CRITICAL -gt 0 ]; then
-		echo -e "${RED}WARNING: $MISSING_CRITICAL critical issues found!${RC}"
-		return 1
-	else
-		echo -e "${GREEN}All critical configurations verified!${RC}"
-		return 0
-	fi
-}
-
-auto_fix_dotfiles() {
-	echo -e "${YELLOW}Attempting intelligent auto-fix...${RC}"
-	
-	local DOTFILES_SOURCE="$1"
-	local CONFIG_DIR="$2"
-	
-	# Método 2: Tentar com rsync (se disponível)
-	if command -v rsync &>/dev/null; then
-		echo -e "${BLUE}Method 2: Using rsync for robust copy...${RC}"
-		dnf install ${DNF_FLAGS} rsync 2>/dev/null || true
-		if command -v rsync &>/dev/null; then
-			rsync -av --chown=$INSTALL_USER:$INSTALL_USER "$DOTFILES_SOURCE/" "$CONFIG_DIR/"
-			chown -R $INSTALL_USER:$INSTALL_USER "$CONFIG_DIR"
-			
-			if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
-				return 0
-			fi
-		fi
-	fi
-	
-	# Método 3: Cópia arquivo por arquivo com find
-	echo -e "${BLUE}Method 3: Using find-based copy...${RC}"
-	cd "$DOTFILES_SOURCE" || return 1
-	find . -type f | while read -r file; do
-		local target_dir="$CONFIG_DIR/$(dirname "$file")"
-		sudo -u $INSTALL_USER mkdir -p "$target_dir"
-		sudo -u $INSTALL_USER cp -f "$file" "$target_dir/" 2>/dev/null || true
-	done
-	cd - > /dev/null
-	
-	chown -R $INSTALL_USER:$INSTALL_USER "$CONFIG_DIR"
-	
-	# Verificar novamente
-	if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
-		return 0
-	else
-		return 1
-	fi
-}
-
 copy_dotfiles() {
 	echo -e "${YELLOW}Copying dotfiles...${RC}"
 	
 	local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
 	local CONFIG_DIR="$USER_HOME/.config"
-	
+
 	# Procurar pelo diretório de dotfiles
 	if [ ! -d "$DOTFILES_SOURCE" ]; then
 		echo -e "${YELLOW}Trying alternative paths...${RC}"
@@ -222,37 +124,56 @@ copy_dotfiles() {
 		
 		if [ ! -d "$DOTFILES_SOURCE" ]; then
 			echo -e "${RED}Error: No valid dotfiles directory found${RC}"
-			echo -e "${YELLOW}Please ensure hyprdots repository is cloned to $USER_HOME${RC}"
 			return 1
 		fi
 	fi
 	
 	echo -e "${GREEN}Found dotfiles at: $DOTFILES_SOURCE${RC}"
-	
-	# Criar .config se não existir
-	sudo -u $INSTALL_USER mkdir -p "$CONFIG_DIR"
-	
-	# Método 1: Cópia padrão recursiva
-	echo -e "${BLUE}Method 1: Standard recursive copy...${RC}"
-	if sudo -u $INSTALL_USER cp -rf "$DOTFILES_SOURCE/"* "$CONFIG_DIR/" 2>/dev/null; then
-		chown -R $INSTALL_USER:$INSTALL_USER "$CONFIG_DIR"
-		echo -e "${GREEN}Standard copy completed${RC}"
-		
-		# Verificar se funcionou
-		if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
-			echo -e "${GREEN}Dotfiles successfully copied and verified!${RC}"
-			return 0
-		else
-			echo -e "${YELLOW}Standard copy incomplete, trying alternative methods...${RC}"
-			auto_fix_dotfiles "$DOTFILES_SOURCE" "$CONFIG_DIR"
-			return $?
-		fi
+
+	# Criar .config como o usuário correto
+	runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
+
+	echo -e "${BLUE}Copying files...${RC}"
+
+	# Copia TUDO, inclusive arquivos ocultos
+	if command -v rsync &>/dev/null; then
+		runuser -u "$INSTALL_USER" -- rsync -a \
+			"$DOTFILES_SOURCE/." "$CONFIG_DIR/"
 	else
-		echo -e "${YELLOW}Standard copy failed, trying alternative methods...${RC}"
-		auto_fix_dotfiles "$DOTFILES_SOURCE" "$CONFIG_DIR"
-		return $?
+		runuser -u "$INSTALL_USER" -- cp -a \
+			"$DOTFILES_SOURCE/." "$CONFIG_DIR/"
+	fi
+
+	echo -e "${GREEN}Dotfiles copy completed${RC}"
+
+	if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
+		echo -e "${GREEN}Dotfiles successfully copied and verified!${RC}"
+		return 0
+	else
+		echo -e "${YELLOW}Verification failed${RC}"
+		return 1
 	fi
 }
+
+
+
+
+wallpapers_config() {
+
+	local TARGET_DIR="$USER_HOME/Documentos/GitHub/wallpapers"
+
+	if [ -d "$TARGET_DIR/.git" ]; then
+		echo "Wallpapers repo already exists — pulling latest changes..."
+		runuser -u "$INSTALL_USER" -- git -C "$TARGET_DIR" pull
+	else
+		echo "Cloning wallpapers repository..."
+		runuser -u "$INSTALL_USER" -- git clone --depth=1 \
+			https://github.com/csouzape/wallpapers \
+			"$TARGET_DIR"
+	fi
+}
+
+
 
 
 main() {
@@ -283,7 +204,10 @@ main() {
 			
 			enable_hypr_repo
 			install_packages
+			copy_dotfiles
 			configure_tlp
+			wallpapers_config
+			
 			
 			if ! copy_dotfiles; then
 				echo -e "${YELLOW}Some configuration files may be missing${RC}"
