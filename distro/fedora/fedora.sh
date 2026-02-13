@@ -21,10 +21,8 @@ root_permission() {
 	fi
 	echo -e "${GREEN}Running with root privileges${RC}"
 }
-remove_kde() {
-	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"
 
-	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
+remove_kde2(){
 		dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
 		dnf remove -y \
 			--setopt=protected_packages= \
@@ -35,12 +33,25 @@ remove_kde() {
 			kf5-* \
 			kf6-* \
 			konsole dolphin ark gwenview
-
-		echo -e "${GREEN}KDE Plasma removed (SDDM preserved)${RC}"
-	else
-		echo -e "${YELLOW}KDE Plasma not found — skipping${RC}"
-	fi
 }
+#remove_kde() {
+#	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"#
+#
+#	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
+#		dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
+#		dnf remove -y \
+##			plasma-desktop \
+#			plasma-workspace* \
+#			plasma-* \
+#			kde-* \
+#			kf5-* \
+##			konsole dolphin ark gwenview
+#
+#		echo -e "${GREEN}KDE Plasma removed (SDDM preserved)${RC}"
+#	else
+#		echo -e "${YELLOW}KDE Plasma not found — skipping${RC}"
+#	fi
+#}3
 enable_hypr_repo() {
 	echo -e "${YELLOW}Enabling Hyprland repository...${RC}"
 	dnf install ${DNF_FLAGS} dnf-plugins-core
