@@ -25,8 +25,8 @@ remove_kde_keep_sddm() {
 	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"
 
 	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
-		sudo dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
-		sudo dnf remove -y \
+		dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
+		dnf remove -y \
 			--setopt=protected_packages= \
 			plasma-desktop \
 			plasma-workspace* \
