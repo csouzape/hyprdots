@@ -282,31 +282,6 @@ setup_sddm() {
 	echo -e "${GREEN}SDDM enabled${RC}"
 }
 
-installFont() {
-    FONT_NAME="MesloLGS Nerd Font Mono"
-    
-    # Verifica se a fonte já está instalada
-    if fc-list :family | grep -iq "$FONT_NAME"; then
-        echo "Fonte '$FONT_NAME' já instalada."
-        return
-    fi
-    
-    echo "Instalando fonte '$FONT_NAME'..."
-	
-    FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
-    FONT_DIR="$HOME/.local/share/fonts/$FONT_NAME"
-    TEMP_DIR=$(mktemp -d)
-    
-    curl -sSLo "$TEMP_DIR/font.zip" "$FONT_URL"
-    unzip -q "$TEMP_DIR/font.zip" -d "$TEMP_DIR"
-    mkdir -p "$FONT_DIR"
-    mv "$TEMP_DIR"/*.ttf "$FONT_DIR"
-    fc-cache -f
-    rm -rf "$TEMP_DIR"
-    
-    echo "Fonte '$FONT_NAME' instalada com sucesso."
-}
-
 main() {
 	echo -e "${BLUE}========================================${RC}"
 	echo -e "${BLUE}  Hyprland Setup Script for Fedora${RC}"
@@ -321,7 +296,6 @@ main() {
 	enable_hypr_repo
 	install_packages
 	configure_tlp
-	installFont
 	
 	# Copiar dotfiles com auto-fix se necessário
 	if ! copy_dotfiles; then
