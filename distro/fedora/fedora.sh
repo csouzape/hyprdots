@@ -21,7 +21,7 @@ root_permission() {
 	fi
 	echo -e "${GREEN}Running with root privileges${RC}"
 }
-remove_kde_keep_sddm() {
+remove_kde() {
 	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"
 
 	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
@@ -254,33 +254,6 @@ copy_dotfiles() {
 	fi
 }
 
-auto_login() {
-	echo -e "${YELLOW}Configuring SDDM autologin...${RC}"
-	
-	mkdir -p /etc/sddm.conf.d
-	cat > /etc/sddm.conf.d/autologin.conf <<EOF
-[Autologin]
-User=$INSTALL_USER
-Session=hyprland
-EOF
-	echo -e "${GREEN}Autologin enabled${RC}"
-}
-
-setup_sddm() {
-	echo -e "${YELLOW}Configuring SDDM...${RC}"
-	
-	dnf install ${DNF_FLAGS} sddm
-	
-	# Desabilitar outros display managers
-	for dm in gdm lightdm lxdm; do
-		if systemctl is-enabled $dm &>/dev/null; then
-			systemctl disable $dm || true
-		fi
-	done
-	
-	systemctl enable sddm
-	echo -e "${GREEN}SDDM enabled${RC}"
-}
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
@@ -292,26 +265,56 @@ main() {
 	echo
 
 	root_permission
-	remove_kde_keep_sddm
-	enable_hypr_repo
-	install_packages
-	configure_tlp
-	
-	# Copiar dotfiles com auto-fix se necessário
-	if ! copy_dotfiles; then
-		echo -e "${YELLOW}Some configuration files may be missing${RC}"
-		echo -e "${YELLOW}Please verify manually after installation${RC}"
-	fi
-	
-	auto_login
-	setup_sddm
 
+	echo -e "${BLUE}========================================${RC}"
+	echo -e "${BLUE}              Menu${RC}"
+	echo -e "${BLUE}========================================${RC}"
+	echo "1) Install Hyprland (normal installation)"
+	echo "2) Remove KDE Plasma only"
+	echo "3) Cancel"
 	echo
-	echo -e "${GREEN}========================================${RC}"
-	echo -e "${GREEN}  Hyprland setup completed!${RC}"
-	echo -e "${GREEN}========================================${RC}"
-	echo -e "${YELLOW}Reboot to start using Hyprland${RC}"
-	echo -e "${GREEN}========================================${RC}"
+
+	read -rp "Select an option [1-3]: " MENU_OPTION
+	echo
+
+	case "$MENU_OPTION" in
+		1)
+			echo -e "${GREEN}Starting Hyprland installation...${RC}"
+			
+			enable_hypr_repo
+			install_packages
+			configure_tlp
+			
+			if ! copy_dotfiles; then
+				echo -e "${YELLOW}Some configuration files may be missing${RC}"
+				echo -e "${YELLOW}Please verify manually after installation${RC}"
+			fi
+		
+			echo
+			echo -e "${GREEN}========================================${RC}"
+			echo -e "${GREEN}  Hyprland setup completed!${RC}"
+			echo -e "${GREEN}========================================${RC}"
+			echo -e "${YELLOW}Reboot to start using Hyprland${RC}"
+			echo -e "${GREEN}========================================${RC}"
+			;;
+
+		2)
+			echo -e "${YELLOW}Removing KDE Plasma only...${RC}"
+			remove_kde
+			echo -e "${GREEN}KDE removal process finished.${RC}"
+			exit 0
+			;;
+
+		3)
+			echo -e "${RED}Operation cancelled.${RC}"
+			exit 0
+			;;
+
+		*)
+			echo -e "${RED}Invalid option.${RC}"
+			exit 1
+			;;
+	esac
 }
 
 main "$@"
