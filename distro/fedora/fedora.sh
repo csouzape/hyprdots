@@ -1,14 +1,12 @@
 #!/bin/bash
 set -e
 
-# Color codes for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 RC='\033[0m'
 
-# who invoked sudo (or fallback to current user)
 INSTALL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo ~$INSTALL_USER)
 
