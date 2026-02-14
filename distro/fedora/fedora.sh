@@ -22,36 +22,21 @@ root_permission() {
 	echo -e "${GREEN}Running with root privileges${RC}"
 }
 
-remove_kde2(){
-	sudo dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
-		dnf remove -y \
-			--setopt=protected_packages= \
-			plasma-desktop \
-			plasma-workspace* \
-			plasma-* \
-			kde-* \
-			kf5-* \
-			kf6-* \
-			konsole dolphin ark gwenview
+remove_kde() {
+    echo -e "${YELLOW}Removing KDE Plasma...${RC}"
+    dnf groupremove ${DNF_FLAGS} "KDE Plasma Workspaces"
+    dnf remove ${DNF_FLAGS} \
+        --setopt=protected_packages= \
+        plasma-desktop \
+        plasma-workspace* \
+        plasma-* \
+        kde-* \
+        kf5-* \
+        kf6-* \
+        konsole dolphin ark gwenview
+    echo -e "${GREEN}KDE Plasma removed${RC}"
 }
-#remove_kde() {
-#	echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"#
-#
-#	if dnf groupinfo "KDE Plasma Workspaces" &>/dev/null; then
-#		dnf groupremove -y ${DNF_FLAGS} "KDE Plasma Workspaces"
-#		dnf remove -y \
-##			plasma-desktop \
-#			plasma-workspace* \
-#			plasma-* \
-#			kde-* \
-#			kf5-* \
-##			konsole dolphin ark gwenview
-#
-#		echo -e "${GREEN}KDE Plasma removed (SDDM preserved)${RC}"
-#	else
-#		echo -e "${YELLOW}KDE Plasma not found — skipping${RC}"
-#	fi
-#}3
+
 enable_hypr_repo() {
 	echo -e "${YELLOW}Enabling Hyprland repository...${RC}"
 	dnf install ${DNF_FLAGS} dnf-plugins-core
@@ -115,7 +100,6 @@ copy_dotfiles() {
 	local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
 	local CONFIG_DIR="$USER_HOME/.config"
 
-	# Procurar pelo diretório de dotfiles
 	if [ ! -d "$DOTFILES_SOURCE" ]; then
 		echo -e "${YELLOW}Trying alternative paths...${RC}"
 		
@@ -141,12 +125,10 @@ copy_dotfiles() {
 	
 	echo -e "${GREEN}Found dotfiles at: $DOTFILES_SOURCE${RC}"
 
-	# Criar .config como o usuário correto
 	runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
 
 	echo -e "${BLUE}Copying files...${RC}"
 
-	# Copia TUDO, inclusive arquivos ocultos
 	if command -v rsync &>/dev/null; then
 		runuser -u "$INSTALL_USER" -- rsync -a \
 			"$DOTFILES_SOURCE/." "$CONFIG_DIR/"
@@ -166,26 +148,48 @@ copy_dotfiles() {
 	fi
 }
 
-
-
-
-wallpapers_config() {
-
-	local TARGET_DIR="$USER_HOME/Documentos/GitHub/wallpapers"
-
-	if [ -d "$TARGET_DIR/.git" ]; then
-		echo "Wallpapers repo already exists — pulling latest changes..."
-		runuser -u "$INSTALL_USER" -- git -C "$TARGET_DIR" pull
-	else
-		echo "Cloning wallpapers repository..."
-		runuser -u "$INSTALL_USER" -- git clone --depth=1 \
-			https://github.com/csouzape/wallpapers \
-			"$TARGET_DIR"
-	fi
+verify_dotfiles_copy() {
+    local SOURCE="$1"
+    local DEST="$2"
+    
+    local ESSENTIAL_FILES=(
+        "hypr/hyprland.conf"
+        "waybar/config"
+    )
+    for file in "${ESSENTIAL_FILES[@]}"; do
+        if [ ! -f "$DEST/$file" ]; then
+            echo -e "${RED}Missing essential file: $file${RC}"
+            return 1
+        fi
+    done
+    return 0
 }
 
+wallpapers_config() {
+    local TARGET_DIR="$USER_HOME/Documentos/GitHub/wallpapers" # MY local
 
-
+    runuser -u "$INSTALL_USER" -- mkdir -p "$(dirname "$TARGET_DIR")"
+    
+    if [ -d "$TARGET_DIR/.git" ]; then
+        echo -e "${YELLOW}Updating wallpapers...${RC}"
+        if runuser -u "$INSTALL_USER" -- git -C "$TARGET_DIR" pull; then
+            echo -e "${GREEN}Wallpapers updated${RC}"
+        else
+            echo -e "${RED}Failed to update wallpapers${RC}"
+            return 1
+        fi
+    else
+        echo -e "${YELLOW}Cloning wallpapers...${RC}"
+        if runuser -u "$INSTALL_USER" -- git clone --depth=1 \
+            https://github.com/csouzape/wallpapers \
+            "$TARGET_DIR"; then
+            echo -e "${GREEN}Wallpapers cloned${RC}"
+        else
+            echo -e "${RED}Failed to clone wallpapers${RC}"
+            return 1
+        fi
+    fi
+}
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
@@ -235,7 +239,7 @@ main() {
 
 		2)
 			echo -e "${YELLOW}Removing KDE Plasma only...${RC}"
-			remove_kde2
+			remove_kde
 			echo -e "${GREEN}KDE removal process finished.${RC}"
 			exit 0
 			;;
