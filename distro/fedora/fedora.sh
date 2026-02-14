@@ -22,8 +22,8 @@ root_permission() {
 
 remove_kde() {
     echo -e "${YELLOW}Removing KDE Plasma...${RC}"
-    dnf groupremove ${DNF_FLAGS} "KDE Plasma Workspaces"
-    dnf remove ${DNF_FLAGS} \
+    sudo dnf groupremove ${DNF_FLAGS} "KDE Plasma Workspaces"
+    sudo dnf remove ${DNF_FLAGS} \
         --setopt=protected_packages= \
         plasma-desktop \
         plasma-workspace* \
