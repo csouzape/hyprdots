@@ -14,8 +14,6 @@ take the permision and start the script
 chmod +x hyprdots.sh
 sudo ./hyprdots.sh
 ```
-### Obs: the script just support fedora kde plasma and arch linux no interface
-
-
+### Obs: the script just support rch linux no interface and Fedora KDE
 ## Obs:
 The script doesn't work in a VM because the monitors are set individually in the waybar. Try configuring the names and adapting it to make the waybar work perfectly.
