@@ -65,7 +65,6 @@ install_packages() {
 		rofi
 		waypaper
 		swww
-		pamixer
 		playerctl
 	)
 	
