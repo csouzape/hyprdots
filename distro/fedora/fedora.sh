@@ -22,8 +22,8 @@ root_permission() {
 
 remove_kde() {
     echo -e "${YELLOW}Removing KDE Plasma...${RC}"
-    sudo dnf groupremove ${DNF_FLAGS} "KDE Plasma Workspaces"
-    sudo dnf remove ${DNF_FLAGS} \
+    sudo dnf group remove -y "KDE Plasma Workspaces"
+    sudo dnf remove -y \
         --setopt=protected_packages= \
         plasma-desktop \
         plasma-workspace* \
@@ -32,9 +32,9 @@ remove_kde() {
         kf5-* \
         kf6-* \
         konsole dolphin ark gwenview
+
     echo -e "${GREEN}KDE Plasma removed${RC}"
 }
-
 enable_hypr_repo() {
 	echo -e "${YELLOW}Enabling Hyprland repository...${RC}"
 	dnf install ${DNF_FLAGS} dnf-plugins-core
