@@ -35,6 +35,26 @@ remove_kde() {
 
     echo -e "${GREEN}KDE Plasma removed${RC}"
 }
+
+
+sddm() {
+    if ! rpm -q sddm &>/dev/null; then
+        echo -e "${YELLOW}SDDM not found. Installing...${RC}"
+        sudo dnf install -y sddm || {
+            echo -e "${RED}ERROR: Failed to install SDDM${RC}"
+            return 1
+        }
+    fi
+
+    echo -e "${BLUE}Configuring SDDM...${RC}"
+    sudo systemctl enable sddm.service --force
+    sudo systemctl set-default graphical.target
+
+    echo -e "${GREEN}SDDM configured as default display manager${RC}"
+}
+
+
+
 enable_hypr_repo() {
 	echo -e "${YELLOW}Enabling Hyprland repository...${RC}"
 	dnf install ${DNF_FLAGS} dnf-plugins-core
@@ -66,6 +86,8 @@ install_packages() {
 		waypaper
 		swww
 		playerctl
+		breeze-gtk
+		nwg-look
 	)
 	
 	dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
