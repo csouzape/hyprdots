@@ -18,8 +18,9 @@ window#waybar {
 }
 
 #workspaces button.active {
-    background: #1c1c1c;
+    background: transparent;
     color: #ffffff;
+    font-weight: bold;
 }
 
 #window {
