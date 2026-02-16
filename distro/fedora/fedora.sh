@@ -100,6 +100,29 @@ install_packages() {
 	echo -e "${GREEN}All packages installed${RC}"
 }
 
+flatpak_install(){
+	echo -e "${YELLOW}Installing Flatpak packages...${RC}"
+	
+	local FLATPAK_PACKAGES=(
+		com.spotify.Client
+		com.visualstudio.code
+		com.github.tchx84.Flatseal
+
+	)
+	
+	for pkg in "${FLATPAK_PACKAGES[@]}"; do
+		if flatpak list --app | grep -q "$pkg"; then
+			echo -e "${GREEN}Flatpak package $pkg already installed${RC}"
+		else
+			flatpak install -y flathub "$pkg" || {
+				echo -e "${RED}ERROR: Failed to install $pkg via Flatpak${RC}"
+			}
+		fi
+	done
+	
+	echo -e "${GREEN}Flatpak packages installation completed${RC}"
+}
+
 configure_tlp() {
 	echo -e "${YELLOW}Configuring TLP...${RC}"
 
@@ -241,6 +264,7 @@ main() {
 			copy_dotfiles
 			configure_tlp
 			wallpapers_config
+			flatpak_install
 			
 			
 			if ! copy_dotfiles; then
