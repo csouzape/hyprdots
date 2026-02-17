@@ -1,327 +1,163 @@
 #!/bin/bash
 set -e
 
-# Color codes for output
+# ── Color codes ──────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 RC='\033[0m'
 
-# get the user who invoked sudo
 INSTALL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo ~$INSTALL_USER)
 
-# pacman flags
-flags="-S -q --needed --noconfirm --noprogressbar"
+DNF_FLAGS="-y"
 
-#call for root permission
+# ── Root check ──────────────────────────────
 root_permission() {
-  if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}Please run as root or with sudo${RC}"
-    exit 1
-  fi
-  echo -e "${GREEN}Running with root privileges${RC}"
-}
-
-# install yay
-install_yay() {
-  echo -e "${YELLOW}Installing yay...${RC}"
-  pacman -S --noconfirm --needed git base-devel
-
-  # Install as regular user
-  cd /tmp
-  sudo -u $INSTALL_USER git clone https://aur.archlinux.org/yay.git
-  cd yay
-  sudo -u $INSTALL_USER makepkg -si --noconfirm
-  cd ..
-  rm -rf yay
-  echo -e "${GREEN}yay installed successfully${RC}"
-}
-
-check_yay() {
-  if ! command -v yay &>/dev/null; then
-    echo -e "${YELLOW}yay could not be found, installing...${RC}"
-    install_yay
-  else
-    echo -e "${GREEN}yay is already installed${RC}"
-  fi
-}
-
-# enable multilib repository function
-install_multilib() {
-  if grep -q "^\[multilib\]" /etc/pacman.conf && ! grep -q "^#\[multilib\]" /etc/pacman.conf; then
-    echo -e "${GREEN}Multilib repository is already enabled${RC}"
-    return 0
-  fi
-  
-  echo -e "${YELLOW}Enabling multilib repository...${RC}"
-  sed -i '/\[multilib\]/,/Include = \/etc\/pacman.d\/mirrorlist/s/^#//' /etc/pacman.conf
-  pacman -Syu --noconfirm
-  echo -e "${GREEN}Multilib repository enabled${RC}"
-}
-
-# tlp configuration function
-check_tlp() {
-  if pacman -Qs tlp &>/dev/null; then
-    echo -e "${GREEN}TLP is already installed${RC}"
-    
-    # Check if service is enabled
-    if systemctl is-enabled tlp &>/dev/null; then
-      echo -e "${GREEN}TLP service is already enabled${RC}"
-    else
-      echo -e "${YELLOW}Enabling TLP service...${RC}"
-      systemctl enable tlp
-      systemctl start tlp
-      echo -e "${GREEN}TLP service enabled${RC}"
+    if [ "$EUID" -ne 0 ]; then
+        echo -e "${RED}Please run as root or with sudo${RC}"
+        exit 1
     fi
-  else
-    echo -e "${YELLOW}TLP not found, installing...${RC}"
-    configure_tlp
-  fi
+    echo -e "${GREEN}Running with root privileges${RC}"
 }
 
-configure_tlp() {
-  echo -e "${YELLOW}Configuring TLP for power management...${RC}"
-  pacman $flags tlp tlp-rdw
-  systemctl enable tlp
-  systemctl start tlp
-  echo -e "${GREEN}TLP has been configured and started${RC}"
-}
-
-# install pacman dependencies function
-install_dependencies_aur() {
-  echo -e "${YELLOW}Checking AUR dependencies for Hyprland...${RC}"
-  
-  local aur_packages=()
-  
-  # Check waypaper
-  if ! pacman -Qi waypaper &>/dev/null; then
-    aur_packages+=("waypaper")
-  else
-    echo -e "${GREEN}waypaper is already installed${RC}"
-  fi
-  
-  # Check google-chrome-bin
-  if ! pacman -Qi google-chrome-bin &>/dev/null; then
-    aur_packages+=("google-chrome-bin")
-  else
-    echo -e "${GREEN}google-chrome-bin is already installed${RC}"
-  fi
-  
-  # Install only missing packages
-  if [ ${#aur_packages[@]} -gt 0 ]; then
-    echo -e "${YELLOW}Installing missing AUR packages: ${aur_packages[*]}${RC}"
-    sudo -u $INSTALL_USER yay -S --noconfirm "${aur_packages[@]}"
-    echo -e "${GREEN}AUR dependencies installed${RC}"
-  else
-    echo -e "${GREEN}All AUR dependencies are already installed${RC}"
-  fi
-}
-
-install_dependencies_pacman() {
-  echo -e "${YELLOW}Installing pacman dependencies${RC}"
-  pacman $flags hyprland swww sddm alacritty thunar pavucontrol ttf-jetbrains-mono waybar discord xdg-desktop-portal \
-    xdg-desktop-portal-hyprland hyprshot swaync rofi 
-  echo -e "${GREEN}Pacman dependencies installed${RC}"
-}
-
-# install gaming dependencies function
-gaming_dependencies() {
-  echo -e "${YELLOW}Installing gaming dependencies...${RC}"
-  pacman $flags gnutls lib32-gnutls base-devel gtk3 lib32-gtk3 \
-    python-google-auth python-protobuf libpulse lib32-libpulse \
-    alsa-lib lib32-alsa-lib alsa-utils alsa-plugins lib32-alsa-plugins \
-    giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap \
-    openal lib32-openal libxcomposite lib32-libxcomposite \
-    libxinerama lib32-libxinerama libgcrypt lib32-libgcrypt \
-    libgpg-error lib32-libgpg-error ncurses lib32-ncurses \
-    mpg123 lib32-mpg123 libjpeg-turbo lib32-libjpeg-turbo \
-    sqlite lib32-sqlite libva lib32-libva \
-    gst-plugins-base-libs lib32-gst-plugins-base-libs \
-    sdl2 lib32-sdl2 v4l-utils lib32-v4l-utils \
-    vulkan-icd-loader lib32-vulkan-icd-loader \
-    ocl-icd lib32-ocl-icd opencl-icd-loader lib32-opencl-icd-loader \
-    libxslt lib32-libxslt cups samba lib32-mesa \
-    vulkan-radeon lib32-vulkan-radeon gamescope mangohud lib32-mangohud \
-    gamemode lib32-gamemode vulkan-intel lib32-vulkan-intel
-  echo -e "${GREEN}Gaming dependencies installed${RC}"
-}
-
-configure_terminus_font() {
-  # Check if already configured
-  if [ -f /etc/vconsole.conf ] && grep -q "^FONT=ter-v18b" /etc/vconsole.conf; then
-    echo -e "${GREEN}Terminus font is already configured${RC}"
-    return 0
-  fi
-  
-  echo -e "${YELLOW}Configuring Terminus font...${RC}"
-  pacman $flags terminus-font
-  
-  # Configure /etc/vconsole.conf
-  echo -e "${YELLOW}Configuring /etc/vconsole.conf...${RC}"
-  if [ -f /etc/vconsole.conf ]; then
-    if grep -q "^FONT=" /etc/vconsole.conf; then
-      sed -i 's/^FONT=.*/FONT=ter-v18b/' /etc/vconsole.conf
-    else
-      echo "FONT=ter-v18b" >>/etc/vconsole.conf
-    fi
-  else
-    echo "FONT=ter-v18b" >/etc/vconsole.conf
-  fi
-
-  # Apply immediately if in TTY
-  if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
-    setfont ter-v18b
-    echo -e "${GREEN}Font applied to current console${RC}"
-  fi
-
-  echo -e "${GREEN}Terminus font configuration completed${RC}"
-}
-
-# copy dotfiles function
-copy_dotfiles() {
-  echo -e "${YELLOW}Copying dotfiles...${RC}"
-
-  if [ -d "$USER_HOME/hyprdots" ]; then
-    # Create .config directory if it doesn't exist
-    sudo -u $INSTALL_USER mkdir -p "$USER_HOME/.config"
-
-    # Copy dotfiles
-    sudo -u $INSTALL_USER cp -r "$USER_HOME/hyprdots/"* "$USER_HOME/.config/"
-    echo -e "${GREEN}Dotfiles copied successfully${RC}"
-  else
-    echo -e "${RED}Warning: $USER_HOME/hyprdots directory not found, skipping...${RC}"
-  fi
-}
-
-# Detect and remove old desktop environment
+# ── DE detection & removal ─────────────────
 detect_de() {
     local DE=""
-    
-    # Method 1: XDG_CURRENT_DESKTOP (most reliable)
-    if [ -n "$XDG_CURRENT_DESKTOP" ]; then
-        DE="$XDG_CURRENT_DESKTOP"
-    # Method 2: DESKTOP_SESSION
-    elif [ -n "$DESKTOP_SESSION" ]; then
-        DE="$DESKTOP_SESSION"
-    # Method 3: XDG_SESSION_DESKTOP
-    elif [ -n "$XDG_SESSION_DESKTOP" ]; then
-        DE="$XDG_SESSION_DESKTOP"
-    # Method 4: Check running processes
-    elif pgrep -x "plasmashell" >/dev/null 2>&1 || pgrep -x "ksmserver" >/dev/null 2>&1; then
-        DE="KDE"
-    elif pgrep -x "gnome-shell" >/dev/null 2>&1; then
-        DE="GNOME"
-    elif pgrep -x "xfce4-session" >/dev/null 2>&1; then
-        DE="XFCE"
-    elif pgrep -x "mate-session" >/dev/null 2>&1; then
-        DE="MATE"
-    elif pgrep -x "cinnamon" >/dev/null 2>&1; then
-        DE="CINNAMON"
-    else
-        DE="UNKNOWN"
-    fi
-    
+    [ -n "$XDG_CURRENT_DESKTOP" ] && DE="$XDG_CURRENT_DESKTOP"
+    [ -z "$DE" ] && [ -n "$DESKTOP_SESSION" ] && DE="$DESKTOP_SESSION"
+    [ -z "$DE" ] && DE="UNKNOWN"
     echo "$DE"
 }
 
-remove_old_de() {
-    local desktop_env=$(detect_de)
-    
-    if [ -z "$desktop_env" ] || [ "$desktop_env" = "UNKNOWN" ]; then
-        echo -e "${YELLOW}No Desktop Environment detected or already removed${RC}"
-        return 0
-    fi
-    
-    echo -e "${YELLOW}Desktop Environment detected: $desktop_env${RC}"
-    echo -e "${BLUE}Removing only DE packages, keeping display managers intact${RC}"
-    
-    desktop_env=$(echo "$desktop_env" | tr '[:lower:]' '[:upper:]')
-    
-    case "$desktop_env" in
+remove_de() {
+    local DE=$(detect_de | tr '[:lower:]' '[:upper:]')
+    case "$DE" in
         *KDE*|*PLASMA*)
-            echo -e "${YELLOW}Removing KDE Plasma (keeping SDDM)...${RC}"
-            if pacman -Qi plasma-desktop >/dev/null 2>&1; then
-                # Remove only DE, NOT sddm or other DMs
-                pacman -Rns --noconfirm plasma-desktop plasma-workspace kde-applications kwalletmanager 2>/dev/null || true
-                echo -e "${GREEN}KDE Plasma removed${RC}"
-            else
-                echo -e "${GREEN}KDE Plasma is not installed${RC}"
-            fi
+            echo -e "${YELLOW}Removing KDE Plasma...${RC}"
+            dnf group remove -y "KDE Plasma Workspaces"
+            dnf remove -y plasma-* kde-* kf5-* kf6-* konsole dolphin ark gwenview || true
             ;;
         *GNOME*)
-            echo -e "${YELLOW}Removing GNOME (keeping GDM)...${RC}"
-            if pacman -Qi gnome-shell >/dev/null 2>&1; then
-                # Remove gnome-shell and apps but keep GDM
-                pacman -Rns --noconfirm gnome-shell gnome-control-center gnome-terminal nautilus 2>/dev/null || true
-                echo -e "${GREEN}GNOME removed${RC}"
-            else
-                echo -e "${GREEN}GNOME is not installed${RC}"
-            fi
-            ;;  
+            echo -e "${YELLOW}Removing GNOME...${RC}"
+            dnf group remove -y "GNOME Desktop Environment"
+            dnf remove -y gnome-shell gnome-terminal nautilus gnome-control-center || true
+            ;;
         *XFCE*)
-            echo -e "${YELLOW}Removing XFCE (keeping LightDM)...${RC}"
-            if pacman -Qi xfce4-session >/dev/null 2>&1; then
-                # Remove only XFCE, keep lightdm
-                pacman -Rns --noconfirm xfce4-session xfce4-panel xfdesktop xfwm4 2>/dev/null || true
-                echo -e "${GREEN}XFCE removed${RC}"
-            else
-                echo -e "${GREEN}XFCE is not installed${RC}"
-            fi
-            ;;
-        *MATE*)
-            echo -e "${YELLOW}Removing MATE (keeping LightDM)...${RC}"
-            if pacman -Qi mate-session-manager >/dev/null 2>&1; then
-                # Remove only MATE, keep lightdm
-                pacman -Rns --noconfirm mate-session-manager mate-panel mate-desktop 2>/dev/null || true
-                echo -e "${GREEN}MATE removed${RC}"
-            else
-                echo -e "${GREEN}MATE is not installed${RC}"
-            fi
-            ;;
-        *CINNAMON*)
-            echo -e "${YELLOW}Removing Cinnamon (keeping LightDM)...${RC}"
-            if pacman -Qi cinnamon >/dev/null 2>&1; then
-                # Remove only Cinnamon, keep lightdm
-                pacman -Rns --noconfirm cinnamon 2>/dev/null || true
-                echo -e "${GREEN}Cinnamon removed${RC}"
-            else
-                echo -e "${GREEN}Cinnamon is not installed${RC}"
-            fi
+            echo -e "${YELLOW}Removing XFCE...${RC}"
+            dnf group remove -y "Xfce Desktop"
+            dnf remove -y xfce4* || true
             ;;
         *)
-            echo -e "${YELLOW}Unrecognized Desktop Environment: $desktop_env${RC}"
-            echo -e "${BLUE}Skipping DE removal for safety${RC}"
+            echo -e "${YELLOW}No recognized DE found or already removed${RC}"
             ;;
     esac
+    echo -e "${GREEN}DE removal completed${RC}"
 }
 
-# Main function
+# ── Display manager ────────────────────────
+configure_sddm() {
+    if ! rpm -q sddm &>/dev/null; then
+        echo -e "${YELLOW}Installing SDDM...${RC}"
+        dnf install -y sddm
+    fi
+    systemctl enable sddm.service --force
+    systemctl set-default graphical.target
+    echo -e "${GREEN}SDDM configured${RC}"
+}
+
+# ── Hyprland repo ──────────────────────────
+enable_hypr_repo() {
+    dnf install -y dnf-plugins-core
+    local HYPR_COPR=${HYPR_COPR:-solopasha/hyprland}
+    if ! dnf copr list 2>/dev/null | grep -q "$HYPR_COPR"; then
+        dnf copr enable -y "$HYPR_COPR"
+        echo -e "${GREEN}Hyprland COPR enabled${RC}"
+    else
+        echo -e "${GREEN}Hyprland COPR already enabled${RC}"
+    fi
+}
+
+# ── Package installation ───────────────────
+install_packages() {
+    local PACKAGES=(
+        hyprland sddm alacritty thunar pavucontrol jetbrains-mono-fonts
+        waybar xdg-desktop-portal-gtk hyprshot swaync rofi waypaper swww playerctl
+        breeze-gtk nwg-look
+    )
+    echo -e "${YELLOW}Installing Fedora packages...${RC}"
+    dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
+    echo -e "${GREEN}Package installation completed${RC}"
+}
+
+flatpak_install() {
+    local FLATPAK_PACKAGES=(com.spotify.Client com.visualstudio.code com.github.tchx84.Flatseal)
+    for pkg in "${FLATPAK_PACKAGES[@]}"; do
+        flatpak list --app | grep -q "$pkg" || flatpak install -y flathub "$pkg"
+    done
+    echo -e "${GREEN}Flatpak installation completed${RC}"
+}
+
+# ── TLP setup ─────────────────────────────
+configure_tlp() {
+    dnf remove -y tuned || true
+    dnf install -y tlp tlp-rdw
+    systemctl enable --now tlp
+    echo -e "${GREEN}TLP configured${RC}"
+}
+
+# ── Dotfiles copy ──────────────────────────
+copy_dotfiles() {
+    local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
+    [ ! -d "$DOTFILES_SOURCE" ] && DOTFILES_SOURCE="$USER_HOME/hyprdots/fedora"
+    [ ! -d "$DOTFILES_SOURCE" ] && DOTFILES_SOURCE="$USER_HOME/hyprdots/distros/fedora"
+
+    if [ ! -d "$DOTFILES_SOURCE" ]; then
+        echo -e "${RED}No dotfiles directory found, skipping${RC}"
+        return 1
+    fi
+
+    local CONFIG_DIR="$USER_HOME/.config"
+    runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
+
+    if command -v rsync &>/dev/null; then
+        runuser -u "$INSTALL_USER" -- rsync -a --delete "$DOTFILES_SOURCE/." "$CONFIG_DIR/"
+    else
+        runuser -u "$INSTALL_USER" -- cp -a "$DOTFILES_SOURCE/." "$CONFIG_DIR/"
+    fi
+    echo -e "${GREEN}Dotfiles copied successfully${RC}"
+}
+
+# ── Wallpapers ────────────────────────────
+setup_wallpapers() {
+    local WALL_DIR="$USER_HOME/Imagens/wallpapers"
+    runuser -u "$INSTALL_USER" -- mkdir -p "$WALL_DIR"
+    if [ -d "$WALL_DIR/.git" ]; then
+        runuser -u "$INSTALL_USER" -- git -C "$WALL_DIR" pull --ff-only
+    else
+        runuser -u "$INSTALL_USER" -- git clone --depth=1 https://github.com/csouzape/wallpapers "$WALL_DIR"
+    fi
+    echo -e "${GREEN}Wallpapers setup completed${RC}"
+}
+
+# ── Main ──────────────────────────────────
 main() {
-  echo -e "${BLUE}========================================${RC}"
-  echo -e "${BLUE}  Hyprland Setup Script for Arch Linux${RC}"
-  echo -e "${BLUE}========================================${RC}"
-  echo ""
+    echo -e "${BLUE}========================================${RC}"
+    echo -e "${BLUE}  Hyprland Setup Script for Fedora${RC}"
+    echo -e "${BLUE}========================================${RC}"
 
-  root_permission
-  remove_old_de
-  check_yay
-  install_multilib
-  check_tlp
-  install_dependencies_pacman
-  install_dependencies_aur
-  gaming_dependencies
-  configure_terminus_font
-  copy_dotfiles
+    root_permission
+    remove_de
+    configure_sddm
+    enable_hypr_repo
+    install_packages
+    copy_dotfiles
+    configure_tlp
+    setup_wallpapers
+    flatpak_install
 
-  echo ""
-  echo -e "${GREEN}========================================${RC}"
-  echo -e "${GREEN}  Hyprland setup completed!${RC}"
-  echo -e "${GREEN}========================================${RC}"
-  echo -e "${YELLOW}The system will reboot in 5 seconds...${RC}"
-  sleep 5
-  reboot
+    echo -e "${GREEN}Hyprland setup completed. Reboot to apply changes.${RC}"
 }
 
-main
+main "$@"
