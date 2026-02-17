@@ -162,7 +162,6 @@ wallpapers_config() {
 
 install_materia_theme() {
 	echo -e "${YELLOW}Installing Materia Theme...${RC}"
-	local INSTALL_DIR="/usr/share/themes"
 	local TMP_DIR
 	TMP_DIR="$(mktemp -d /tmp/materia-theme.XXXXXX)"
 	trap "rm -rf $TMP_DIR" RETURN
@@ -172,7 +171,7 @@ install_materia_theme() {
 	done
 
 	git clone --depth=1 https://github.com/nana-4/materia-theme.git "$TMP_DIR" || return 1
-	meson setup --prefix=/usr -Ddest="$INSTALL_DIR" "$TMP_DIR/build" "$TMP_DIR" || return 1
+	meson setup --prefix=/usr "$TMP_DIR/build" "$TMP_DIR" || return 1
 	ninja -C "$TMP_DIR/build" || return 1
 	ninja -C "$TMP_DIR/build" install || return 1
 
