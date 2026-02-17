@@ -147,13 +147,13 @@ remove_old_de() {
 # ── Main package installation ─────────────
 install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
-        xdg-desktop-portal-hyprland hyprshot swaync rofi waypaper swww \
-        playerctl breeze-gtk nwg-look jetbrains-mono-fonts
+        xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
+        playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono
     echo -e "${GREEN}Main packages installed${RC}"
 }
 
 install_dependencies_aur() {
-    local aur_packages=(google-chrome)
+    local aur_packages=(google-chrome waypaper)
     for pkg in "${aur_packages[@]}"; do
         if ! pacman -Qi "$pkg" &>/dev/null; then
             sudo -u "$INSTALL_USER" yay -S --noconfirm "$pkg"
