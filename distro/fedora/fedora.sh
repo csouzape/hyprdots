@@ -86,21 +86,18 @@ install_packages() {
 }
 
 flatpak_install() {
-	echo -e "${YELLOW}Installing Flatpak packages...${RC}"
-	local FLATPAK_PACKAGES=(
-		com.spotify.Client
-		com.visualstudio.code
-		com.github.tchx84.Flatseal
-	)
-	for pkg in "${FLATPAK_PACKAGES[@]}"; do
-		if flatpak list --app | grep -q "$pkg"; then
-			echo -e "${GREEN}$pkg already installed${RC}"
-		else
-			flatpak install -y flathub "$pkg" || echo -e "${RED}ERROR: Failed to install $pkg${RC}"
-		fi
-	done
-	echo -e "${GREEN}Flatpak packages installation completed${RC}"
-}
+	echo -e "${YELLOW} Installing Flatpak applications...${RC}"
+	if ! command -v flatpak &>/dev/null; then
+		echo -e "${YELLOW}Flatpak not found. Installing...${RC}"
+		sudo dnf install -y flatpak || { echo -e "${RED}ERROR: Failed to install Flatpak${RC}"; return 1; }
+	fi
+	flatpak install -y flathub com.spotify.Client
+	flatpak install -y flathub com.visualstudio.code
+	flatpak install -y flathub com.github.tchx84.Flatseal
+	flatpak install -y flathub com.discordapp.Discord
+	echo -e "${GREEN}Flatpak applications installed${RC}"
+
+} 
 
 configure_tlp() {
 	echo -e "${YELLOW}Configuring TLP...${RC}"
