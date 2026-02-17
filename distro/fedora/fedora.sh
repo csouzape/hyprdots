@@ -99,7 +99,6 @@ install_packages() {
 		waypaper
 		swww
 		playerctl
-		breeze-gtk
 		nwg-look
 	)
 	
