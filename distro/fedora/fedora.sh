@@ -22,8 +22,8 @@ root_permission() {
 
 remove_kde() {
     echo -e "${YELLOW}Removing KDE Plasma...${RC}"
-    sudo dnf group remove -y "KDE Plasma Workspaces"
-    sudo dnf remove -y \
+	dnf group remove -y "KDE Plasma Workspaces"
+    dnf remove -y \
         --setopt=protected_packages= \
         plasma-desktop \
         plasma-workspace* \
@@ -40,33 +40,36 @@ remove_kde() {
 sddm() {
     if ! rpm -q sddm &>/dev/null; then
         echo -e "${YELLOW}SDDM not found. Installing...${RC}"
-        sudo dnf install -y sddm || {
+        dnf install -y sddm || {
             echo -e "${RED}ERROR: Failed to install SDDM${RC}"
             return 1
         }
     fi
 
     echo -e "${BLUE}Configuring SDDM...${RC}"
-    sudo systemctl enable sddm.service --force
-    sudo systemctl set-default graphical.target
+    systemctl enable sddm.service --force
+    systemctl set-default graphical.target
 
     echo -e "${GREEN}SDDM configured as default display manager${RC}"
 }
 
-auto_login(){
+auto_login() {
 	echo -e "${YELLOW}Configuring auto-login for $INSTALL_USER...${RC}"
 	local SDDM_CONF="/etc/sddm.conf"
-	if [ -f "$SDDM_CONF" ]; then
-		if grep -q "AutoLoginEnable=true" "$SDDM_CONF" && grep -
-q "AutoLoginUser=$INSTALL_USER" "$SDDM_CONF"; then
-			echo -e "${GREEN}Auto-login already configured for $INSTALL_USER${RC}"
-			return 0
-		fi
-	else
-		touch "$SDDM_CONF"
-	fi
-}
 
+	if grep -q "AutoLoginUser=$INSTALL_USER" "$SDDM_CONF" 2>/dev/null; then
+		echo -e "${GREEN}Auto-login already configured for $INSTALL_USER${RC}"
+		return 0
+	fi
+
+	cat > "$SDDM_CONF" << SDDM
+[Autologin]
+User=$INSTALL_USER
+Session=hyprland
+SDDM
+
+	echo -e "${GREEN}Auto-login configured for $INSTALL_USER${RC}"
+}
 
 enable_hypr_repo() {
 	echo -e "${YELLOW}Enabling Hyprland repository...${RC}"
