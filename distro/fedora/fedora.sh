@@ -135,60 +135,65 @@ configure_tlp() {
 	systemctl enable --now tlp
 	echo -e "${GREEN}TLP configured${RC}"
 }
-
 copy_dotfiles() {
-	echo -e "${YELLOW}Copying dotfiles...${RC}"
-	
-	local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
-	local CONFIG_DIR="$USER_HOME/.config"
+    echo -e "${YELLOW}Copying dotfiles...${RC}"
 
-	if [ ! -d "$DOTFILES_SOURCE" ]; then
-		echo -e "${YELLOW}Trying alternative paths...${RC}"
-		
-		local ALTERNATIVE_PATHS=(
-			"$USER_HOME/hyprdots/distros/fedora"
-			"$USER_HOME/hyprdots/fedora"
-			"/home/$INSTALL_USER/hyprdots/distro/fedora"
-		)
-		
-		for alt_path in "${ALTERNATIVE_PATHS[@]}"; do
-			if [ -d "$alt_path" ]; then
-				DOTFILES_SOURCE="$alt_path"
-				echo -e "${GREEN}Found at: $DOTFILES_SOURCE${RC}"
-				break
-			fi
-		done
-		
-		if [ ! -d "$DOTFILES_SOURCE" ]; then
-			echo -e "${RED}Error: No valid dotfiles directory found${RC}"
-			return 1
-		fi
-	fi
-	
-	echo -e "${GREEN}Found dotfiles at: $DOTFILES_SOURCE${RC}"
+    # Validação básica
+    [ -z "${INSTALL_USER:-}" ] && { echo "INSTALL_USER not set"; return 1; }
 
-	runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
+    local USER_HOME
+    USER_HOME=$(eval echo "~$INSTALL_USER")
 
-	echo -e "${BLUE}Copying files...${RC}"
+    local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
+    local CONFIG_DIR="$USER_HOME/.config"
 
-	if command -v rsync &>/dev/null; then
-		runuser -u "$INSTALL_USER" -- rsync -a \
-			"$DOTFILES_SOURCE/." "$CONFIG_DIR/"
-	else
-		runuser -u "$INSTALL_USER" -- cp -a \
-			"$DOTFILES_SOURCE/." "$CONFIG_DIR/"
-	fi
+    if [ ! -d "$DOTFILES_SOURCE" ]; then
+        echo -e "${YELLOW}Trying alternative paths...${RC}"
 
-	echo -e "${GREEN}Dotfiles copy completed${RC}"
+        local ALTERNATIVE_PATHS=(
+            "$USER_HOME/hyprdots/distros/fedora"
+            "$USER_HOME/hyprdots/fedora"
+        )
 
-	if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
-		echo -e "${GREEN}Dotfiles successfully copied and verified!${RC}"
-		return 0
-	else
-		echo -e "${YELLOW}Verification failed${RC}"
-		return 1
-	fi
+        for alt_path in "${ALTERNATIVE_PATHS[@]}"; do
+            if [ -d "$alt_path" ]; then
+                DOTFILES_SOURCE="$alt_path"
+                echo -e "${GREEN}Found at: $DOTFILES_SOURCE${RC}"
+                break
+            fi
+        done
+
+        [ ! -d "$DOTFILES_SOURCE" ] && {
+            echo -e "${RED}Error: No valid dotfiles directory found${RC}"
+            return 1
+        }
+    fi
+
+    echo -e "${GREEN}Using dotfiles at: $DOTFILES_SOURCE${RC}"
+
+    runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR" || return 1
+
+    echo -e "${BLUE}Copying files...${RC}"
+
+    if command -v rsync &>/dev/null; then
+        runuser -u "$INSTALL_USER" -- rsync -a --delete \
+            "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
+    else
+        runuser -u "$INSTALL_USER" -- cp -a \
+            "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
+    fi
+
+    echo -e "${GREEN}Dotfiles copy completed${RC}"
+
+    if verify_dotfiles_copy "$DOTFILES_SOURCE" "$CONFIG_DIR"; then
+        echo -e "${GREEN}Dotfiles successfully copied and verified!${RC}"
+        return 0
+    else
+        echo -e "${YELLOW}Verification failed${RC}"
+        return 1
+    fi
 }
+
 
 verify_dotfiles_copy() {
     local SOURCE="$1"
