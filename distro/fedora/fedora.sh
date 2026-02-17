@@ -243,6 +243,196 @@ wallpapers_config() {
     fi
 }
 
+install_mybash() {
+    set -e
+
+    local gitpath="$HOME/.local/share/mybash"
+    local FONT_NAME="MesloLGS Nerd Font Mono"
+    local FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
+    local FONT_DIR="$HOME/.local/share/fonts"
+    local TEMP_DIR
+    local STARSHIP_CONFIG="$HOME/.config/starship.toml"
+
+    command_exists() { command -v "$1" >/dev/null 2>&1; }
+
+    # Dependências
+    if ! command_exists git || ! command_exists tar || ! command_exists unzip || ! command_exists fc-list; then
+        echo "Installing dependencies..."
+        if command_exists dnf; then
+            sudo dnf install -y git tar unzip fontconfig
+        elif command_exists pacman; then
+            sudo pacman -S --needed --noconfirm git tar unzip fontconfig
+        fi
+    fi
+
+    # Clonar mybash
+    [ -d "$gitpath" ] && rm -rf "$gitpath"
+    mkdir -p "$(dirname "$gitpath")"
+    git clone https://github.com/ChrisTitusTech/mybash.git "$gitpath"
+
+    # Fonte
+    if ! fc-list :family | grep -iq "$FONT_NAME"; then
+        echo "Installing font $FONT_NAME..."
+        TEMP_DIR=$(mktemp -d)
+        curl -sSLo "$TEMP_DIR/${FONT_NAME}.zip" "$FONT_URL"
+        unzip "$TEMP_DIR/${FONT_NAME}.zip" -d "$TEMP_DIR"
+        mkdir -p "$FONT_DIR/$FONT_NAME"
+        mv "$TEMP_DIR"/*.ttf "$FONT_DIR/$FONT_NAME"
+        fc-cache -fv
+        rm -rf "$TEMP_DIR"
+    else
+        echo "Font $FONT_NAME already installed."
+    fi
+
+    # Starship
+    if ! command_exists starship; then
+        curl -sSL https://starship.rs/install.sh | sh
+    fi
+
+    # Configuração personalizada do Starship
+    mkdir -p "$(dirname "$STARSHIP_CONFIG")"
+    cat > "$STARSHIP_CONFIG" <<'EOF'
+format = """
+[](#303030)\
+$python\
+$username\
+[](bg:#303030 fg:#303030)\
+$directory\
+[](fg:#303030 bg:#303030)\
+$git_branch\
+$git_status\
+[](fg:#303030 bg:#303030)\
+$c\
+$elixir\
+$elm\
+$golang\
+$haskell\
+$java\
+$julia\
+$nodejs\
+$nim\
+$rust\
+[](fg:#303030 bg:#303030)\
+$docker_context\
+[](fg:#303030 bg:#303030)\
+$time\
+[ ](fg:#303030)\
+"""
+command_timeout = 5000
+
+[username]
+show_always = true
+style_user = "bg:#303030"
+style_root = "bg:#303030"
+format = '[$user ]($style)'
+
+[directory]
+style = "bg:#303030"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[c]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[docker_context]
+symbol = " "
+style = "bg:#06969A"
+format = '[ $symbol $context ]($style)$path'
+
+[elixir]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[elm]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[git_branch]
+symbol = ""
+style = "bg:#4C566A"
+format = '[ $symbol $branch ]($style)'
+
+[git_status]
+style = "bg:#4C566A"
+format = '[$all_status$ahead_behind ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[haskell]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[java]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[julia]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[nodejs]
+symbol = ""
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[nim]
+symbol = " "
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[python]
+style = "bg:#3B4252"
+format = '[(\($virtualenv\) )]($style)'
+
+[rust]
+symbol = ""
+style = "bg:#86BBD8"
+format = '[ $symbol ($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:#303030"
+format = '[ $time ]($style)'
+EOF
+
+    # Fzf
+    if ! command_exists fzf; then
+        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+        ~/.fzf/install --all
+    fi
+
+    # Zoxide
+    if ! command_exists zoxide; then
+        curl -sSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    fi
+
+    # Link .bashrc
+    [ -f "$HOME/.bashrc" ] && mv "$HOME/.bashrc" "$HOME/.bashrc.bak"
+    ln -svf "$gitpath/.bashrc" "$HOME/.bashrc"
+
+    echo "Installation complete! Restart your shell to see the Starship prompt."
+}
+
+
+
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
@@ -275,6 +465,7 @@ main() {
 			copy_dotfiles
 			configure_tlp
 			wallpapers_config
+			mybash
 			flatpak_install
 			
 			
