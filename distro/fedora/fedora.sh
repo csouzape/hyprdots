@@ -178,99 +178,6 @@ install_materia_theme() {
 	echo -e "${GREEN}Materia Theme installed${RC}"
 }
 
-mybash() {
-	local gitpath="$USER_HOME/.local/share/mybash"
-
-	if [ -L "$USER_HOME/.bashrc" ] && [ "$(readlink "$USER_HOME/.bashrc")" = "$gitpath/.bashrc" ]; then
-		echo -e "${GREEN}mybash already configured${RC}"
-		return 0
-	fi
-
-	echo -e "${YELLOW}Installing mybash...${RC}"
-
-	dnf install ${DNF_FLAGS} bash bash-completion tar bat tree unzip fontconfig git fzf
-
-	mkdir -p "$USER_HOME/.local/share"
-	[ -d "$gitpath" ] && rm -rf "$gitpath"
-	runuser -u "$INSTALL_USER" -- git clone https://github.com/ChrisTitusTech/mybash.git "$gitpath"
-
-	local FONT_NAME="MesloLGS Nerd Font Mono"
-	if ! fc-list :family | grep -iq "$FONT_NAME"; then
-		echo -e "${YELLOW}Installing font '$FONT_NAME'...${RC}"
-		local FONT_DIR="$USER_HOME/.local/share/fonts"
-		local TEMP_DIR
-		TEMP_DIR=$(mktemp -d)
-		curl -sSLo "$TEMP_DIR/${FONT_NAME}.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
-		unzip "$TEMP_DIR/${FONT_NAME}.zip" -d "$TEMP_DIR"
-		mkdir -p "$FONT_DIR/$FONT_NAME"
-		mv "$TEMP_DIR"/*.ttf "$FONT_DIR/$FONT_NAME"
-		fc-cache -fv
-		rm -rf "$TEMP_DIR"
-		echo -e "${GREEN}Font installed${RC}"
-	fi
-
-	if ! command -v starship &>/dev/null; then
-		curl -sSL https://starship.rs/install.sh | sh || { echo -e "${RED}Failed to install starship${RC}"; return 1; }
-	fi
-
-	if ! command -v fzf &>/dev/null; then
-		runuser -u "$INSTALL_USER" -- git clone --depth 1 https://github.com/junegunn/fzf.git "$USER_HOME/.fzf"
-		"$USER_HOME/.fzf/install" --all
-	fi
-
-	if ! command -v zoxide &>/dev/null; then
-		curl -sSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh || { echo -e "${RED}Failed to install zoxide${RC}"; return 1; }
-	fi
-
-	local OLD_BASHRC="$USER_HOME/.bashrc"
-	if [ -e "$OLD_BASHRC" ] && [ ! -e "$USER_HOME/.bashrc.bak" ]; then
-		mv "$OLD_BASHRC" "$USER_HOME/.bashrc.bak"
-	fi
-
-	runuser -u "$INSTALL_USER" -- ln -svf "$gitpath/.bashrc" "$USER_HOME/.bashrc"
-	runuser -u "$INSTALL_USER" -- mkdir -p "$USER_HOME/.config"
-	runuser -u "$INSTALL_USER" -- ln -svf "$gitpath/starship.toml" "$USER_HOME/.config/starship.toml"
-
-	echo -e "${GREEN}mybash installed${RC}"
-}
-
-fastfetch() {
-	local config_file="$USER_HOME/.config/fastfetch/config.jsonc"
-	local rc_file="$USER_HOME/.bashrc"
-
-	if [ -f "$config_file" ] && grep -q "fastfetch" "$rc_file" 2>/dev/null; then
-		echo -e "${GREEN}Fastfetch already configured${RC}"
-		return 0
-	fi
-
-	echo -e "${YELLOW}Installing Fastfetch...${RC}"
-
-	if ! command -v fastfetch &>/dev/null; then
-		dnf install ${DNF_FLAGS} fastfetch || { echo -e "${RED}Failed to install fastfetch${RC}"; return 1; }
-	fi
-
-	if [ ! -f "$config_file" ]; then
-		if [ -d "$USER_HOME/.config/fastfetch" ] && [ ! -d "$USER_HOME/.config/fastfetch-bak" ]; then
-			cp -r "$USER_HOME/.config/fastfetch" "$USER_HOME/.config/fastfetch-bak"
-		fi
-		mkdir -p "$USER_HOME/.config/fastfetch"
-		curl -sSLo "$config_file" \
-			https://raw.githubusercontent.com/ChrisTitusTech/mybash/main/config.jsonc
-		echo -e "${GREEN}Fastfetch config installed${RC}"
-	fi
-
-	if [ ! -f "$rc_file" ]; then
-		echo -e "${RED}Shell config file $rc_file not found${RC}"
-		return 1
-	fi
-
-	if ! grep -q "fastfetch" "$rc_file"; then
-		printf "\n# Run fastfetch on shell initialization\nfastfetch\n" >> "$rc_file"
-		echo -e "${GREEN}Added fastfetch to $rc_file${RC}"
-	fi
-
-	echo -e "${GREEN}Fastfetch configured${RC}"
-}
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
@@ -295,8 +202,6 @@ main() {
 			configure_tlp
 			install_materia_theme
 			wallpapers_config
-			mybash
-			fastfetch
 			flatpak_install
 			copy_dotfiles || echo -e "${YELLOW}Some config files may be missing — verify manually${RC}"
 			echo -e "${GREEN}Setup completed! Reboot to start using Hyprland.${RC}"
