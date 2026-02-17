@@ -138,23 +138,24 @@ configure_tlp() {
 copy_dotfiles() {
     echo -e "${YELLOW}Copying dotfiles...${RC}"
 
-    # Validação básica
     [ -z "${INSTALL_USER:-}" ] && { echo "INSTALL_USER not set"; return 1; }
-
     local USER_HOME
     USER_HOME=$(eval echo "~$INSTALL_USER")
-
-    local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
     local CONFIG_DIR="$USER_HOME/.config"
 
+    # Detecta automaticamente o diretório do script atual
+    local SCRIPT_DIR
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+    # Prioriza o diretório atual do script, depois tenta os caminhos antigos
+    local DOTFILES_SOURCE="$SCRIPT_DIR"
     if [ ! -d "$DOTFILES_SOURCE" ]; then
         echo -e "${YELLOW}Trying alternative paths...${RC}"
-
         local ALTERNATIVE_PATHS=(
+            "$USER_HOME/hyprdots/distro/fedora"
             "$USER_HOME/hyprdots/distros/fedora"
             "$USER_HOME/hyprdots/fedora"
         )
-
         for alt_path in "${ALTERNATIVE_PATHS[@]}"; do
             if [ -d "$alt_path" ]; then
                 DOTFILES_SOURCE="$alt_path"
@@ -172,15 +173,12 @@ copy_dotfiles() {
     echo -e "${GREEN}Using dotfiles at: $DOTFILES_SOURCE${RC}"
 
     runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR" || return 1
-
     echo -e "${BLUE}Copying files...${RC}"
 
     if command -v rsync &>/dev/null; then
-        runuser -u "$INSTALL_USER" -- rsync -a --delete \
-            "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
+        runuser -u "$INSTALL_USER" -- rsync -a --delete "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
     else
-        runuser -u "$INSTALL_USER" -- cp -a \
-            "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
+        runuser -u "$INSTALL_USER" -- cp -a "$DOTFILES_SOURCE/." "$CONFIG_DIR/" || return 1
     fi
 
     echo -e "${GREEN}Dotfiles copy completed${RC}"
@@ -194,11 +192,9 @@ copy_dotfiles() {
     fi
 }
 
-
 verify_dotfiles_copy() {
     local SOURCE="$1"
     local DEST="$2"
-    
     local ESSENTIAL_FILES=(
         "hypr/hyprland.conf"
         "waybar/config"
@@ -215,7 +211,6 @@ verify_dotfiles_copy() {
 wallpapers_config() {
     local TARGET_DIR="$USER_HOME/Imagens/wallpapers"
 
-    # Garantir que variáveis existem
     [ -z "${INSTALL_USER:-}" ] && { echo "INSTALL_USER not set"; return 1; }
     [ -z "${USER_HOME:-}" ] && { echo "USER_HOME not set"; return 1; }
 
@@ -243,195 +238,25 @@ wallpapers_config() {
     fi
 }
 
-install_mybash() {
-    set -e
 
-    local gitpath="$HOME/.local/share/mybash"
-    local FONT_NAME="MesloLGS Nerd Font Mono"
-    local FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip"
-    local FONT_DIR="$HOME/.local/share/fonts"
-    local TEMP_DIR
-    local STARSHIP_CONFIG="$HOME/.config/starship.toml"
+install_materia_theme() {
+	echo -e "${YELLOW}Installing Materia Theme...${RC}"
+	local INSTALL_DIR="/usr/share/themes"
+	local TMP_DIR
+	TMP_DIR="$(mktemp -d /tmp/materia-theme.XXXXXX)"
+	trap "rm -rf $TMP_DIR" RETURN
 
-    command_exists() { command -v "$1" >/dev/null 2>&1; }
+	for dep in git meson ninja sassc; do
+		command -v "$dep" &>/dev/null || { echo -e "${RED}Missing dependency: $dep${RC}"; return 1; }
+	done
 
-    # Dependências
-    if ! command_exists git || ! command_exists tar || ! command_exists unzip || ! command_exists fc-list; then
-        echo "Installing dependencies..."
-        if command_exists dnf; then
-            sudo dnf install -y git tar unzip fontconfig
-        elif command_exists pacman; then
-            sudo pacman -S --needed --noconfirm git tar unzip fontconfig
-        fi
-    fi
+	git clone --depth=1 https://github.com/nana-4/materia-theme.git "$TMP_DIR" || return 1
+	meson setup --prefix=/usr -Ddest="$INSTALL_DIR" "$TMP_DIR/build" "$TMP_DIR" || return 1
+	ninja -C "$TMP_DIR/build" || return 1
+	ninja -C "$TMP_DIR/build" install || return 1
 
-    # Clonar mybash
-    [ -d "$gitpath" ] && rm -rf "$gitpath"
-    mkdir -p "$(dirname "$gitpath")"
-    git clone https://github.com/ChrisTitusTech/mybash.git "$gitpath"
-
-    # Fonte
-    if ! fc-list :family | grep -iq "$FONT_NAME"; then
-        echo "Installing font $FONT_NAME..."
-        TEMP_DIR=$(mktemp -d)
-        curl -sSLo "$TEMP_DIR/${FONT_NAME}.zip" "$FONT_URL"
-        unzip "$TEMP_DIR/${FONT_NAME}.zip" -d "$TEMP_DIR"
-        mkdir -p "$FONT_DIR/$FONT_NAME"
-        mv "$TEMP_DIR"/*.ttf "$FONT_DIR/$FONT_NAME"
-        fc-cache -fv
-        rm -rf "$TEMP_DIR"
-    else
-        echo "Font $FONT_NAME already installed."
-    fi
-
-    # Starship
-    if ! command_exists starship; then
-        curl -sSL https://starship.rs/install.sh | sh
-    fi
-
-    # Configuração personalizada do Starship
-    mkdir -p "$(dirname "$STARSHIP_CONFIG")"
-    cat > "$STARSHIP_CONFIG" <<'EOF'
-format = """
-[](#303030)\
-$python\
-$username\
-[](bg:#303030 fg:#303030)\
-$directory\
-[](fg:#303030 bg:#303030)\
-$git_branch\
-$git_status\
-[](fg:#303030 bg:#303030)\
-$c\
-$elixir\
-$elm\
-$golang\
-$haskell\
-$java\
-$julia\
-$nodejs\
-$nim\
-$rust\
-[](fg:#303030 bg:#303030)\
-$docker_context\
-[](fg:#303030 bg:#303030)\
-$time\
-[ ](fg:#303030)\
-"""
-command_timeout = 5000
-
-[username]
-show_always = true
-style_user = "bg:#303030"
-style_root = "bg:#303030"
-format = '[$user ]($style)'
-
-[directory]
-style = "bg:#303030"
-format = "[ $path ]($style)"
-truncation_length = 3
-truncation_symbol = "…/"
-
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = " "
-"Pictures" = " "
-
-[c]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[docker_context]
-symbol = " "
-style = "bg:#06969A"
-format = '[ $symbol $context ]($style)$path'
-
-[elixir]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[elm]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[git_branch]
-symbol = ""
-style = "bg:#4C566A"
-format = '[ $symbol $branch ]($style)'
-
-[git_status]
-style = "bg:#4C566A"
-format = '[$all_status$ahead_behind ]($style)'
-
-[golang]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[haskell]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[java]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[julia]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[nodejs]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[nim]
-symbol = " "
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[python]
-style = "bg:#3B4252"
-format = '[(\($virtualenv\) )]($style)'
-
-[rust]
-symbol = ""
-style = "bg:#86BBD8"
-format = '[ $symbol ($version) ]($style)'
-
-[time]
-disabled = false
-time_format = "%R"
-style = "bg:#303030"
-format = '[ $time ]($style)'
-EOF
-
-    # Fzf
-    if ! command_exists fzf; then
-        git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
-        ~/.fzf/install --all
-    fi
-
-    # Zoxide
-    if ! command_exists zoxide; then
-        curl -sSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-    fi
-
-    # Link .bashrc
-    [ -f "$HOME/.bashrc" ] && mv "$HOME/.bashrc" "$HOME/.bashrc.bak"
-    ln -svf "$gitpath/.bashrc" "$HOME/.bashrc"
-
-    echo "Installation complete! Restart your shell to see the Starship prompt."
+	echo -e "${GREEN}Materia Theme installed${RC}"
 }
-
-
 
 
 main() {
