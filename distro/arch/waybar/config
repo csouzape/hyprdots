@@ -9,13 +9,12 @@
     "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator", "network", "tray"], 
 
     "hyprland/workspaces": {
-        "format": "{name}", 
-        "on-click": "activate",
-        "sort-by-number": true,
-        "persistent-workspaces": {
-            "*": 6 
-        }
+    "format": "{name}",
+    "on-click": "activate",
+    "sort-by-number": true,
+    "all-outputs": false
     },
+    
     "hyprland/window": {
         "format": "{title}", 
         "separate-outputs": true,

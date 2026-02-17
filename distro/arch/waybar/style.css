@@ -12,14 +12,15 @@ window#waybar {
 }
 
 #workspaces button {
-    padding: 0 4px;
+    padding: 0 1px;
     background: transparent;
     color: #ffffff;
 }
 
 #workspaces button.active {
-    background: #1c1c1c;
+    background: transparent;
     color: #ffffff;
+    font-weight: bold;
 }
 
 #window {
