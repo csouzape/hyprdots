@@ -99,6 +99,36 @@ flatpak_install() {
 
 } 
 
+google_chrome_install() {
+    echo -e "${YELLOW}Installing Google Chrome...${RC}"
+
+    # Verifica wget
+    if ! command -v wget >/dev/null 2>&1; then
+        echo -e "${YELLOW}wget not found. Installing...${RC}"
+        sudo dnf install -y wget || {
+            echo -e "${RED}ERROR: Failed to install wget${RC}"
+            return 1
+        }
+    fi
+
+    local DOWNLOAD_PATH="$HOME/Downloads/google-chrome.rpm"
+
+    wget -O "$DOWNLOAD_PATH" \
+        https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm || {
+        echo -e "${RED}ERROR: Failed to download Google Chrome${RC}"
+        return 1
+    }
+
+    sudo dnf install -y "$DOWNLOAD_PATH" || {
+        echo -e "${RED}ERROR: Failed to install Google Chrome${RC}"
+        return 1
+    }
+
+    rm -f "$DOWNLOAD_PATH"
+
+    echo -e "${GREEN}Google Chrome installed successfully${RC}"
+}
+
 configure_tlp() {
 	echo -e "${YELLOW}Configuring TLP...${RC}"
 	if systemctl is-enabled tuned &>/dev/null; then
@@ -174,7 +204,6 @@ install_materia_theme() {
 
 	echo -e "${GREEN}Materia Theme installed${RC}"
 }
-
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
