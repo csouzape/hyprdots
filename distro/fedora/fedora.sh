@@ -208,13 +208,18 @@ verify_dotfiles_copy() {
 }
 
 wallpapers_config() {
-    local TARGET_DIR="$USER_HOME/Documentos/GitHub/wallpapers" # MY local
+    local TARGET_DIR="$USER_HOME/Imagens/wallpapers"
 
-    runuser -u "$INSTALL_USER" -- mkdir -p "$(dirname "$TARGET_DIR")"
-    
+    # Garantir que variáveis existem
+    [ -z "${INSTALL_USER:-}" ] && { echo "INSTALL_USER not set"; return 1; }
+    [ -z "${USER_HOME:-}" ] && { echo "USER_HOME not set"; return 1; }
+
+    # Criar diretório completo
+    runuser -u "$INSTALL_USER" -- mkdir -p "$TARGET_DIR" || return 1
+
     if [ -d "$TARGET_DIR/.git" ]; then
         echo -e "${YELLOW}Updating wallpapers...${RC}"
-        if runuser -u "$INSTALL_USER" -- git -C "$TARGET_DIR" pull; then
+        if runuser -u "$INSTALL_USER" -- git -C "$TARGET_DIR" pull --ff-only; then
             echo -e "${GREEN}Wallpapers updated${RC}"
         else
             echo -e "${RED}Failed to update wallpapers${RC}"
@@ -232,6 +237,7 @@ wallpapers_config() {
         fi
     fi
 }
+
 
 main() {
 	echo -e "${BLUE}========================================${RC}"
