@@ -152,6 +152,7 @@ install_dependencies_pacman() {
     echo -e "${GREEN}Main packages installed${RC}"
 }
 
+
 install_dependencies_aur() {
     local aur_packages=(google-chrome waypaper)
     for pkg in "${aur_packages[@]}"; do
@@ -161,6 +162,13 @@ install_dependencies_aur() {
     done
     echo -e "${GREEN}AUR packages installed${RC}"
 }
+
+sddm_config() {
+    echo -e "${YELLOW}Enabling SDDM display manager...${RC}"
+    systemctl enable --now sddm.service
+    echo -e "${GREEN}SDDM enabled and started${RC}"
+}
+
 
 # ── Menu ──────────────────────────────────
 main() {
@@ -186,6 +194,7 @@ main() {
             configure_terminus_font
             copy_dotfiles
             setup_wallpapers
+            sddm_config
             echo -e "${GREEN}Hyprland installation complete!${RC}"
             ;;
         2)
