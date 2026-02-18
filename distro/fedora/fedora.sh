@@ -76,7 +76,7 @@ install_packages() {
 		hyprland sddm alacritty thunar pavucontrol
 		jetbrains-mono-fonts waybar xdg-desktop-portal-gtk
 		hyprshot swaync rofi waypaper swww playerctl nwg-look
-		swayimg
+		swayimg 
 	)
 	dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
 	if ! command -v Hyprland &>/dev/null; then
@@ -96,6 +96,9 @@ flatpak_install() {
 	flatpak install -y flathub com.visualstudio.code
 	flatpak install -y flathub com.github.tchx84.Flatseal
 	flatpak install -y flathub com.discordapp.Discord
+	flatpak install -y flathub io.github.martchus.syncthingtray
+	flatpak install -y flathub md.obsidian.Obsidian
+
 	echo -e "${GREEN}Flatpak applications installed${RC}"
 
 } 
