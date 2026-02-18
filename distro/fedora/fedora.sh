@@ -76,7 +76,7 @@ install_packages() {
 		hyprland sddm alacritty thunar pavucontrol
 		jetbrains-mono-fonts waybar xdg-desktop-portal-gtk
 		hyprshot swaync rofi waypaper swww playerctl nwg-look
-		swayimg sassc npm meson
+		swayimg sassc npm meson zathura zathura-pdf-poppler
 	)
 	dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
 	if ! command -v Hyprland &>/dev/null; then
