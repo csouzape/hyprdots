@@ -76,7 +76,7 @@ configure_terminus_font() {
     echo -e "${GREEN}Terminus font configured${RC}"
 }
 
-# ── Dotfiles copy ──────────────────────────
+
 copy_dotfiles() {
     local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
     [ ! -d "$DOTFILES_SOURCE" ] && DOTFILES_SOURCE="$USER_HOME/hyprdots/fedora"
@@ -142,7 +142,7 @@ install_dependencies_pacman() {
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
         playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono
         papirus-icon-theme discord 
-    echo -e "${GREEN}Main packages installed${RC}"
+    echo -e "${GREEN}Main packages 'installed${RC}"
 }
 
 
@@ -163,7 +163,6 @@ sddm_config() {
 }
 
 
-# ── Menu ──────────────────────────────────
 main() {
     echo -e "${BLUE}========================================${RC}"
     echo -e "${BLUE}      Hyprland Setup Script (Arch)      ${RC}"
