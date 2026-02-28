@@ -140,7 +140,7 @@ remove_old_de() {
 install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
-        playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono
+        playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono \
         papirus-icon-theme discord 
     echo -e "${GREEN}Main packages 'installed${RC}"
 }
@@ -162,6 +162,53 @@ sddm_config() {
     echo -e "${GREEN}SDDM enabled and started${RC}"
 }
 
+
+installfastfetch(){
+    if ! command -v fastfetch &>/dev/null; then 
+        echo -e "${YELLOW}Installing fastfetch...${RC}"
+        sudo pacman -S --needed --noconfirm fastfetch
+        echo -e "${GREEN}fastfetch installed${RC}"
+    else 
+        echo -e "${GREEN}fastfetch already installed${RC}"
+    
+    fi 
+
+}
+configfastfetch(){
+    CONFIG_DIR="$USER_HOME/.config/fastfetch"
+    mkdir -p "$CONFIG_DIR"
+
+    curl -sSLo "$CONFIG_DIR/config.jsonc" \
+        https://raw.githubusercontent.com/ChrisTitusTech/mybash/main/config.jsonc
+
+}
+
+
+setup_fastfetch_shell_arch() {
+    printf "Configurando integração com shell...\n"
+
+    current_shell=$(basename "$SHELL")
+
+    case "$current_shell" in
+        bash) rc_file="$HOME/.bashrc" ;;
+        zsh)  rc_file="$HOME/.zshrc" ;;
+        fish) rc_file="$HOME/.config/fish/config.fish" ;;
+        *)
+            printf "Shell não suportado automaticamente.\n"
+            return 1
+            ;;
+    esac
+
+    [ -f "$rc_file" ] || return 0
+
+    if grep -q "^fastfetch" "$rc_file"; then
+        printf "Fastfetch já configurado em %s\n" "$rc_file"
+        return 0
+    fi
+
+    printf "\n# Run fastfetch on shell initialization\nfastfetch\n" >> "$rc_file"
+    printf "Fastfetch adicionado em %s\n" "$rc_file"
+}
 
 main() {
     echo -e "${BLUE}========================================${RC}"
@@ -186,6 +233,9 @@ main() {
             configure_terminus_font
             copy_dotfiles
             setup_wallpapers
+            installfastfetch
+            configfastfetch
+            setup_fastfetch_shell_arch
             sddm_config
             echo -e "${GREEN}Hyprland installation complete!${RC}"
             ;;
