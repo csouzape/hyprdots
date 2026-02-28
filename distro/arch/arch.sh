@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-# ── Color codes ──────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -13,7 +12,6 @@ USER_HOME=$(eval echo ~$INSTALL_USER)
 
 PACMAN_FLAGS="-S --needed --noconfirm --noprogressbar"
 
-# ── Root permission ─────────────────────────
 root_permission() {
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}Please run as root or with sudo${RC}"
@@ -22,7 +20,7 @@ root_permission() {
     echo -e "${GREEN}Running with root privileges${RC}"
 }
 
-# ── YAY installation ───────────────────────
+
 install_yay() {
     echo -e "${YELLOW}Installing yay...${RC}"
     pacman $PACMAN_FLAGS git base-devel
@@ -39,7 +37,6 @@ check_yay() {
     command -v yay &>/dev/null || install_yay
 }
 
-# ── Multilib enable ────────────────────────
 enable_multilib() {
     if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
         echo -e "${YELLOW}Enabling multilib repository...${RC}"
@@ -51,7 +48,6 @@ enable_multilib() {
     fi
 }
 
-# ── TLP configuration ──────────────────────
 configure_tlp() {
     echo -e "${YELLOW}Configuring TLP...${RC}"
     pacman $PACMAN_FLAGS tlp tlp-rdw
@@ -59,7 +55,6 @@ configure_tlp() {
     echo -e "${GREEN}TLP configured${RC}"
 }
 
-# ── Gaming dependencies ────────────────────
 gaming_dependencies() {
     echo -e "${YELLOW}Installing gaming libs...${RC}"
     pacman $PACMAN_FLAGS lib32-gnutls lib32-gtk3 lib32-libpulse lib32-alsa-lib \
@@ -70,7 +65,6 @@ gaming_dependencies() {
     echo -e "${GREEN}Gaming libs installed${RC}"
 }
 
-# ── Terminus font ──────────────────────────
 configure_terminus_font() {
     pacman $PACMAN_FLAGS terminus-font
     if [ -f /etc/vconsole.conf ]; then
@@ -100,7 +94,6 @@ copy_dotfiles() {
     echo -e "${GREEN}Dotfiles copied${RC}"
 }
 
-# ── Wallpapers ─────────────────────────────
 setup_wallpapers() {
     local WALL_DIR="$USER_HOME/Imagens/wallpapers"
     runuser -u "$INSTALL_USER" -- mkdir -p "$WALL_DIR"
@@ -112,7 +105,6 @@ setup_wallpapers() {
     echo -e "${GREEN}Wallpapers ready${RC}"
 }
 
-# ── Detect and remove old DE ──────────────
 detect_de() {
     local DE=""
     [ -n "$XDG_CURRENT_DESKTOP" ] && DE="$XDG_CURRENT_DESKTOP"
@@ -144,17 +136,18 @@ remove_old_de() {
     esac
 }
 
-# ── Main package installation ─────────────
+
 install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
         playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono
+        papirus-icon-theme discord 
     echo -e "${GREEN}Main packages installed${RC}"
 }
 
 
 install_dependencies_aur() {
-    local aur_packages=(google-chrome waypaper)
+    local aur_packages=(google-chrome waypaper spotify visual-studio-code-bin)
     for pkg in "${aur_packages[@]}"; do
         if ! pacman -Qi "$pkg" &>/dev/null; then
             sudo -u "$INSTALL_USER" yay -S --noconfirm "$pkg"
