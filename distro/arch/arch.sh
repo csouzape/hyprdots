@@ -151,7 +151,8 @@ install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
         playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono \
-        papirus-icon-theme discord
+        papirus-icon-theme discord noto-fonts noto-fonts-emoji ttf-liberation \ 
+        ttf-dejavu 
     echo -e "${GREEN}Main packages installed${RC}"
 }
 
