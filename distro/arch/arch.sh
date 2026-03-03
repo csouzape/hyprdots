@@ -147,6 +147,34 @@ remove_old_de() {
     esac
 }
 
+
+install_flatpak() {
+    if ! command -v flatpak &>/dev/null; then
+        echo -e "${YELLOW}Installing Flatpak...${RC}"
+        pacman $PACMAN_FLAGS flatpak
+        flatpak remote-add --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+        echo -e "${GREEN}Flatpak installed${RC}"
+    fi
+}
+
+
+install_dependencies_flatpak() {
+    local flatpak_packages=(
+        io.github.martchus.syncthingtray
+    )
+
+    install_flatpak
+
+    for pkg in "${flatpak_packages[@]}"; do
+        if flatpak info "$pkg" &>/dev/null; then
+            echo -e "${GREEN}$pkg already installed${RC}"
+        else
+            echo -e "${YELLOW}Installing $pkg...${RC}"
+            flatpak install -y flathub "$pkg"
+        fi
+    done
+}
 install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
@@ -244,6 +272,7 @@ main() {
             configure_tlp
             install_dependencies_pacman
             install_dependencies_aur
+            install_dependencies_flatpak
             gaming_dependencies
             configure_terminus_font
             copy_dotfiles
