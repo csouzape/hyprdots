@@ -1,17 +1,14 @@
 #!/bin/bash
 set -e
 
-# Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 RC='\033[0m'
 
-# Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Function to detect the Linux distribution
 detect_distro() {
     if [ -f /etc/os-release ]; then
         . /etc/os-release
@@ -26,7 +23,7 @@ detect_distro() {
     echo "$DISTRO"
 }
 
-# Function to check if script exists
+
 check_script() {
     local script_path="$1"
     if [ ! -f "$script_path" ]; then
@@ -34,29 +31,25 @@ check_script() {
         exit 1
     fi
     
-    # Make script executable
     chmod +x "$script_path"
 }
 
-# Main function
+
 main() {
     echo -e "${BLUE}========================================${RC}"
     echo -e "${BLUE}       Hyprdots Installation Script    ${RC}"
     echo -e "${BLUE}========================================${RC}"
     echo ""
     
-    # Check if running as root
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}Please run this script with sudo${RC}"
         exit 1
     fi
-    
-    # Detect distribution
+
     DISTRO=$(detect_distro)
     echo -e "${BLUE}Detected distribution: ${YELLOW}$DISTRO${RC}"
     echo ""
     
-    # Determine which installation script to run
     case "$DISTRO" in
         arch|archarm|manjaro|endeavouros)
             INSTALL_SCRIPT="$SCRIPT_DIR/distro/arch/arch.sh"
@@ -73,10 +66,8 @@ main() {
             ;;
     esac
     
-    # Check if installation script exists
     check_script "$INSTALL_SCRIPT"
     
-    # Run the installation script
     echo -e "${YELLOW}Starting installation...${RC}"
     echo ""
     bash "$INSTALL_SCRIPT"
