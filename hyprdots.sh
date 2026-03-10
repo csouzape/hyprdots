@@ -23,24 +23,21 @@ detect_distro() {
     echo "$DISTRO"
 }
 
-
 check_script() {
     local script_path="$1"
     if [ ! -f "$script_path" ]; then
         echo -e "${RED}Error: Script not found: $script_path${RC}"
         exit 1
     fi
-    
     chmod +x "$script_path"
 }
 
-
 main() {
     echo -e "${BLUE}========================================${RC}"
-    echo -e "${BLUE}       Hyprdots Installation Script    ${RC}"
+    echo -e "${BLUE}       Hyprdots Installation Script     ${RC}"
     echo -e "${BLUE}========================================${RC}"
     echo ""
-    
+
     if [ "$EUID" -ne 0 ]; then
         echo -e "${RED}Please run this script with sudo${RC}"
         exit 1
@@ -49,7 +46,7 @@ main() {
     DISTRO=$(detect_distro)
     echo -e "${BLUE}Detected distribution: ${YELLOW}$DISTRO${RC}"
     echo ""
-    
+
     case "$DISTRO" in
         arch|archarm|manjaro|endeavouros)
             INSTALL_SCRIPT="$SCRIPT_DIR/distro/arch/arch.sh"
@@ -65,16 +62,18 @@ main() {
             exit 1
             ;;
     esac
-    
+
     check_script "$INSTALL_SCRIPT"
-    
+
     echo -e "${YELLOW}Starting installation...${RC}"
     echo ""
-    bash "$INSTALL_SCRIPT"
-    
+
+    # < /dev/tty garante input interativo mesmo quando chamado via dsxtool
+    bash "$INSTALL_SCRIPT" < /dev/tty
+
     echo ""
     echo -e "${GREEN}========================================${RC}"
-    echo -e "${GREEN}   Installation completed successfully!${RC}"
+    echo -e "${GREEN}   Installation completed successfully! ${RC}"
     echo -e "${GREEN}========================================${RC}"
     echo -e "${YELLOW}Please reboot your system to start using Hyprland${RC}"
     echo -e "${GREEN}========================================${RC}"

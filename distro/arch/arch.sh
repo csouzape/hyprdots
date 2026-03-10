@@ -9,6 +9,7 @@ RC='\033[0m'
 
 INSTALL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(eval echo ~"$INSTALL_USER")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 PACMAN_FLAGS="-S --needed --noconfirm --noprogressbar"
 
@@ -41,13 +42,7 @@ check_yay() {
 enable_multilib() {
     if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
         echo -e "${YELLOW}Enabling multilib repository...${RC}"
-        # Uncomment [multilib] block robustly
-        awk '/^#\[multilib\]/{print "[multilib]"; next}
-             /^#Include = \/etc\/pacman.d\/mirrorlist/{
-                 if (prev == "[multilib]") { print "Include = /etc/pacman.d/mirrorlist"; next }
-             }
-             { prev=$0; print }' /etc/pacman.conf > /tmp/pacman.conf.tmp \
-        && mv /tmp/pacman.conf.tmp /etc/pacman.conf
+        sed -i '/^#\[multilib\]/{s/^#//;n;s/^#//}' /etc/pacman.conf
         pacman -Syu --noconfirm
         echo -e "${GREEN}Multilib enabled${RC}"
     else
@@ -75,21 +70,20 @@ gaming_dependencies() {
 configure_terminus_font() {
     pacman $PACMAN_FLAGS terminus-font
     if [ -f /etc/vconsole.conf ]; then
-        grep -q "^FONT=ter-v18b" /etc/vconsole.conf || sed -i 's/^FONT=.*/FONT=ter-v18b/' /etc/vconsole.conf
+        grep -q "^FONT=ter-v18b" /etc/vconsole.conf \
+            || sed -i 's/^FONT=.*/FONT=ter-v18b/' /etc/vconsole.conf
     else
         echo "FONT=ter-v18b" > /etc/vconsole.conf
     fi
-    [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ] && setfont ter-v18b
+    [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ] && setfont ter-v18b || true
     echo -e "${GREEN}Terminus font configured${RC}"
 }
 
 copy_dotfiles() {
-    local DOTFILES_SOURCE="$USER_HOME/hyprdots/distro/fedora"
-    [ ! -d "$DOTFILES_SOURCE" ] && DOTFILES_SOURCE="$USER_HOME/hyprdots/fedora"
-    [ ! -d "$DOTFILES_SOURCE" ] && DOTFILES_SOURCE="$USER_HOME/hyprdots/distros/fedora"
-    [ ! -d "$DOTFILES_SOURCE" ] && { echo -e "${RED}No dotfiles found${RC}"; return 1; }
-
+    # SCRIPT_DIR é distro/arch/ — os dotfiles já estão aqui
+    local DOTFILES_SOURCE="$SCRIPT_DIR"
     local CONFIG_DIR="$USER_HOME/.config"
+
     runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
 
     if command -v rsync &>/dev/null; then
@@ -97,11 +91,10 @@ copy_dotfiles() {
     else
         runuser -u "$INSTALL_USER" -- cp -a "$DOTFILES_SOURCE/." "$CONFIG_DIR/"
     fi
-    echo -e "${GREEN}Dotfiles copied${RC}"
+    echo -e "${GREEN}Dotfiles copied from $DOTFILES_SOURCE${RC}"
 }
 
 setup_wallpapers() {
-    # Usa XDG_PICTURES_DIR se disponível, senão ~/Pictures (compatível com qualquer locale)
     local PICTURES_DIR
     PICTURES_DIR=$(sudo -u "$INSTALL_USER" bash -lc 'echo "${XDG_PICTURES_DIR:-$HOME/Pictures}"')
     local WALL_DIR="$PICTURES_DIR/wallpapers"
@@ -110,15 +103,16 @@ setup_wallpapers() {
     if [ -d "$WALL_DIR/.git" ]; then
         runuser -u "$INSTALL_USER" -- git -C "$WALL_DIR" pull --ff-only
     else
-        runuser -u "$INSTALL_USER" -- git clone --depth=1 https://github.com/csouzape/wallpapers "$WALL_DIR"
+        runuser -u "$INSTALL_USER" -- git clone --depth=1 \
+            https://github.com/csouzape/wallpapers "$WALL_DIR"
     fi
     echo -e "${GREEN}Wallpapers ready at: $WALL_DIR${RC}"
 }
 
 detect_de() {
-    # Tenta obter o DE a partir do ambiente do usuário real, não do root
     local DE=""
-    DE=$(sudo -u "$INSTALL_USER" bash -lc 'echo "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"' 2>/dev/null || true)
+    DE=$(sudo -u "$INSTALL_USER" bash -lc \
+        'echo "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"' 2>/dev/null || true)
     echo "${DE:-UNKNOWN}"
 }
 
@@ -127,16 +121,20 @@ remove_old_de() {
     DE=$(detect_de | tr '[:lower:]' '[:upper:]')
     case "$DE" in
         *KDE*|*PLASMA*)
-            pacman -Rns --noconfirm plasma-desktop plasma-workspace kde-applications kwalletmanager || true
+            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
+                kde-applications kwalletmanager || true
             ;;
         *GNOME*)
-            pacman -Rns --noconfirm gnome-shell gnome-control-center gnome-terminal nautilus || true
+            pacman -Rns --noconfirm gnome-shell gnome-control-center \
+                gnome-terminal nautilus || true
             ;;
         *XFCE*)
-            pacman -Rns --noconfirm xfce4-session xfce4-panel xfdesktop xfwm4 || true
+            pacman -Rns --noconfirm xfce4-session xfce4-panel \
+                xfdesktop xfwm4 || true
             ;;
         *MATE*)
-            pacman -Rns --noconfirm mate-session-manager mate-panel mate-desktop || true
+            pacman -Rns --noconfirm mate-session-manager \
+                mate-panel mate-desktop || true
             ;;
         *CINNAMON*)
             pacman -Rns --noconfirm cinnamon || true
@@ -147,7 +145,6 @@ remove_old_de() {
     esac
 }
 
-
 install_flatpak() {
     if ! command -v flatpak &>/dev/null; then
         echo -e "${YELLOW}Installing Flatpak...${RC}"
@@ -157,7 +154,6 @@ install_flatpak() {
         echo -e "${GREEN}Flatpak installed${RC}"
     fi
 }
-
 
 install_dependencies_flatpak() {
     local flatpak_packages=(
@@ -175,12 +171,13 @@ install_dependencies_flatpak() {
         fi
     done
 }
+
 install_dependencies_pacman() {
     pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
         playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono \
-        papirus-icon-theme discord noto-fonts noto-fonts-emoji ttf-liberation \ 
-        ttf-dejavu 
+        papirus-icon-theme discord noto-fonts noto-fonts-emoji \
+        ttf-liberation ttf-dejavu
     echo -e "${GREEN}Main packages installed${RC}"
 }
 
@@ -211,7 +208,6 @@ installfastfetch() {
 }
 
 configfastfetch() {
-    # Garante que curl está disponível antes de usá-lo
     if ! command -v curl &>/dev/null; then
         echo -e "${YELLOW}Installing curl...${RC}"
         pacman $PACMAN_FLAGS curl
@@ -227,7 +223,6 @@ configfastfetch() {
 setup_fastfetch_shell_arch() {
     echo -e "${YELLOW}Configuring fastfetch shell integration...${RC}"
 
-    # Usa o shell do usuário real, não do root
     local current_shell
     current_shell=$(basename "$(getent passwd "$INSTALL_USER" | cut -d: -f7)")
 
@@ -262,7 +257,7 @@ main() {
     echo "1) Install Hyprland"
     echo "2) Remove KDE Plasma only"
     echo "3) Cancel"
-    read -rp "Select an option [1-3]: " MENU
+    read -rp "Select an option [1-3]: " MENU < /dev/tty
 
     case "$MENU" in
         1)
@@ -284,16 +279,17 @@ main() {
             echo -e "${GREEN}Hyprland installation complete!${RC}"
             ;;
         2)
-            pacman -Rns --noconfirm plasma-desktop plasma-workspace kde-applications kwalletmanager || true
+            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
+                kde-applications kwalletmanager || true
             echo -e "${GREEN}KDE removed${RC}"
             ;;
         3)
-            echo -e "${RED}Cancelled${RC}"
+            echo -e "${YELLOW}Cancelled${RC}"
             exit 0
             ;;
         *)
             echo -e "${RED}Invalid option${RC}"
-            exit 1
+            exit 0
             ;;
     esac
 }
