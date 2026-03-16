@@ -157,7 +157,7 @@ install_flatpak() {
 
 install_dependencies_flatpak() {
     local flatpak_packages=(
-        io.github.martchus.syncthingtray
+        flathub com.github.zocker_160.SyncThingy
     )
 
     install_flatpak
