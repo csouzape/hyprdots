@@ -1,230 +1,257 @@
 #!/bin/bash
-set -eu
+set -euo pipefail
+IFS=$'\n\t'
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-RC='\033[0m'
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m'
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly RC='\033[0m'
 
-INSTALL_USER=${SUDO_USER:-$USER}
-USER_HOME=$(eval echo ~"$INSTALL_USER")
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly PACMAN_FLAGS="-S --needed --noconfirm --noprogressbar"
+readonly LOG_FILE="/var/log/hyprland-setup.log"
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-PACMAN_FLAGS="-S --needed --noconfirm --noprogressbar"
+INSTALL_USER="${SUDO_USER:-${USER:-}}"
+if [[ -z "$INSTALL_USER" || "$INSTALL_USER" == "root" ]]; then
+    echo -e "${RED}Could not determine a non-root user. Run with: sudo -E ./setup-hyprland.sh${RC}"
+    exit 1
+fi
+USER_HOME="$(eval echo ~"$INSTALL_USER")"
+
+log()    { echo -e "$*" | tee -a "$LOG_FILE"; }
+info()   { log "${BLUE}[INFO]${RC}  $*"; }
+ok()     { log "${GREEN}[OK]${RC}    $*"; }
+warn()   { log "${YELLOW}[WARN]${RC}  $*"; }
+err()    { log "${RED}[ERROR]${RC} $*" >&2; }
+die()    { err "$*"; exit 1; }
+
+as_user() { runuser -u "$INSTALL_USER" -- "$@"; }
 
 root_permission() {
-    if [ "$EUID" -ne 0 ]; then
-        echo -e "${RED}Please run as root or with sudo${RC}"
-        exit 1
+    [[ "$EUID" -eq 0 ]] || die "Please run as root or with sudo."
+    ok "Running with root privileges (install user: $INSTALL_USER)"
+}
+
+check_arch() {
+    [[ -f /etc/arch-release ]] || die "This script targets Arch Linux only."
+}
+
+check_internet() {
+    info "Checking internet connectivity..."
+    if ! ping -c1 -W5 archlinux.org &>/dev/null; then
+        die "No internet connection detected. Aborting."
     fi
-    echo -e "${GREEN}Running with root privileges${RC}"
+    ok "Internet OK"
+}
+
+pacman_install() {
+    info "Installing (pacman): $*"
+    pacman $PACMAN_FLAGS "$@" || die "pacman failed to install: $*"
+}
+
+pacman_install_list() {
+    local -a to_install=()
+    for pkg in "$@"; do
+        pacman -Qi "$pkg" &>/dev/null || to_install+=("$pkg")
+    done
+    if [[ ${#to_install[@]} -gt 0 ]]; then
+        pacman_install "${to_install[@]}"
+    else
+        ok "All packages already installed: $*"
+    fi
 }
 
 install_yay() {
-    echo -e "${YELLOW}Installing yay...${RC}"
-    pacman $PACMAN_FLAGS git base-devel
-    cd /tmp
-    sudo -u "$INSTALL_USER" git clone https://aur.archlinux.org/yay.git
-    cd yay
-    sudo -u "$INSTALL_USER" makepkg -si --noconfirm
-    cd ..
-    rm -rf yay
-    echo -e "${GREEN}yay installed successfully${RC}"
+    info "Installing yay..."
+    pacman_install_list git base-devel
+
+    local tmpdir
+    tmpdir="$(mktemp -d)"
+    trap 'rm -rf "$tmpdir"' RETURN
+
+    as_user git clone https://aur.archlinux.org/yay.git "$tmpdir/yay"
+    (cd "$tmpdir/yay" && as_user makepkg -si --noconfirm) \
+        || die "Failed to build/install yay."
+    ok "yay installed"
 }
 
 check_yay() {
-    if ! sudo -u "$INSTALL_USER" bash -lc "command -v yay" &>/dev/null; then
+    if ! as_user bash -lc "command -v yay" &>/dev/null; then
         install_yay
+    else
+        ok "yay already present"
     fi
 }
 
 enable_multilib() {
-    if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
-        echo -e "${YELLOW}Enabling multilib repository...${RC}"
-        sed -i '/^#\[multilib\]/{s/^#//;n;s/^#//}' /etc/pacman.conf
-        pacman -Syu --noconfirm
-        echo -e "${GREEN}Multilib enabled${RC}"
-    else
-        echo -e "${GREEN}Multilib already enabled${RC}"
+    if grep -q "^\[multilib\]" /etc/pacman.conf; then
+        ok "multilib already enabled"
+        return
     fi
+    info "Enabling multilib repository..."
+    sed -i '/^#\[multilib\]/{
+        s/^#//
+        n
+        s/^#//
+    }' /etc/pacman.conf
+    pacman -Syu --noconfirm || die "pacman -Syu failed after enabling multilib"
+    ok "multilib enabled"
 }
 
 configure_tlp() {
-    echo -e "${YELLOW}Configuring TLP...${RC}"
-    pacman $PACMAN_FLAGS tlp tlp-rdw
-    systemctl enable --now tlp
-    echo -e "${GREEN}TLP configured${RC}"
-}
-
-gaming_dependencies() {
-    echo -e "${YELLOW}Installing gaming libs...${RC}"
-    pacman $PACMAN_FLAGS lib32-gnutls lib32-gtk3 lib32-libpulse lib32-alsa-lib \
-        lib32-libpng lib32-libjpeg-turbo lib32-sqlite lib32-libva \
-        lib32-vulkan-icd-loader lib32-vulkan-radeon lib32-vulkan-intel \
-        vulkan-icd-loader vulkan-radeon vulkan-intel ocl-icd opencl-icd-loader \
-        gamemode mangohud gamescope
-    echo -e "${GREEN}Gaming libs installed${RC}"
+    info "Configuring TLP..."
+    pacman_install_list tlp tlp-rdw
+    systemctl enable --now tlp || warn "Failed to enable TLP (may already be active)"
+    ok "TLP configured"
 }
 
 configure_terminus_font() {
-    pacman $PACMAN_FLAGS terminus-font
-    if [ -f /etc/vconsole.conf ]; then
-        grep -q "^FONT=ter-v18b" /etc/vconsole.conf \
-            || sed -i 's/^FONT=.*/FONT=ter-v18b/' /etc/vconsole.conf
-    else
-        echo "FONT=ter-v18b" > /etc/vconsole.conf
-    fi
-    [ -z "${DISPLAY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ] && setfont ter-v18b || true
-    echo -e "${GREEN}Terminus font configured${RC}"
-}
+    info "Configuring Terminus font..."
+    pacman_install_list terminus-font
 
-copy_dotfiles() {
-    # SCRIPT_DIR é distro/arch/ — os dotfiles já estão aqui
-    local DOTFILES_SOURCE="$SCRIPT_DIR"
-    local CONFIG_DIR="$USER_HOME/.config"
-
-    runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
-
-    if command -v rsync &>/dev/null; then
-        runuser -u "$INSTALL_USER" -- rsync -a --delete "$DOTFILES_SOURCE/." "$CONFIG_DIR/"
-    else
-        runuser -u "$INSTALL_USER" -- cp -a "$DOTFILES_SOURCE/." "$CONFIG_DIR/"
-    fi
-    echo -e "${GREEN}Dotfiles copied from $DOTFILES_SOURCE${RC}"
-}
-
-setup_wallpapers() {
-    local PICTURES_DIR
-    PICTURES_DIR=$(sudo -u "$INSTALL_USER" bash -lc 'echo "${XDG_PICTURES_DIR:-$HOME/Pictures}"')
-    local WALL_DIR="$PICTURES_DIR/wallpapers"
-
-    runuser -u "$INSTALL_USER" -- mkdir -p "$WALL_DIR"
-    if [ -d "$WALL_DIR/.git" ]; then
-        runuser -u "$INSTALL_USER" -- git -C "$WALL_DIR" pull --ff-only
-    else
-        runuser -u "$INSTALL_USER" -- git clone --depth=1 \
-            https://github.com/csouzape/wallpapers "$WALL_DIR"
-    fi
-    echo -e "${GREEN}Wallpapers ready at: $WALL_DIR${RC}"
-}
-
-detect_de() {
-    local DE=""
-    DE=$(sudo -u "$INSTALL_USER" bash -lc \
-        'echo "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"' 2>/dev/null || true)
-    echo "${DE:-UNKNOWN}"
-}
-
-remove_old_de() {
-    local DE
-    DE=$(detect_de | tr '[:lower:]' '[:upper:]')
-    case "$DE" in
-        *KDE*|*PLASMA*)
-            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
-                kde-applications kwalletmanager || true
-            ;;
-        *GNOME*)
-            pacman -Rns --noconfirm gnome-shell gnome-control-center \
-                gnome-terminal nautilus || true
-            ;;
-        *XFCE*)
-            pacman -Rns --noconfirm xfce4-session xfce4-panel \
-                xfdesktop xfwm4 || true
-            ;;
-        *MATE*)
-            pacman -Rns --noconfirm mate-session-manager \
-                mate-panel mate-desktop || true
-            ;;
-        *CINNAMON*)
-            pacman -Rns --noconfirm cinnamon || true
-            ;;
-        *)
-            echo -e "${YELLOW}No DE detected or unsupported DE: ${DE}${RC}"
-            ;;
-    esac
-}
-
-install_flatpak() {
-    if ! command -v flatpak &>/dev/null; then
-        echo -e "${YELLOW}Installing Flatpak...${RC}"
-        pacman $PACMAN_FLAGS flatpak
-        flatpak remote-add --if-not-exists flathub \
-            https://dl.flathub.org/repo/flathub.flatpakrepo
-        echo -e "${GREEN}Flatpak installed${RC}"
-    fi
-}
-
-install_dependencies_flatpak() {
-    local flatpak_packages=(
-        flathub com.github.zocker_160.SyncThingy
-    )
-
-    install_flatpak
-
-    for pkg in "${flatpak_packages[@]}"; do
-        if flatpak info "$pkg" &>/dev/null; then
-            echo -e "${GREEN}$pkg already installed${RC}"
+    local vconsole=/etc/vconsole.conf
+    if [[ -f "$vconsole" ]]; then
+        if grep -q "^FONT=" "$vconsole"; then
+            sed -i 's/^FONT=.*/FONT=ter-v18b/' "$vconsole"
         else
-            echo -e "${YELLOW}Installing $pkg...${RC}"
-            flatpak install -y flathub "$pkg"
+            echo "FONT=ter-v18b" >> "$vconsole"
         fi
-    done
+    else
+        echo "FONT=ter-v18b" > "$vconsole"
+    fi
+
+    # Apply only in a TTY session
+    if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+        setfont ter-v18b || warn "setfont failed (non-critical)"
+    fi
+    ok "Terminus font configured"
+}
+
+gaming_dependencies() {
+    info "Installing gaming libs..."
+    pacman_install_list \
+        lib32-gnutls lib32-gtk3 lib32-libpulse lib32-alsa-lib \
+        lib32-libpng lib32-libjpeg-turbo lib32-sqlite lib32-libva \
+        lib32-vulkan-icd-loader lib32-vulkan-radeon lib32-vulkan-intel \
+        vulkan-icd-loader vulkan-radeon vulkan-intel \
+        ocl-icd opencl-icd-loader \
+        gamemode mangohud gamescope
+    ok "Gaming libs installed"
 }
 
 install_dependencies_pacman() {
-    pacman $PACMAN_FLAGS hyprland sddm alacritty thunar pavucontrol waybar \
+    info "Installing main packages..."
+    pacman_install_list \
+        hyprland sddm alacritty thunar pavucontrol waybar \
         xdg-desktop-portal-hyprland hyprshot swaync rofi swww \
         playerctl materia-gtk-theme nwg-look ttf-jetbrains-mono \
         papirus-icon-theme discord noto-fonts noto-fonts-emoji \
         ttf-liberation ttf-dejavu
-    echo -e "${GREEN}Main packages installed${RC}"
+    ok "Main packages installed"
 }
 
 install_dependencies_aur() {
-    local aur_packages=(google-chrome waypaper spotify visual-studio-code-bin)
+    info "Installing AUR packages..."
+    local -a aur_packages=(google-chrome waypaper spotify visual-studio-code-bin)
     for pkg in "${aur_packages[@]}"; do
-        if ! pacman -Qi "$pkg" &>/dev/null; then
-            sudo -u "$INSTALL_USER" bash -lc "yay -S --noconfirm $pkg"
+        if pacman -Qi "$pkg" &>/dev/null; then
+            ok "$pkg already installed"
+        else
+            info "Installing AUR: $pkg"
+            as_user bash -lc "yay -S --noconfirm $pkg" \
+                || warn "Failed to install AUR package: $pkg (skipping)"
         fi
     done
-    echo -e "${GREEN}AUR packages installed${RC}"
+    ok "AUR packages done"
 }
 
-sddm_config() {
-    echo -e "${YELLOW}Enabling SDDM display manager...${RC}"
-    systemctl enable --now sddm.service
-    echo -e "${GREEN}SDDM enabled and started${RC}"
+install_flatpak() {
+    if command -v flatpak &>/dev/null; then
+        ok "flatpak already installed"
+        return
+    fi
+    info "Installing Flatpak..."
+    pacman_install_list flatpak
+    flatpak remote-add --if-not-exists flathub \
+        https://dl.flathub.org/repo/flathub.flatpakrepo \
+        || warn "Could not add Flathub remote (check connectivity)"
+    ok "Flatpak installed"
+}
+
+install_dependencies_flatpak() {
+    install_flatpak
+    local -a flatpak_packages=(com.github.zocker_160.SyncThingy)
+    for pkg in "${flatpak_packages[@]}"; do
+        if flatpak info "$pkg" &>/dev/null 2>&1; then
+            ok "$pkg already installed"
+        else
+            info "Installing flatpak: $pkg"
+            flatpak install -y flathub "$pkg" \
+                || warn "Failed to install flatpak: $pkg (skipping)"
+        fi
+    done
+}
+copy_dotfiles() {
+    local src="$SCRIPT_DIR"
+    local dst="$USER_HOME/.config"
+
+    info "Copying dotfiles from $src → $dst"
+    as_user mkdir -p "$dst"
+
+    if command -v rsync &>/dev/null; then
+        as_user rsync -a --delete "$src/." "$dst/"
+    else
+        as_user cp -a "$src/." "$dst/"
+    fi
+    ok "Dotfiles copied"
+}
+
+setup_wallpapers() {
+    local pictures_dir
+    pictures_dir="$(as_user bash -lc 'echo "${XDG_PICTURES_DIR:-$HOME/Pictures}"')"
+    local wall_dir="$pictures_dir/wallpapers"
+
+    info "Setting up wallpapers at $wall_dir"
+    as_user mkdir -p "$wall_dir"
+
+    if [[ -d "$wall_dir/.git" ]]; then
+        as_user git -C "$wall_dir" pull --ff-only \
+            || warn "Could not pull wallpapers (non-critical)"
+    else
+        as_user git clone --depth=1 \
+            https://github.com/csouzape/wallpapers "$wall_dir" \
+            || warn "Could not clone wallpapers (non-critical)"
+    fi
+    ok "Wallpapers ready at $wall_dir"
 }
 
 installfastfetch() {
-    if ! command -v fastfetch &>/dev/null; then
-        echo -e "${YELLOW}Installing fastfetch...${RC}"
-        pacman $PACMAN_FLAGS fastfetch
-        echo -e "${GREEN}fastfetch installed${RC}"
-    else
-        echo -e "${GREEN}fastfetch already installed${RC}"
+    if command -v fastfetch &>/dev/null; then
+        ok "fastfetch already installed"
+        return
     fi
+    info "Installing fastfetch..."
+    pacman_install_list fastfetch
+    ok "fastfetch installed"
 }
 
 configfastfetch() {
-    if ! command -v curl &>/dev/null; then
-        echo -e "${YELLOW}Installing curl...${RC}"
-        pacman $PACMAN_FLAGS curl
-    fi
+    info "Configuring fastfetch..."
+    pacman_install_list curl
 
-    local CONFIG_DIR="$USER_HOME/.config/fastfetch"
-    runuser -u "$INSTALL_USER" -- mkdir -p "$CONFIG_DIR"
-    curl -sSLo "$CONFIG_DIR/config.jsonc" \
-        https://raw.githubusercontent.com/ChrisTitusTech/mybash/main/config.jsonc
-    echo -e "${GREEN}fastfetch configured${RC}"
+    local config_dir="$USER_HOME/.config/fastfetch"
+    as_user mkdir -p "$config_dir"
+    as_user curl -sSLo "$config_dir/config.jsonc" \
+        https://raw.githubusercontent.com/ChrisTitusTech/mybash/main/config.jsonc \
+        || warn "Could not download fastfetch config (non-critical)"
+    ok "fastfetch configured"
 }
 
 setup_fastfetch_shell_arch() {
-    echo -e "${YELLOW}Configuring fastfetch shell integration...${RC}"
-
+    info "Configuring fastfetch shell integration..."
     local current_shell
-    current_shell=$(basename "$(getent passwd "$INSTALL_USER" | cut -d: -f7)")
+    current_shell="$(basename "$(getent passwd "$INSTALL_USER" | cut -d: -f7)")"
 
     local rc_file=""
     case "$current_shell" in
@@ -232,32 +259,81 @@ setup_fastfetch_shell_arch() {
         zsh)  rc_file="$USER_HOME/.zshrc" ;;
         fish) rc_file="$USER_HOME/.config/fish/config.fish" ;;
         *)
-            echo -e "${YELLOW}Shell '$current_shell' not supported for auto-config.${RC}"
+            warn "Shell '$current_shell' not supported for auto-config."
             return 0
             ;;
     esac
 
-    [ -f "$rc_file" ] || return 0
+    [[ -f "$rc_file" ]] || { warn "$rc_file not found, skipping"; return 0; }
 
     if grep -q "^fastfetch" "$rc_file"; then
-        echo -e "${GREEN}fastfetch already configured in $rc_file${RC}"
+        ok "fastfetch already in $rc_file"
         return 0
     fi
 
-    printf "\n# Run fastfetch on shell initialization\nfastfetch\n" >> "$rc_file"
-    echo -e "${GREEN}fastfetch added to $rc_file${RC}"
+    printf '\n# Run fastfetch on shell initialization\nfastfetch\n' >> "$rc_file"
+    ok "fastfetch added to $rc_file"
+}
+
+detect_de() {
+    as_user bash -lc \
+        'echo "${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-UNKNOWN}}"' 2>/dev/null \
+        || echo "UNKNOWN"
+}
+
+remove_old_de() {
+    local de
+    de="$(detect_de | tr '[:lower:]' '[:upper:]')"
+    info "Detected DE: $de"
+
+    case "$de" in
+        *KDE*|*PLASMA*)
+            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
+                kde-applications kwalletmanager 2>/dev/null || true ;;
+        *GNOME*)
+            pacman -Rns --noconfirm gnome-shell gnome-control-center \
+                gnome-terminal nautilus 2>/dev/null || true ;;
+        *XFCE*)
+            pacman -Rns --noconfirm xfce4-session xfce4-panel \
+                xfdesktop xfwm4 2>/dev/null || true ;;
+        *MATE*)
+            pacman -Rns --noconfirm mate-session-manager \
+                mate-panel mate-desktop 2>/dev/null || true ;;
+        *CINNAMON*)
+            pacman -Rns --noconfirm cinnamon 2>/dev/null || true ;;
+        *)
+            warn "No DE detected or unsupported DE: $de — skipping removal" ;;
+    esac
+    ok "DE removal step done"
+}
+
+sddm_config() {
+    info "Enabling SDDM display manager..."
+    systemctl enable --now sddm.service \
+        || warn "Could not enable/start SDDM (may need a reboot)"
+    ok "SDDM enabled"
 }
 
 main() {
-    echo -e "${BLUE}========================================${RC}"
-    echo -e "${BLUE}      Hyprland Setup Script (Arch)      ${RC}"
-    echo -e "${BLUE}========================================${RC}"
-    root_permission
+    # Initialise log file
+    touch "$LOG_FILE" && chmod 640 "$LOG_FILE"
+    info "Log: $LOG_FILE"
 
-    echo "1) Install Hyprland"
-    echo "2) Remove KDE Plasma only"
-    echo "3) Cancel"
-    read -rp "Select an option [1-3]: " MENU < /dev/tty
+    echo -e "${BLUE}========================================"
+    echo -e "      Hyprland Setup Script (Arch)      "
+    echo -e "========================================${RC}"
+
+    root_permission
+    check_arch
+    check_internet
+
+    echo
+    echo "1) Install Hyprland (full setup)"
+    echo "2) Remove current DE only"
+    echo "3) Remove KDE Plasma only"
+    echo "4) Cancel"
+    echo
+    read -rp "Select an option [1-4]: " MENU < /dev/tty
 
     case "$MENU" in
         1)
@@ -276,20 +352,26 @@ main() {
             configfastfetch
             setup_fastfetch_shell_arch
             sddm_config
-            echo -e "${GREEN}Hyprland installation complete!${RC}"
+            ok "====== Hyprland installation complete! ======"
+            info "Log saved to $LOG_FILE"
+            info "Please reboot to start your new session."
             ;;
         2)
-            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
-                kde-applications kwalletmanager || true
-            echo -e "${GREEN}KDE removed${RC}"
+            remove_old_de
+            ok "DE removed"
             ;;
         3)
-            echo -e "${YELLOW}Cancelled${RC}"
+            pacman -Rns --noconfirm plasma-desktop plasma-workspace \
+                kde-applications kwalletmanager 2>/dev/null \
+                || warn "Some KDE packages were not found"
+            ok "KDE removed"
+            ;;
+        4)
+            warn "Cancelled by user"
             exit 0
             ;;
         *)
-            echo -e "${RED}Invalid option${RC}"
-            exit 0
+            die "Invalid option: $MENU"
             ;;
     esac
 }
