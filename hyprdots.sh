@@ -84,9 +84,13 @@ run_install() {
             INSTALL_SCRIPT="$SCRIPT_DIR/distro/arch/arch.sh"
             success "Usando script de instalação para Arch Linux"
             ;;
+        fedora)
+            INSTALL_SCRIPT="$SCRIPT_DIR/distro/fedora/fedora.sh"
+            success "Usando script de instalação para Fedora"
+            ;;
         *)
             error "Distribuição não suportada: $DISTRO"
-            warn "Suportado: Arch Linux e variantes"
+            warn "Suportados: Arch Linux e variantes, Fedora"
             exit 1
             ;;
     esac

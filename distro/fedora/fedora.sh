@@ -2,7 +2,7 @@
 # distro/fedora/fedora.sh — Instalação para Fedora KDE → Hyprland
 set -e
 
-
+# ─── Cores ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -11,18 +11,21 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 RC='\033[0m'
 
+# ─── Contexto ─────────────────────────────────────────────────────────────────
 INSTALL_USER="${SUDO_USER:-$USER}"
 USER_HOME=$(eval echo ~"$INSTALL_USER")
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DNF_FLAGS="-y"
 HYPR_COPR="${HYPR_COPR:-solopasha/hyprland}"
 
+# ─── Log ──────────────────────────────────────────────────────────────────────
 info()    { echo -e "${BLUE}[INFO]${RC}  $1"; }
 success() { echo -e "${GREEN}[OK]${RC}    $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${RC}  $1"; }
 error()   { echo -e "${RED}[ERRO]${RC}  $1"; }
 step()    { echo -e "\n${CYAN}${BOLD}==> $1${RC}"; }
 
+# ─── Permissão root ───────────────────────────────────────────────────────────
 root_permission() {
     if [ "$EUID" -ne 0 ]; then
         error "Execute com sudo: ${BOLD}sudo ./hyprdots.sh${RC}"
@@ -31,21 +34,23 @@ root_permission() {
     success "Rodando com privilégios root (usuário real: $INSTALL_USER)"
 }
 
+# ─── Detecção de IDEs ─────────────────────────────────────────────────────────
 detect_ides() {
     IDES_FOUND=()
 
-
+    # VS Code — pode ser nativo ou Flatpak
     if command -v code &>/dev/null || command -v codium &>/dev/null || \
        flatpak list 2>/dev/null | grep -qi "visualstudio.code\|vscodium"; then
         IDES_FOUND+=("vscode")
     fi
 
- 
+    # Neovim
     if command -v nvim &>/dev/null; then
         IDES_FOUND+=("neovim")
     fi
 }
 
+# ─── COPR Hyprland ────────────────────────────────────────────────────────────
 enable_hypr_repo() {
     step "Habilitando repositório COPR: $HYPR_COPR"
 
@@ -59,40 +64,53 @@ enable_hypr_repo() {
     fi
 }
 
+# ─── Pacotes DNF ──────────────────────────────────────────────────────────────
 install_packages() {
     step "Instalando pacotes via dnf"
 
     local PACKAGES=(
+        # Hyprland core
         hyprland
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
-        wayland
+        # Bar & launcher
         waybar
         rofi
+        # Terminal
         alacritty
+        # Display manager
         sddm
+        # Notificações
         swaync
+        # Wallpaper
         swww
         waypaper
+        # Screenshot
         hyprshot
+        # Mídia & controles
         playerctl
         pavucontrol
+        # Gerenciador de arquivos
         thunar
+        # Tema GTK
         nwg-look
         sassc
+        # Fontes
         jetbrains-mono-fonts
+        # Visualizador PDF
         zathura
         zathura-pdf-poppler
+        # Imagens
         swayimg
+        # Build tools
         meson
         ninja-build
         npm
         git
-        wget
         rsync
     )
 
-    dnf install ${DNF_FLAGS} "${PACKAGES[@]}"
+    dnf install ${DNF_FLAGS} --skip-unavailable "${PACKAGES[@]}"
 
     if ! command -v Hyprland &>/dev/null; then
         error "Hyprland não foi instalado corretamente"
@@ -102,6 +120,7 @@ install_packages() {
     success "Todos os pacotes instalados"
 }
 
+# ─── Flatpak ──────────────────────────────────────────────────────────────────
 flatpak_install() {
     step "Instalando aplicações Flatpak"
 
@@ -110,6 +129,7 @@ flatpak_install() {
         dnf install -y flatpak || { error "Falha ao instalar Flatpak"; return 1; }
     fi
 
+    # Adiciona Flathub se não existir
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
     local FLATPAKS=(
@@ -128,30 +148,26 @@ flatpak_install() {
     success "Aplicações Flatpak instaladas"
 }
 
-google_chrome_install() {
-    step "Instalando Google Chrome"
+# ─── Google Chrome ────────────────────────────────────────────────────────────
+brave_install() {
+    step "Instalando Brave Browser (Flatpak)"
 
-    if command -v google-chrome-stable &>/dev/null; then
-        success "Google Chrome já instalado"
+    if flatpak list 2>/dev/null | grep -q "com.brave.Browser"; then
+        success "Brave já instalado"
         return
     fi
 
-    command -v wget &>/dev/null || dnf install -y wget
+    flatpak install -y flathub com.brave.Browser \
+        || { error "Falha ao instalar Brave via Flatpak"; return 1; }
 
-    local DOWNLOAD_PATH="/tmp/google-chrome.rpm"
-
-    wget -O "$DOWNLOAD_PATH" \
-        https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm \
-        || { error "Falha ao baixar Google Chrome"; return 1; }
-
-    dnf install -y "$DOWNLOAD_PATH" || { error "Falha ao instalar Google Chrome"; return 1; }
-
-    rm -f "$DOWNLOAD_PATH"
-    success "Google Chrome instalado"
+    success "Brave instalado"
 }
 
+# ─── TLP (gerenciamento de energia) ──────────────────────────────────────────
 configure_tlp() {
     step "Configurando TLP"
+
+    # Remove tuned se estiver ativo (conflito com TLP)
     if systemctl is-enabled tuned &>/dev/null; then
         warn "Desabilitando tuned (conflito com TLP)..."
         systemctl disable --now tuned.service || true
@@ -163,6 +179,7 @@ configure_tlp() {
     success "TLP configurado"
 }
 
+# ─── Materia Theme ────────────────────────────────────────────────────────────
 install_materia_theme() {
     step "Instalando Materia Theme"
 
@@ -182,6 +199,7 @@ install_materia_theme() {
     success "Materia Theme instalado"
 }
 
+# ─── Wallpapers ───────────────────────────────────────────────────────────────
 wallpapers_config() {
     step "Configurando wallpapers"
 
@@ -201,6 +219,7 @@ wallpapers_config() {
     success "Wallpapers prontos em ~/Pictures/wallpapers"
 }
 
+# ─── SDDM ─────────────────────────────────────────────────────────────────────
 configure_sddm() {
     step "Configurando SDDM"
 
@@ -214,6 +233,7 @@ configure_sddm() {
     success "SDDM configurado como display manager padrão"
 }
 
+# ─── Auto-login ───────────────────────────────────────────────────────────────
 configure_auto_login() {
     step "Configurando auto-login para $INSTALL_USER"
 
@@ -233,6 +253,7 @@ SDDM
     success "Auto-login configurado para $INSTALL_USER"
 }
 
+# ─── Remoção do KDE ───────────────────────────────────────────────────────────
 remove_kde() {
     step "Removendo KDE Plasma"
 
@@ -250,6 +271,7 @@ remove_kde() {
     success "KDE Plasma removido"
 }
 
+# ─── Dotfiles ────────────────────────────────────────────────────────────────
 copy_dotfiles() {
     step "Copiando dotfiles"
 
@@ -277,12 +299,15 @@ copy_dotfiles() {
     success "Dotfiles copiados"
 }
 
+# ─── Aviso de monitor ─────────────────────────────────────────────────────────
 monitor_hint() {
     step "Verificando monitor"
     warn "As configs do waybar usam nomes de monitor fixos do autor."
     warn "Após o reboot, rode: ${CYAN}hyprctl monitors${RC}"
     warn "E ajuste o campo ${CYAN}\"output\"${RC} em ~/.config/waybar/config"
 }
+
+# ─── DESINSTALAÇÃO SEGURA ─────────────────────────────────────────────────────
 
 FEDORA_PACKAGES=(
     hyprland xdg-desktop-portal-hyprland xdg-desktop-portal-gtk
@@ -366,6 +391,7 @@ _remove_dnf_packages() {
 
     local removal_list=("${FEDORA_PACKAGES[@]}")
 
+    # Protege Neovim se detectado
     if [[ " ${IDES_FOUND[*]} " =~ "neovim" ]]; then
         warn "Neovim detectado → pacote preservado"
         for pkg in "${NEOVIM_PROTECTED_PKGS[@]}"; do
@@ -402,6 +428,7 @@ _remove_flatpaks() {
         com.discordapp.Discord
         io.github.martchus.syncthingtray
         md.obsidian.Obsidian
+        com.brave.Browser
     )
 
     # Protege VS Code Flatpak se detectado
@@ -427,6 +454,7 @@ _remove_flatpaks() {
     done
 }
 
+# ─── MENU PRINCIPAL ───────────────────────────────────────────────────────────
 main() {
     echo -e "${BLUE}${BOLD}"
     echo "  ╔══════════════════════════════════════════════════╗"
@@ -458,7 +486,7 @@ main() {
             install_materia_theme
             wallpapers_config
             flatpak_install
-            google_chrome_install
+            brave_install
             copy_dotfiles || warn "Alguns configs podem estar ausentes — verifique manualmente"
             configure_sddm
             configure_auto_login
