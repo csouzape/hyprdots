@@ -431,7 +431,6 @@ _remove_flatpaks() {
         com.brave.Browser
     )
 
-    # Protege VS Code Flatpak se detectado
     if [[ " ${IDES_FOUND[*]} " =~ "vscode" ]]; then
         warn "VS Code detectado → Flatpak do VS Code preservado"
         flatpaks_to_remove=("${flatpaks_to_remove[@]/com.visualstudio.code}")
