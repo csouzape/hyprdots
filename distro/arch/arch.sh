@@ -61,14 +61,18 @@ install_aur_helper() {
 install_base_deps() {
     step "Atualizando sistema e instalando dependências base"
 
-    pacman -Syu --noconfirm
+    if [ "$SKIP_UPDATE" != "1" ]; then
+        step "Atualizando sistema"
+        pacman -Syu --noconfirm
+    else
+        warn "Pulando atualização do sistema"
+    fi
 
     local BASE_PKGS=(
         hyprland
         xdg-desktop-portal-hyprland
         xdg-desktop-portal-gtk
         wayland
-        wlroots
         sddm
         qt5-declarative
         qt5-graphicaleffects
@@ -92,40 +96,23 @@ install_env_packages() {
 
     local ENV_PKGS=(
         waybar
-        rofi-wayland   # Terminal
+        rofi  # Terminal
         alacritty
-        kitty
         dunst
-        libnotify
         swww
-        hyprlock
-        hypridle
         hyprshot
         grim
         slurp
         wl-clipboard
-        cliphist
-        brightnessctl
-        playerctl
-        pamixer
         thunar
         gvfs
         thunar-archive-plugin
-        file-roller
         nwg-look
         gtk3
         gtk4
         papirus-icon-theme
-        ttf-jetbrains-mono-nerd
-        ttf-nerd-fonts-symbols
-        noto-fonts-emoji
-        btop
-        fastfetch
-        polkit-kde-agent
-        xdg-utils
-        xdg-user-dirs
-        python
-        python-pip
+        ttf-jetbrains-mono
+        materia-gtk-theme
     )
 
     pacman -S --noconfirm --needed "${ENV_PKGS[@]}"
@@ -136,10 +123,6 @@ install_aur_packages() {
     step "Instalando pacotes do AUR"
 
     local AUR_PKGS=(
-        hyprpaper
-        hyprshot
-        wlogout
-        swayosd-git
     )
 
     sudo -u "$REAL_USER" "$AUR_HELPER" -S --noconfirm --needed "${AUR_PKGS[@]}" || \
