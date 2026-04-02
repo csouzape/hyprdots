@@ -73,6 +73,12 @@ check_script() {
     chmod +x "$script_path"
 }
 
+ask_update() {
+    echo -ne "${YELLOW}Deseja atualizar o sistema antes da instalação? [s/N]:${RC} "
+    read -r update_choice < /dev/tty
+    [[ "$update_choice" =~ ^[sS]$ ]]
+}
+
 run_install() {
     local DISTRO
     DISTRO=$(detect_distro)
@@ -97,9 +103,34 @@ run_install() {
 
     check_script "$INSTALL_SCRIPT"
 
+    # Usa a função corretamente
+    if ask_update; then
+        echo ""
+        step "Atualizando sistema..."
+
+        case "$DISTRO" in
+            arch|archarm|manjaro|endeavouros)
+                pacman -Syu --noconfirm
+                ;;
+            fedora)
+                dnf upgrade -y
+                ;;
+        esac
+
+        success "Sistema atualizado."
+        echo ""
+        SKIP_UPDATE=0
+    else
+        echo ""
+        warn "Atualização ignorada."
+        echo ""
+        SKIP_UPDATE=1
+    fi
+
     step "Iniciando instalação..."
     echo ""
-    bash "$INSTALL_SCRIPT" < /dev/tty
+
+    SKIP_UPDATE="$SKIP_UPDATE" bash "$INSTALL_SCRIPT" < /dev/tty
 
     echo ""
     echo -e "${GREEN}${BOLD}"
@@ -109,7 +140,6 @@ run_install() {
     echo -e "${RC}"
     warn "Reinicie o sistema para iniciar o Hyprland."
 }
-
 
 HYPR_PACKAGES=(
     hyprland hyprpaper hyprlock hypridle hyprshot xdg-desktop-portal-hyprland
