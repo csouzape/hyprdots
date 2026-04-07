@@ -1,208 +1,117 @@
-#!/bin/bash
-# distro/arch/arch.sh — Instalação para Arch Linux
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-RC='\033[0m'
+USER_NAME="${SUDO_USER:-$USER}"
 
-info()    { echo -e "${BLUE}[INFO]${RC}  $1"; }
-success() { echo -e "${GREEN}[OK]${RC}    $1"; }
-warn()    { echo -e "${YELLOW}[WARN]${RC}  $1"; }
-error()   { echo -e "${RED}[ERRO]${RC}  $1"; }
-step()    { echo -e "\n${CYAN}${BOLD}==> $1${RC}"; }
+PACMAN_PACKAGES=(
+    hyprland
+    swaync
+    waybar
+    rofi
+    materia-gtk-theme
+    papirus-icon-theme
+    alacritty
+    thunar
+)
 
-REAL_USER="${SUDO_USER:-$USER}"
-REAL_HOME=$(eval echo "~$REAL_USER")
+AUR_PACKAGES=(
+    brave
+)
 
-install_aur_helper() {
-    step "Instalando AUR helper"
+FLATPAK_PACKAGES=(
+    org.vinegarhq.Sober
+    com.discordapp.Discord
+)
 
+log() {
+    printf "[INFO] %s\n" "$1"
+}
+
+error() {
+    printf "[ERROR] %s\n" "$1" >&2
+    exit 1
+}
+
+run_as_user() {
+    sudo -u "$USER_NAME" bash -c "$1"
+}
+
+verify_root() {
+    [[ "$EUID" -eq 0 ]] || error "Run as root"
+}
+
+verify_dependencies() {
+    log "Checking base dependencies"
+    pacman -S --noconfirm --needed git base-devel
+}
+
+
+install_yay() {
     if command -v yay &>/dev/null; then
-        success "yay já instalado"
-        AUR_HELPER="yay"
+        log "yay already installed"
         return
     fi
 
-    if command -v paru &>/dev/null; then
-        success "paru já instalado"
-        AUR_HELPER="paru"
-        return
+    log "Installing yay (AUR)"
+    run_as_user "
+        set -e
+        cd /tmp
+        rm -rf yay
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si --noconfirm
+        cd ..
+        rm -rf yay
+    "
+}
+
+
+install_pacman() {
+    log "Installing pacman packages"
+    pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
+}
+
+install_aur() {
+    log "Installing AUR packages"
+    run_as_user "yay -S --noconfirm --needed ${AUR_PACKAGES[*]}"
+}
+
+install_flatpak() {
+    if ! command -v flatpak &>/dev/null; then
+        log "Installing flatpak"
+        pacman -S --noconfirm --needed flatpak
     fi
 
-    echo -e "  ${CYAN}1)${RC} yay"
-    echo -e "  ${CYAN}2)${RC} paru"
-    echo -ne "  ${YELLOW}Escolha o AUR helper [1/2]:${RC} "
-    read -r aur_choice < /dev/tty
-
-    cd /tmp
-    case "$aur_choice" in
-        2)
-            AUR_HELPER="paru"
-            sudo -u "$REAL_USER" git clone https://aur.archlinux.org/paru.git /tmp/paru_build
-            cd /tmp/paru_build
-            sudo -u "$REAL_USER" makepkg -si --noconfirm
-            ;;
-        *)
-            AUR_HELPER="yay"
-            sudo -u "$REAL_USER" git clone https://aur.archlinux.org/yay.git /tmp/yay_build
-            cd /tmp/yay_build
-            sudo -u "$REAL_USER" makepkg -si --noconfirm
-            ;;
-    esac
-
-    success "$AUR_HELPER instalado"
+    run_as_user "
+        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        flatpak install -y ${FLATPAK_PACKAGES[*]}
+    "
 }
 
-install_base_deps() {
-    step "Atualizando sistema e instalando dependências base"
+copy_configs() {
+    log "Copying configs to ~/.config"
 
-    if [ "$SKIP_UPDATE" != "1" ]; then
-        step "Atualizando sistema"
-        pacman -Syu --noconfirm
-    else
-        warn "Pulando atualização do sistema"
-    fi
+    run_as_user "
+        set -e
 
-    local BASE_PKGS=(
-        hyprland
-        xdg-desktop-portal-hyprland
-        xdg-desktop-portal-gtk
-        wayland
-        sddm
-        qt5-declarative
-        qt5-graphicaleffects
-        qt5-quickcontrols2
-        pipewire
-        pipewire-alsa
-        pipewire-pulse
-        wireplumber
-        base-devel
-        git
-        curl
-        wget
-    )
+        SRC_DIR=\"$(pwd)/hyprdots/distro/arch\"
+        DEST_DIR=\"\$HOME/.config\"
 
-    pacman -S --noconfirm --needed "${BASE_PKGS[@]}"
-    success "Dependências base instaladas"
-}
+        mkdir -p \"\$DEST_DIR\"
 
-install_env_packages() {
-    step "Instalando pacotes do ambiente"
-
-    local ENV_PKGS=(
-        waybar
-        rofi  # Terminal
-        alacritty
-        dunst
-        swww
-        hyprshot
-        grim
-        slurp
-        wl-clipboard
-        thunar
-        gvfs
-        thunar-archive-plugin
-        nwg-look
-        gtk3
-        gtk4
-        papirus-icon-theme
-        ttf-jetbrains-mono
-        materia-gtk-theme
-    )
-
-    pacman -S --noconfirm --needed "${ENV_PKGS[@]}"
-    success "Pacotes do ambiente instalados"
-}
-
-install_aur_packages() {
-    step "Instalando pacotes do AUR"
-
-    local AUR_PKGS=(
-    )
-
-    sudo -u "$REAL_USER" "$AUR_HELPER" -S --noconfirm --needed "${AUR_PKGS[@]}" || \
-        warn "Alguns pacotes AUR falharam — verifique manualmente"
-
-    success "Pacotes AUR instalados"
-}
-
-enable_services() {
-    step "Habilitando serviços"
-
-    systemctl enable sddm
-    success "SDDM habilitado"
-
-    sudo -u "$REAL_USER" systemctl --user enable pipewire pipewire-pulse wireplumber 2>/dev/null || true
-    success "PipeWire habilitado"
-}
-
-copy_dotfiles() {
-    step "Copiando dotfiles para ~/.config"
-
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    DOTS_DIR="$SCRIPT_DIR/../../dots"
-
-    if [ ! -d "$DOTS_DIR" ]; then
-        warn "Diretório de dotfiles não encontrado em: $DOTS_DIR"
-        warn "Pulando cópia de configs. Adicione seus configs em distro/arch/../../dots/"
-        return
-    fi
-
-    mkdir -p "$REAL_HOME/.config"
-
-    for dir in "$DOTS_DIR"/*/; do
-        app=$(basename "$dir")
-        dest="$REAL_HOME/.config/$app"
-
-        if [ -d "$dest" ]; then
-            warn "Backup de config existente: $dest → $dest.bak"
-            mv "$dest" "${dest}.bak"
-        fi
-
-        cp -r "$dir" "$dest"
-        chown -R "$REAL_USER:$REAL_USER" "$dest"
-        success "Config copiado: ~/.config/$app"
-    done
-}
-
-configure_monitor_hint() {
-    step "Verificando monitor"
-
-    local monitors
-    monitors=$(hyprctl monitors 2>/dev/null | grep "Monitor" | awk '{print $2}' || echo "")
-
-    if [ -n "$monitors" ]; then
-        info "Monitor(es) detectado(s): ${YELLOW}$monitors${RC}"
-        warn "O waybar usa nomes de monitor fixos."
-        warn "Edite ${CYAN}~/.config/waybar/config${RC} e ajuste o campo ${CYAN}\"output\"${RC} se necessário."
-    else
-        warn "Hyprland ainda não iniciou. Após o reboot, rode:"
-        warn "  ${CYAN}hyprctl monitors${RC}"
-        warn "E ajuste o campo 'output' em ~/.config/waybar/config"
-    fi
+        cp -r \"\$SRC_DIR\"/* \"\$DEST_DIR\"/
+    "
 }
 
 main() {
-    install_base_deps
-    install_aur_helper
-    install_env_packages
-    install_aur_packages
-    copy_dotfiles
-    enable_services
-    configure_monitor_hint
-
-    echo ""
-    echo -e "${GREEN}${BOLD}"
-    echo "  ╔══════════════════════════════════════════════════╗"
-    echo "  ║  Arch: instalação concluída!                     ║"
-    echo "  ║  → Reinicie e selecione Hyprland no SDDM         ║"
-    echo "  ╚══════════════════════════════════════════════════╝"
-    echo -e "${RC}"
+    verify_root
+    verify_dependencies
+    install_yay
+    install_pacman
+    install_aur
+    install_flatpak
+    copy_configs
+    log "Done"
 }
 
-main
+main "$@"
