@@ -1,5 +1,5 @@
 configuration {
-    modi: "drun,run,window";
+    modi: "drun";
     icon-theme: "Papirus";
     show-icons: true;
     terminal: "alacritty";
@@ -7,41 +7,37 @@ configuration {
     location: 0;
     disable-history: false;
     hide-scrollbar: true;
-    display-drun: "   Apps ";
-    display-run: "   Run ";
-    sidebar-mode: true;
+    display-drun: "   Apps ";
+    sidebar-mode: false;
 }
 
 @theme "/dev/null"
 
 * {
-    /* Cores */
-    bg-col:  #121212;
+    bg-col:       #121212;
     bg-col-light: #1e1e1e;
-    border-col: #333333;
+    border-col:   #333333;
     selected-col: #1e1e1e;
-    blue: #89b4fa;
-    fg-col: #D9D9D9;
-    fg-col2: #ff4f4f;
-
-    width: 600;
-    font: "JetBrainsMono Nerd Font 11";
-    
-    /* Zera o arredondamento globalmente */
-    border-radius: 0px; 
+    blue:         #89b4fa;
+    fg-col:       #D9D9D9;
+    fg-col2:      #ff4f4f;
+    width:        350;
+    font:         "JetBrainsMono Nerd Font 11";
+    border-radius: 0px;
 }
 
-element-text, element-icon , mode-switcher {
+element-text, element-icon, mode-switcher {
     background-color: inherit;
     text-color:       inherit;
 }
 
 window {
-    height: 360px;
-    border: 2px;
-    border-color: @border-col;
+    width:            350px;
+    height:           360px;
+    border:           2px;
+    border-color:     @border-col;
     background-color: @bg-col;
-    border-radius: 0px; /* Quadrado */
+    border-radius:    0px;
 }
 
 mainbox {
@@ -49,47 +45,47 @@ mainbox {
 }
 
 inputbar {
-    children: [prompt,entry];
+    children:         [prompt, entry];
     background-color: @bg-col;
-    border-radius: 0px; /* Quadrado */
-    padding: 2px;
+    border-radius:    0px;
+    padding:          2px;
 }
 
 prompt {
     background-color: #303030;
-    padding: 6px;
-    text-color: @bg-col;
-    border-radius: 0px; /* Quadrado */
-    margin: 20px 0px 0px 20px;
+    padding:          6px;
+    text-color:       @fg-col;
+    border-radius:    0px;
+    margin:           20px 0px 0px 20px;
 }
 
 textbox-prompt-colon {
     expand: false;
-    str: ":";
+    str:    ":";
 }
 
 entry {
-    padding: 6px;
-    margin: 20px 0px 0px 10px;
-    text-color: @fg-col;
+    padding:          6px;
+    margin:           20px 0px 0px 10px;
+    text-color:       @fg-col;
     background-color: @bg-col;
-    placeholder: "Search...";
+    placeholder:      "Search...";
 }
 
 listview {
-    border: 0px 0px 0px;
-    padding: 6px 0px 0px;
-    margin: 10px 0px 0px 20px;
-    columns: 1;
-    lines: 5;
+    border:           0px 0px 0px;
+    padding:          6px 0px 0px;
+    margin:           10px 0px 0px 20px;
+    columns:          1;
+    lines:            5;
     background-color: @bg-col;
 }
 
 element {
-    padding: 5px;
+    padding:          5px;
     background-color: @bg-col;
-    text-color: @fg-col;
-    border-radius: 0px; /* Quadrado */
+    text-color:       @fg-col;
+    border-radius:    0px;
 }
 
 element-icon {
@@ -97,25 +93,21 @@ element-icon {
 }
 
 element selected {
-    background-color:  @selected-col;
-    text-color: #303030;
-    border-radius: 0px; /* Quadrado */
-}
-
-mode-switcher {
-    spacing: 0;
+    background-color: @selected-col;
+    text-color:       @fg-col;
+    border-radius:    0px;
 }
 
 button {
-    padding: 10px;
+    padding:          10px;
     background-color: @bg-col-light;
-    text-color: @fg-col;
-    vertical-align: 0.5; 
+    text-color:       @fg-col;
+    vertical-align:   0.5;
     horizontal-align: 0.5;
-    border-radius: 0px; /* Quadrado */
+    border-radius:    0px;
 }
 
 button selected {
-  background-color: @bg-col;
-  text-color: #303030;
+    background-color: @bg-col;
+    text-color:       @fg-col;
 }
