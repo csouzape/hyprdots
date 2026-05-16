@@ -1,3 +1,6 @@
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2a23126b-2a51-49c0-ae96-0356f27479fc" />
+
+
 # hyprdots
 
 Meus dotfiles pessoais para **Hyprland** no Arch Linux.
