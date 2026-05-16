@@ -5,10 +5,6 @@
 
 Meus dotfiles pessoais para **Hyprland** no Arch Linux.
 
-## Capturas
-
-> Adicione suas screenshots aqui.
-
 ## Instalação
 
 ```bash
