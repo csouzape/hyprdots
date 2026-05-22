@@ -21,13 +21,13 @@ install_hyprland() {
         xdg-desktop-portal-hyprland
         discord
         obs-studio
-        waypaper
     )
 
     local AUR=(
         hyprpaper
         visual-studio-code-bin
         brave-bin
+        waypaper
     )
 
     local FLATPAK=(
