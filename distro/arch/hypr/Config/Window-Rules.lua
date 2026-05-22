@@ -67,6 +67,14 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name = "RENAME DIALOG",
+    float = true,
+    center = true,
+    size = "monitor_w*0.35 monitor_h*0.15",
+    match = { title = "^.*(Insira o novo nome).*$" },
+})
+
+hl.window_rule({
     name = "FLOAT MEDIUM",
     float = true,
     center = true,

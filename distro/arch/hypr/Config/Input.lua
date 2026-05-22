@@ -37,14 +37,14 @@ hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 
 -- mídia / utilitários
 hl.bind("KP_Prior", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"))
-hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -t"))
+hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
-
+hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("waypaper --random"))
 
 -- desligar / sair
 hl.bind(
-    mainMod .. " + M",
+    mainMod .. " + SHIFT + M",
     hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
 
@@ -52,12 +52,12 @@ hl.bind(
 hl.bind(
     "Print",
     hl.dsp.exec_cmd(
-        'grim -g "$(slurp -b 00000044 -c ffffff00)" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%s).png | wl-copy'
+        "bash -c 'grim -g \"$(slurp -b 00000044 -c ffffff00)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
     )
 )
 hl.bind(
     "SHIFT + Print",
-    hl.dsp.exec_cmd('grim -g "$(slurp -o)" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%s).png | wl-copy')
+    hl.dsp.exec_cmd("bash -c 'grim -g \"$(slurp -o)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'")
 )
 
 -- foco e movimentação
@@ -71,15 +71,14 @@ hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" 
 hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
+hl.bind(mainMod .. " + L", hl.dsp.layout("splitratio 0.05"), { repeating = true })
+hl.bind(mainMod .. " + H", hl.dsp.layout("splitratio -0.05"), { repeating = true })
+
 for i = 1, 10 do
     local key = i % 10
     hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
     hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
-
--- workspaces especiais
-hl.bind(mainMod .. " + S", hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- mouse
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
