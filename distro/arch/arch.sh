@@ -76,81 +76,94 @@ install_hyprland() {
 }
 
 copy_dotfiles() {
-    local SRC="$SCRIPT_DIR/hypr"
-    local DEST="$HOME/.config/hypr"
+    local SRC="$SCRIPT_DIR"   # arch/ dir, since SCRIPT_DIR is set in arch.sh
+    local CONFIG="$HOME/.config"
 
-    local EXPECTED=(
-        "hyprland.lua"
-        "hyprpaper.conf"
-        "Config/Auto-Start.lua"
-        "Config/Decorations.lua"
-        "Config/Environment.lua"
-        "Config/Identifiers.lua"
-        "Config/Input.lua"
-        "Config/Miscellaneous.lua"
-        "Config/Monitors.lua"
-        "Config/Window-Rules.lua"
-    )
+    # Collect all config dirs (everything in arch/ except arch.sh itself)
+    local dirs=()
+    while IFS= read -r -d '' dir; do
+        dirs+=("$(basename "$dir")")
+    done < <(find "$SRC" -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
-    local missing=()
-    local existing=()
+    if [[ ${#dirs[@]} -eq 0 ]]; then
+        echo "==> No config directories found in $SRC"
+        return 1
+    fi
 
-    for file in "${EXPECTED[@]}"; do
-        if [[ -e "$DEST/$file" ]]; then
-            existing+=("$file")
-        else
-            missing+=("$file")
-        fi
+    echo "==> Config directories to copy: ${dirs[*]}"
+    echo ""
+
+    local all_existing=()
+    local all_missing=()
+
+    # Per-dir file check
+    for dir in "${dirs[@]}"; do
+        local src_dir="$SRC/$dir"
+        local dest_dir="$CONFIG/$dir"
+
+        while IFS= read -r -d '' file; do
+            local rel="${file#"$src_dir/"}"
+            if [[ -e "$dest_dir/$rel" ]]; then
+                all_existing+=("$dir/$rel")
+            else
+                all_missing+=("$dir/$rel")
+            fi
+        done < <(find "$src_dir" -type f -print0 | sort -z)
     done
 
-    if [[ ${#existing[@]} -gt 0 ]]; then
-        echo "==> The following files already exist in $DEST:"
-        for file in "${existing[@]}"; do
-            echo "    [exists]  $file"
+    # Report
+    if [[ ${#all_existing[@]} -gt 0 ]]; then
+        echo "==> Already exists:"
+        for f in "${all_existing[@]}"; do
+            echo "    [exists]  ~/.config/$f"
         done
         echo ""
     fi
 
-    if [[ ${#missing[@]} -gt 0 ]]; then
-        echo "==> The following files are missing:"
-        for file in "${missing[@]}"; do
-            echo "    [missing] $file"
+    if [[ ${#all_missing[@]} -gt 0 ]]; then
+        echo "==> Will be created:"
+        for f in "${all_missing[@]}"; do
+            echo "    [new]     ~/.config/$f"
         done
         echo ""
     fi
 
-    if [[ ${#existing[@]} -eq 0 ]]; then
-        # Nothing exists yet, copy everything silently
-        echo "==> No existing config found. Copying dotfiles..."
-        mkdir -p "$DEST"
-        cp -r "$SRC/." "$DEST/" || return 1
-        echo "==> Dotfiles copied."
-        return 0
+    # Decide whether to prompt
+    if [[ ${#all_existing[@]} -gt 0 ]]; then
+        read -rp "==> Some files already exist. Overwrite? (y/n): " answer
+        [[ "$answer" != "y" ]] && { echo "Skipping dotfiles."; return 0; }
     fi
 
-    read -rp "==> Overwrite existing files? (y/n): " answer
-    if [[ "$answer" != "y" ]]; then
-        echo "Skipping dotfiles."
-        return 0
-    fi
-
+    # Copy
     echo "==> Copying dotfiles..."
-    mkdir -p "$DEST/Config"
+    local errors=0
 
-    for file in "${EXPECTED[@]}"; do
-        local src_file="$SRC/$file"
-        local dest_file="$DEST/$file"
+    for dir in "${dirs[@]}"; do
+        local src_dir="$SRC/$dir"
+        local dest_dir="$CONFIG/$dir"
 
-        if [[ ! -f "$src_file" ]]; then
-            echo "  Warning: source file not found, skipping: $src_file"
-            continue
-        fi
+        while IFS= read -r -d '' file; do
+            local rel="${file#"$src_dir/"}"
+            local dest_file="$dest_dir/$rel"
 
-        mkdir -p "$(dirname "$dest_file")"
-        cp "$src_file" "$dest_file" && echo "  [copied]  $file" || echo "  [failed]  $file"
+            mkdir -p "$(dirname "$dest_file")"
+            if cp "$file" "$dest_file"; then
+                echo "  [copied]  ~/.config/$dir/$rel"
+            else
+                echo "  [failed]  ~/.config/$dir/$rel"
+                ((errors++))
+            fi
+        done < <(find "$src_dir" -type f -print0 | sort -z)
     done
 
-    echo "==> Done."
+    if [[ $errors -eq 0 ]]; then
+        echo ""
+        echo "==> Dotfiles copied successfully."
+    else
+        echo ""
+        echo "==> Done with $errors error(s)."
+        return 1
+    fi
 }
 
 # Only run directly, not when sourced
