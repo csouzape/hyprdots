@@ -1,117 +1,85 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
-USER_NAME="${SUDO_USER:-$USER}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-PACMAN_PACKAGES=(
-    hyprland
-    swaync
-    waybar
-    rofi
-    materia-gtk-theme
-    papirus-icon-theme
-    alacritty
-    thunar
-)
+install_hyprland() {
 
-AUR_PACKAGES=(
-    brave
-)
+    local PACMAN=(
+        hyprland
+        waybar
+        swaync
+        grim
+        slurp
+        rofi
+        alacritty
+        wl-clipboard
+        nwg-look
+        materia-gtk-theme
+        papirus-icon-theme
+        xdg-desktop-portal
+        xdg-desktop-portal-gtk
+        xdg-desktop-portal-hyprland
+        discord
+        obs-studio
+        waypaper
+    )
 
-FLATPAK_PACKAGES=(
-    org.vinegarhq.Sober
-    com.discordapp.Discord
-)
+    local AUR=(
+        hyprpaper
+        visual-studio-code-bin
+        brave-bin
+    )
 
-log() {
-    printf "[INFO] %s\n" "$1"
-}
+    local FLATPAK=(
+        com.github.zocker_160.Syncthingy
+        org.localsend.localsend_app
+    )
 
-error() {
-    printf "[ERROR] %s\n" "$1" >&2
-    exit 1
-}
+    echo "==> Installing pacman packages..."
+    sudo pacman -S --needed "${PACMAN[@]}" || return 1
 
-run_as_user() {
-    sudo -u "$USER_NAME" bash -c "$1"
-}
+    echo "==> Installing AUR packages..."
+    yay -S --needed "${AUR[@]}" || return 1
 
-verify_root() {
-    [[ "$EUID" -eq 0 ]] || error "Run as root"
-}
-
-verify_dependencies() {
-    log "Checking base dependencies"
-    pacman -S --noconfirm --needed git base-devel
-}
-
-
-install_yay() {
-    if command -v yay &>/dev/null; then
-        log "yay already installed"
-        return
-    fi
-
-    log "Installing yay (AUR)"
-    run_as_user "
-        set -e
-        cd /tmp
-        rm -rf yay
-        git clone https://aur.archlinux.org/yay.git
-        cd yay
-        makepkg -si --noconfirm
-        cd ..
-        rm -rf yay
-    "
-}
-
-
-install_pacman() {
-    log "Installing pacman packages"
-    pacman -S --noconfirm --needed "${PACMAN_PACKAGES[@]}"
-}
-
-install_aur() {
-    log "Installing AUR packages"
-    run_as_user "yay -S --noconfirm --needed ${AUR_PACKAGES[*]}"
-}
-
-install_flatpak() {
     if ! command -v flatpak &>/dev/null; then
-        log "Installing flatpak"
-        pacman -S --noconfirm --needed flatpak
+        echo "Flatpak not found."
+
+        read -rp "Do you want to install Flatpak? (y/n): " answer
+
+        if [[ "$answer" == "y" ]]; then
+            sudo pacman -S --needed flatpak
+
+            flatpak remote-add --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+        else
+            return 1
+        fi
     fi
 
-    run_as_user "
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-        flatpak install -y ${FLATPAK_PACKAGES[*]}
-    "
+    echo "==> Installing Flatpak packages..."
+
+    for pkg in "${FLATPAK[@]}"; do
+        if ! flatpak list --app | grep -q "$pkg"; then
+            flatpak install flathub "$pkg" -y
+        else
+            echo "$pkg is already installed."
+        fi
+    done
 }
 
-copy_configs() {
-    log "Copying configs to ~/.config"
+copy_dotfiles() {
 
-    run_as_user "
-        set -e
+    if [[ -d "$HOME/.config/hypr" ]]; then
+        echo "Hyprland configuration already exists. Skipping."
+    else
+        echo "Copying dotfiles..."
 
-        SRC_DIR=\"$(pwd)/hyprdots/distro/arch\"
-        DEST_DIR=\"\$HOME/.config\"
+        mkdir -p "$HOME/.config/hypr"
 
-        mkdir -p \"\$DEST_DIR\"
-
-        cp -r \"\$SRC_DIR\"/* \"\$DEST_DIR\"/
-    "
+        cp -r "$SCRIPT_DIR/distro/arch/hypr/." \
+        "$HOME/.config/hypr/"
+    fi
 }
 
-main() {
-    verify_root
-    verify_dependencies
-    install_yay
-    install_pacman
-    install_aur
-    install_flatpak
-    copy_configs
-    log "Done"
-}
-
-main "$@"
+install_hyprland
+copy_dotfiles
