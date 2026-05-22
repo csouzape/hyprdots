@@ -83,11 +83,19 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name = "MPV",
+    float = true,
+    center = true,
+    size = "monitor_w*0.7 monitor_h*0.58",
+    match = { class = "^mpv$" },
+})
+
+hl.window_rule({
     name = "FLOAT LARGE",
     float = true,
     center = true,
     size = "monitor_w*0.5 monitor_h*0.58",
-    match = { class = "^(.*dolphin.*|qimgv|mpv|timeshift-gtk)$" },
+    match = { class = "^(.*dolphin.*|qimgv|timeshift-gtk)$" },
 })
 
 hl.window_rule({
