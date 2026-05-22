@@ -66,10 +66,12 @@ main() {
             1)
                 echo "Running install_hyprland..."
                 load_distro
+                install_hyprland
                 read -rp "Press Enter..."
                 ;;
             2)
                 echo "Running copy_dotfiles..."
+                load_distro
                 copy_dotfiles
                 read -rp "Press Enter..."
                 ;;
