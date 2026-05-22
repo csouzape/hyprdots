@@ -39,6 +39,18 @@ install_hyprland() {
     sudo pacman -S --needed "${PACMAN[@]}" || return 1
 
     echo "==> Installing AUR packages..."
+    if command -v yay &>/dev/null; then
+        echo "yay found. Installing AUR packages..."
+    else
+        read -rp "yay not found. Do you want to install yay? (y/n): " answer
+        if [[ "$answer" == "y" ]]; then
+            git clone https://aur.archlinux.org/yay.git /tmp/yay
+            (cd /tmp/yay && makepkg -si --noconfirm)
+            rm -rf /tmp/yay
+        else
+            return 1
+        fi
+    fi
     yay -S --needed "${AUR[@]}" || return 1
 
     if ! command -v flatpak &>/dev/null; then
