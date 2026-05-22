@@ -2,16 +2,23 @@
   --border-radius: 0px;
   --cc-bg: #121212;
 
-  --widget-background: #1a1a1a;
+  --widget-background: #121212;
   --noti-bg-alpha: 1;
 
-  --padding: 8px;
-  --border: 1px solid rgba(255,255,255,0.07);
+  --padding: 2px;
+  --border: none;
+  --control-center-size: 360px;
 }
 
 .control-center {
   border-radius: 0;
   background: #121212;
+  width: var(--control-center-size);
+  height: var(--control-center-size);
+  max-height: var(--control-center-size);
+  overflow: hidden;
+  position: relative;
+  top: 0;
 }
 
 .widgets > .widget,
@@ -19,40 +26,42 @@
 .widget-mpris > box > button {
   background: var(--widget-background);
   border-radius: 0;
-  padding: var(--padding);
-  border: var(--border);
+  padding: 0;
+  border: none;
 }
 
 .control-center-list-placeholder {
-  padding: var(--padding);
+  padding: 0;
 }
 
 .notification-group {
   border-radius: 0;
-  padding: 4px;
+  padding: 0;
+  background: #121212;
+  border: none;
 }
 
 .widget.widget-mpris {
-  background: transparent;
+  background: #121212;
   border-radius: 0;
   padding: 0;
   border: none;
 }
 .widget.widget-mpris > carouselindicatordots {
-  --dots-padding: 3px;
+  --dots-padding: 1px;
   padding: var(--dots-padding);
   padding-left: var(--dots-padding);
-  padding-right: calc(4px + var(--dots-padding));
+  padding-right: calc(2px + var(--dots-padding));
   margin: 0;
-  margin-top: var(--padding);
+  margin-top: 0;
 }
 .widget-mpris > box > button:hover {
   background: rgba(255,255,255,0.05);
 }
 .widget-mpris-player {
   box-shadow: none;
-  border: var(--border);
-  margin: 0 var(--padding);
+  border: none;
+  margin: 0;
 }
 .widget-mpris-player:only-child {
   margin: 0;
