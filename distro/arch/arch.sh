@@ -40,12 +40,12 @@ install_hyprland() {
 
     echo "==> Installing AUR packages..."
     if command -v yay &>/dev/null; then
-        echo "yay found. Installing AUR packages..."
+        echo "yay found."
     else
-        read -rp "yay not found. Do you want to install yay? (y/n): " answer
+        read -rp "yay not found. Install yay? (y/n): " answer
         if [[ "$answer" == "y" ]]; then
             git clone https://aur.archlinux.org/yay.git /tmp/yay
-            (cd /tmp/yay && makepkg -si --noconfirm)
+            (cd /tmp/yay && makepkg -si --noconfirm) || return 1
             rm -rf /tmp/yay
         else
             return 1
@@ -53,45 +53,41 @@ install_hyprland() {
     fi
     yay -S --needed "${AUR[@]}" || return 1
 
+    echo "==> Installing Flatpak packages..."
     if ! command -v flatpak &>/dev/null; then
-        echo "Flatpak not found."
-
-        read -rp "Do you want to install Flatpak? (y/n): " answer
-
+        read -rp "Flatpak not found. Install it? (y/n): " answer
         if [[ "$answer" == "y" ]]; then
-            sudo pacman -S --needed flatpak
-
+            sudo pacman -S --needed flatpak || return 1
             flatpak remote-add --if-not-exists flathub \
-            https://dl.flathub.org/repo/flathub.flatpakrepo
+                https://dl.flathub.org/repo/flathub.flatpakrepo
+            echo "Flatpak installed. You may need to restart your session before Flatpak apps work correctly."
         else
             return 1
         fi
     fi
 
-    echo "==> Installing Flatpak packages..."
-
     for pkg in "${FLATPAK[@]}"; do
-        if ! flatpak list --app | grep -q "$pkg"; then
-            flatpak install flathub "$pkg" -y
-        else
+        if flatpak list --app | grep -qF "$pkg"; then
             echo "$pkg is already installed."
+        else
+            flatpak install flathub "$pkg" -y || echo "Warning: failed to install $pkg"
         fi
     done
 }
 
 copy_dotfiles() {
-
     if [[ -d "$HOME/.config/hypr" ]]; then
-        echo "Hyprland configuration already exists. Skipping."
+        echo "Hyprland config already exists at ~/.config/hypr. Skipping."
     else
         echo "Copying dotfiles..."
-
         mkdir -p "$HOME/.config/hypr"
-
-        cp -r "$SCRIPT_DIR/distro/arch/hypr/." \
-        "$HOME/.config/hypr/"
+        cp -r "$SCRIPT_DIR/hypr/." "$HOME/.config/hypr/" || return 1
+        echo "Dotfiles copied."
     fi
 }
 
-install_hyprland
-copy_dotfiles
+# Only run directly, not when sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    install_hyprland
+    copy_dotfiles
+fi
