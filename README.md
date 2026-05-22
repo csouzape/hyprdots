@@ -1,5 +1,7 @@
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2a23126b-2a51-49c0-ae96-0356f27479fc" />
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/12eb9e44-c625-4a82-b52a-87db028f3848" />
+
 
 # hyprdots
 
