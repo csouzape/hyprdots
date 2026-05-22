@@ -51,14 +51,11 @@ print_banner() {
 }
 
 main() {
-    load_distro
-
     while true; do
         clear
 
         print_banner
 
-        # ---- Menu options ----
         echo -e "  ${MAGENTA}${BOLD}[1]${RESET} Install Hyprland"
         echo -e "  ${MAGENTA}${BOLD}[2]${RESET} Copy dotfiles"
         echo -e "  ${MAGENTA}${BOLD}[3]${RESET} Exit"
@@ -68,7 +65,7 @@ main() {
         case "$option" in
             1)
                 echo "Running install_hyprland..."
-                install_hyprland
+                load_distro
                 read -rp "Press Enter..."
                 ;;
             2)
