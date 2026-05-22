@@ -76,14 +76,81 @@ install_hyprland() {
 }
 
 copy_dotfiles() {
-    if [[ -d "$HOME/.config/hypr" ]]; then
-        echo "Hyprland config already exists at ~/.config/hypr. Skipping."
-    else
-        echo "Copying dotfiles..."
-        mkdir -p "$HOME/.config/hypr"
-        cp -r "$SCRIPT_DIR/hypr/." "$HOME/.config/hypr/" || return 1
-        echo "Dotfiles copied."
+    local SRC="$SCRIPT_DIR/hypr"
+    local DEST="$HOME/.config/hypr"
+
+    local EXPECTED=(
+        "hyprland.lua"
+        "hyprpaper.conf"
+        "Config/Auto-Start.lua"
+        "Config/Decorations.lua"
+        "Config/Environment.lua"
+        "Config/Identifiers.lua"
+        "Config/Input.lua"
+        "Config/Miscellaneous.lua"
+        "Config/Monitors.lua"
+        "Config/Window-Rules.lua"
+    )
+
+    local missing=()
+    local existing=()
+
+    for file in "${EXPECTED[@]}"; do
+        if [[ -e "$DEST/$file" ]]; then
+            existing+=("$file")
+        else
+            missing+=("$file")
+        fi
+    done
+
+    if [[ ${#existing[@]} -gt 0 ]]; then
+        echo "==> The following files already exist in $DEST:"
+        for file in "${existing[@]}"; do
+            echo "    [exists]  $file"
+        done
+        echo ""
     fi
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo "==> The following files are missing:"
+        for file in "${missing[@]}"; do
+            echo "    [missing] $file"
+        done
+        echo ""
+    fi
+
+    if [[ ${#existing[@]} -eq 0 ]]; then
+        # Nothing exists yet, copy everything silently
+        echo "==> No existing config found. Copying dotfiles..."
+        mkdir -p "$DEST"
+        cp -r "$SRC/." "$DEST/" || return 1
+        echo "==> Dotfiles copied."
+        return 0
+    fi
+
+    read -rp "==> Overwrite existing files? (y/n): " answer
+    if [[ "$answer" != "y" ]]; then
+        echo "Skipping dotfiles."
+        return 0
+    fi
+
+    echo "==> Copying dotfiles..."
+    mkdir -p "$DEST/Config"
+
+    for file in "${EXPECTED[@]}"; do
+        local src_file="$SRC/$file"
+        local dest_file="$DEST/$file"
+
+        if [[ ! -f "$src_file" ]]; then
+            echo "  Warning: source file not found, skipping: $src_file"
+            continue
+        fi
+
+        mkdir -p "$(dirname "$dest_file")"
+        cp "$src_file" "$dest_file" && echo "  [copied]  $file" || echo "  [failed]  $file"
+    done
+
+    echo "==> Done."
 }
 
 # Only run directly, not when sourced
