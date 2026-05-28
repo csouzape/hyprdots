@@ -21,6 +21,7 @@ install_hyprland() {
     xdg-desktop-portal-hyprland
     discord
     obs-studio
+    mpv
   )
 
   local AUR=(
