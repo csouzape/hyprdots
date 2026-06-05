@@ -6,7 +6,7 @@
     "spacing": 0, 
     "modules-left": ["hyprland/workspaces"], 
     "modules-center": ["hyprland/window"], 
-    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator", "network", "tray", "custom/separator" ,"custom/power"], 
+    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator","tray", "custom/separator" ,"custom/power"], 
 
     "hyprland/workspaces": {
     "format": "{name}",
@@ -30,9 +30,10 @@
         "tooltip-format": "{timeTo}"
     },
     "pulseaudio": {
-        "format": "{volume}% {icon}", 
-        "format-icons": ["", "", ""],
-        "on-click": "pavucontrol"
+    "format": "{volume}% {icon}",
+    "format-icons": ["󰕿", "󰖀", "󰕾"],
+    "format-muted": "󰝟 mudo",
+    "on-click": "pavucontrol"
     },
     "custom/separator": {
     "format": "|",
@@ -40,21 +41,12 @@
     "tooltip": false
     },
     "clock": {
-        "format": "{:%H:%M %p}", // Relógio como "01:28 PM"
+        "format": "{:%H:%M %p}",
         "tooltip-format": "{:%Y-%m-%d | %H:%M}"
-    },
-    "network": {
-    "format-ethernet": "󰈀",  
-    "format-linked": "󰈀 (No IP)",
-    "format-disconnected": "󰲜", 
-    "tooltip-format-wifi": "{essid} ({signaldBm}dBm) ",
-    "tooltip-format-ethernet": "{ifname} 󰈀",
-    "tooltip-format-disconnected": "Desconectado",
-    "on-click": "nm-connection-editor"
     },
     "tray": {
         "icon-size": 16,
-        "spacing": 8 // Ícones da tray (volume, rede extra, etc.)
+        "spacing": 8 
     },
 
     "custom/power": {

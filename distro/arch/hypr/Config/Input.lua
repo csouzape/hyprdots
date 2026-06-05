@@ -40,7 +40,23 @@ hl.bind("KP_Prior", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
-hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("waypaper --random"))
+hl.bind(mainMod .. " + SHIFT + W", function()
+    local pasta = "/home/carlos/Imagens/Backgrounds"
+    local handle = io.popen('find "' .. pasta .. '" -type f \\( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \\)')
+    local arquivos = {}
+    for linha in handle:lines() do
+        table.insert(arquivos, linha)
+    end
+    handle:close()
+
+    if #arquivos > 0 then
+        math.randomseed(os.time())
+        local escolhido = arquivos[math.random(#arquivos)]
+        hl.exec_cmd('pkill swaybg; swaybg -i "' .. escolhido .. '" -m fill')
+    end
+end)
+
+
 
 -- desligar / sair
 hl.bind(

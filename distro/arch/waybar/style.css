@@ -4,11 +4,14 @@
     font-family: JetBrainsMono, sans-serif; 
     font-size: 13.3px;
     min-height: 0;
+    padding: 0;
+    margin: 0;
 }
-
 window#waybar {
     background: rgba(0, 0, 0, 0.6); 
     color: #ffffff;
+    padding: 0;
+    margin: 0;
 }
 
 #workspaces button {
@@ -27,9 +30,9 @@ window#waybar {
     margin: 0 20px;
 }
 
-
-#network{
-    padding: 0 5px
+#pulseaudio {
+    padding: 0 5px;
+    font-size: 14px;
 }
 
 #custom-gpuinfo, #cpu, #memory, #battery, #pulseaudio, #clock, #tray {
