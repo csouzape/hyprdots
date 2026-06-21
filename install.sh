@@ -19,9 +19,10 @@ if [[ ! -f "$CONFIG_DIR/arch.sh" ]]; then
 fi
 
 
+# Must NOT run as root: makepkg/yay refuse to, and privileged commands use sudo themselves.
 check_root() {
-  if [[ $EUID -ne 0 ]]; then
-    echo -e "${RED}==> This script must be run as root. Please use sudo.${RESET}"
+  if [[ $EUID -eq 0 ]]; then
+    echo -e "${RED}==> Do not run this script as root. Run it as a normal user; sudo is used when needed.${RESET}"
     exit 1
   fi
 }
@@ -47,15 +48,14 @@ check_arch_base() {
 
 
 check_multilib() {
-    if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
+    if grep -q "^\[multilib\]" /etc/pacman.conf; then
         echo -e "${GREEN}==> Multilib already enabled.${RESET}"
         return 0
-    else
-        echo -e "${YELLOW}==> Enabling multilib repository...${RESET}"
-        sudo sed -i '/\[multilib\]/,/Include/ s/^#//' /etc/pacman.conf
-        sudo pacman -Sy
     fi
 
+    echo -e "${YELLOW}==> Enabling multilib repository...${RESET}"
+    sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
+    sudo pacman -Sy
 }
 
 check_aur() {
@@ -87,8 +87,7 @@ source "$CONFIG_DIR/arch.sh"
 check_root
 check_arch_base
 check_multilib
-
-
+check_aur || exit 1
 
 install_hyprland
 copy_dotfiles
