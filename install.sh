@@ -85,15 +85,68 @@ check_aur() {
 }
 
 
-# Orchestrates the whole install: detection checks first, then package install + dotfiles.
-main() {
-  check_root
+show_banner() {
+  echo -e "${CYAN}"
+  cat <<'EOF'
+██╗  ██╗██╗   ██╗██████╗ ██████╗ ██████╗  ██████╗ ████████╗███████╗
+██║  ██║╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝
+███████║ ╚████╔╝ ██████╔╝██████╔╝██║  ██║██║   ██║   ██║   ███████╗
+██╔══██║  ╚██╔╝  ██╔═══╝ ██╔══██╗██║  ██║██║   ██║   ██║   ╚════██║
+██║  ██║   ██║   ██║     ██║  ██║██████╔╝╚██████╔╝   ██║   ███████║
+╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝   ╚══════╝                                                             
+EOF
+  echo -e "${RESET}"
+}
+
+show_menu() {
+  echo -e "${YELLOW}Choose an option:${RESET}"
+  echo -e "  ${GREEN}1)${RESET} Install dependencies ${BLUE}+${RESET} copy configs"
+  echo -e "  ${GREEN}2)${RESET} Only copy configs"
+  echo -e "  ${GREEN}3)${RESET} Only install dependencies"
+  echo -e "  ${GREEN}q)${RESET} Quit"
+  echo ""
+}
+
+# Bundles the package-related steps: repo check, AUR helper, then the packages.
+install_deps() {
   check_arch_base
   check_multilib
-  check_aur || exit 1
+  check_aur || return 1
+  install_pacman_dependences || return 1
+}
 
-  install_pacman_dependences || exit 1
-  copy_dotfiles || exit 1
+# Shows the menu and dispatches the chosen action.
+main() {
+  clear
+  show_banner
+  check_root
+
+  show_menu
+  read -rp "==> Option: " choice
+  echo ""
+
+  case "$choice" in
+    1)
+      install_deps || exit 1
+      copy_dotfiles || exit 1
+      ;;
+    2)
+      copy_dotfiles || exit 1
+      ;;
+    3)
+      install_deps || exit 1
+      ;;
+    q | Q)
+      echo -e "${YELLOW}==> Aborted.${RESET}"
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}==> Invalid option.${RESET}"
+      exit 1
+      ;;
+  esac
+
+  echo -e "${GREEN}==> All done!${RESET}"
 }
 
 main "$@"
