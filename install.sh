@@ -18,6 +18,9 @@ if [[ ! -f "$CONFIG_DIR/arch.sh" ]]; then
   exit 1
 fi
 
+# Load the ecosystem: makes arch.sh's functions (install_hyprland, copy_dotfiles) available here.
+source "$CONFIG_DIR/arch.sh"
+
 
 # Must NOT run as root: makepkg/yay refuse to, and privileged commands use sudo themselves.
 check_root() {
@@ -82,12 +85,15 @@ check_aur() {
 }
 
 
-source "$CONFIG_DIR/arch.sh"
+# Orchestrates the whole install: detection checks first, then package install + dotfiles.
+main() {
+  check_root
+  check_arch_base
+  check_multilib
+  check_aur || exit 1
 
-check_root
-check_arch_base
-check_multilib
-check_aur || exit 1
+  install_pacman_dependences || exit 1
+  copy_dotfiles || exit 1
+}
 
-install_hyprland
-copy_dotfiles
+main "$@"
