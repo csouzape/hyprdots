@@ -1,15 +1,15 @@
 -- Configurações de entrada e dispositivos
 hl.config({
-    input = {
-        kb_layout = "br",
-        kb_variant = "abnt2",
-        kb_model = "",
-        kb_options = "",
-        kb_rules = "",
-        follow_mouse = 1,
-        sensitivity = 0,
-        touchpad = { natural_scroll = false },
-    },
+	input = {
+		kb_layout = "br",
+		kb_variant = "abnt2",
+		kb_model = "",
+		kb_options = "",
+		kb_rules = "",
+		follow_mouse = 1,
+		sensitivity = 0,
+		touchpad = { natural_scroll = false },
+	},
 })
 
 -- Bindings do Hyprland usando identificadores globais
@@ -41,39 +41,27 @@ hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
 hl.bind(mainMod .. " + SHIFT + W", function()
-    local pasta = "/home/carlos/Imagens/Backgrounds"
-    local handle = io.popen('find "' .. pasta .. '" -type f \\( -iname "*.jpg" -o -iname "*.png" -o -iname "*.jpeg" -o -iname "*.webp" \\)')
-    local arquivos = {}
-    for linha in handle:lines() do
-        table.insert(arquivos, linha)
-    end
-    handle:close()
-
-    if #arquivos > 0 then
-        math.randomseed(os.time())
-        local escolhido = arquivos[math.random(#arquivos)]
-        hl.exec_cmd('pkill swaybg; swaybg -i "' .. escolhido .. '" -m fill')
-    end
+	ids.set_random_wallpaper({ kill = true })
 end)
-
-
 
 -- desligar / sair
 hl.bind(
-    mainMod .. " + SHIFT + M",
-    hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
+	mainMod .. " + SHIFT + M",
+	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
 
 -- capturas de tela
 hl.bind(
-    "Print",
-    hl.dsp.exec_cmd(
-        "bash -c 'grim -g \"$(slurp -b 00000044 -c ffffff00)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
-    )
+	"Print",
+	hl.dsp.exec_cmd(
+		"bash -c 'grim -g \"$(slurp -b 00000044 -c ffffff00)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
+	)
 )
 hl.bind(
-    "SHIFT + Print",
-    hl.dsp.exec_cmd("bash -c 'grim -g \"$(slurp -o)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'")
+	"SHIFT + Print",
+	hl.dsp.exec_cmd(
+		"bash -c 'grim -g \"$(slurp -o)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
+	)
 )
 
 -- foco e movimentação
@@ -91,9 +79,9 @@ hl.bind(mainMod .. " + L", hl.dsp.layout("splitratio 0.05"), { repeating = true 
 hl.bind(mainMod .. " + H", hl.dsp.layout("splitratio -0.05"), { repeating = true })
 
 for i = 1, 10 do
-    local key = i % 10
-    hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
-    hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+	local key = i % 10
+	hl.bind(mainMod .. " + " .. key, hl.dsp.focus({ workspace = i }))
+	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
 -- mouse
