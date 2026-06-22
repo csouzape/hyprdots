@@ -1,6 +1,12 @@
 # hyprdots
-
 Personal dotfiles for Hyprland on Arch Linux.
+
+
+<img width="1920" height="1080" alt="593574714-2a23126b-2a51-49c0-ae96-0356f27479fc" src="https://github.com/user-attachments/assets/30ab446e-4cab-4526-9a64-52ab59db5fe9" />
+
+
+<img width="1920" height="1080" alt="596782223-12eb9e44-c625-4a82-b52a-87db028f3848" src="https://github.com/user-attachments/assets/c5aca5d1-5ea2-4fd0-b2fb-7edd7d3dea56" />
+
 
 ## Overview
 
