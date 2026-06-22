@@ -46,7 +46,8 @@ The installer provides a simple interactive menu:
 
 ```
   1) Install     — Configure Hyprland and all dotfiles
-  2) Uninstall   — Remove packages/dotfiles safely
+  2) Only copy configs 
+  3) Only Install dependencies 
   0) Exit
 ```
 
