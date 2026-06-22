@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Entry point: resolve the repo root and run the Arch installer in config/
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$SCRIPT_DIR/config"
 
 
-# Colors to make this beautiful 
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -18,11 +17,8 @@ if [[ ! -f "$CONFIG_DIR/arch.sh" ]]; then
   exit 1
 fi
 
-# Load the ecosystem: makes arch.sh's functions (install_hyprland, copy_dotfiles) available here.
 source "$CONFIG_DIR/arch.sh"
 
-
-# Must NOT run as root: makepkg/yay refuse to, and privileged commands use sudo themselves.
 check_root() {
   if [[ $EUID -eq 0 ]]; then
     echo -e "${RED}==> Do not run this script as root. Run it as a normal user; sudo is used when needed.${RESET}"
@@ -31,14 +27,12 @@ check_root() {
 }
 
 
-# Abort unless we're on an Arch-based distro.
 check_arch_base() {
   if [[ ! -f /etc/os-release ]]; then
     echo -e "${RED}==> Cannot detect the distribution (/etc/os-release missing).${RESET}"
     exit 1
   fi
 
-  # shellcheck disable=SC1091
   source /etc/os-release
 
   if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
@@ -107,7 +101,6 @@ show_menu() {
   echo ""
 }
 
-# Bundles the package-related steps: repo check, AUR helper, then the packages.
 install_deps() {
   check_arch_base
   check_multilib
@@ -115,7 +108,6 @@ install_deps() {
   install_pacman_dependences || return 1
 }
 
-# Shows the menu and dispatches the chosen action.
 main() {
   clear
   show_banner
