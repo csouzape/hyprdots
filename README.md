@@ -1,13 +1,33 @@
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2a23126b-2a51-49c0-ae96-0356f27479fc" />
-
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/12eb9e44-c625-4a82-b52a-87db028f3848" />
-
-
 # hyprdots
 
-Meus dotfiles pessoais para **Hyprland** no Arch Linux.
+Personal dotfiles for Hyprland on Arch Linux.
 
-## Instalação
+## Overview
+
+This repository provides a curated set of configuration files and an interactive installer to set up a Hyprland environment on Arch Linux and compatible distributions (Manjaro, EndeavourOS). The installer installs and links the following components and configurations:
+
+- Hyprland configuration
+- Waybar configuration
+- Alacritty terminal configuration
+- MPV configuration
+- Rofi configuration
+- xdg-desktop-portal configuration for Hyprland portals
+- SwayNC configuration (notification center)
+
+## Features
+
+- Interactive installer script to install or remove the dotfiles
+- Safe uninstall option that attempts to restore prior state
+- Preconfigured layouts and rules for Hyprland windows and monitors
+- Theme and style files for Waybar and SwayNC
+- Input and keybinding templates for Hyprland
+- MPV and Alacritty sensible defaults and input mappings
+- Rofi theme configuration for application launcher
+- Portal configuration for xdg-desktop-portal to improve integration
+
+## Installation
+
+Clone the repository and run the installer script:
 
 ```bash
 git clone https://github.com/csouzape/hyprdots
@@ -16,24 +36,36 @@ chmod +x hyprdots.sh
 sudo ./hyprdots.sh
 ```
 
-O script apresenta um **menu interativo**:
+The installer provides a simple interactive menu:
 
 ```
-  1) Instalar     — Configura Hyprland e todos os dotfiles
-  2) Desinstalar  — Remove pacotes/dotfiles de forma segura
-  0) Sair
+  1) Install     — Configure Hyprland and all dotfiles
+  2) Uninstall   — Remove packages/dotfiles safely
+  0) Exit
 ```
 
-## ⚠️ Avisos
+## Repository Layout
 
-- **Monitores**: as configs do waybar usam nomes de monitor fixos.  
-  Após instalar, rode `hyprctl monitors` e ajuste o campo `output` em `~/.config/waybar/config`.
+Key configuration folders included in this repository:
 
-- **VM**: não funciona corretamente em máquinas virtuais devido ao mapeamento de monitor.
-- **Distribuição**: suporte apenas para Arch Linux e variantes (Manjaro, EndeavourOS).
+- `config/alacritty/` — Alacritty terminal configuration
+- `config/hypr/` — Hyprland main configuration files and subconfigs
+- `config/mpv/` — MPV configuration and input mappings
+- `config/rofi/` — Rofi theme and configuration
+- `config/swaync/` — Notification center configuration and style
+- `config/waybar/` — Waybar module configuration and style
+- `config/xdg-desktop-portal/` — Portal configuration for Hyprland
 
-## Requisitos
+## Warnings and Notes
 
-- Arch Linux (instalação mínima)
-- `git` instalado
-- Conexão com a internet
+- Monitors: Waybar configuration uses fixed monitor names. After installation run `hyprctl monitors` and update the `output` field in `~/.config/waybar/config` if necessary.
+- Virtual machines: Some monitor-related features may not work correctly in VMs due to display mapping.
+- Distribution support: This project targets Arch Linux and its derivatives only.
+
+## Requirements
+
+- Arch Linux (minimal installation recommended)
+- `git` installed
+- Internet connection during installation
+
+If you would like any additional details added (examples, screenshots, or installation options), tell me which sections to expand.

@@ -3,8 +3,6 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$SCRIPT_DIR/config"
 
-
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -26,7 +24,6 @@ check_root() {
   fi
 }
 
-
 check_arch_base() {
   if [[ ! -f /etc/os-release ]]; then
     echo -e "${RED}==> Cannot detect the distribution (/etc/os-release missing).${RESET}"
@@ -42,7 +39,6 @@ check_arch_base() {
     exit 1
   fi
 }
-
 
 check_multilib() {
     if grep -q "^\[multilib\]" /etc/pacman.conf; then
