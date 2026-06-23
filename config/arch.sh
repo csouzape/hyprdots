@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# config/ dir, used as the source for the dotfiles.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 install_pacman_dependences() {
