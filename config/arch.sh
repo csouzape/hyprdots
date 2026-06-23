@@ -34,8 +34,6 @@ copy_dotfiles() {
 
   local errors=0
   local count=0
-
-  # Each directory inside config/ becomes ~/.config/<name>; the *.sh scripts are skipped by the */ glob.
   for dir in "$SRC"/*/; do
     [[ -d "$dir" ]] || continue
     local name
