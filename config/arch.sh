@@ -17,7 +17,7 @@ install_pacman_dependences() {
     wl-clipboard 
     xdg-desktop-portal-hyprland 
     xdg-desktop-portal-gtk 
-    pavucontrol 
+    pavucontrol
 
   )
 
