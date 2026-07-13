@@ -93,6 +93,8 @@ show_menu() {
   echo -e "  ${GREEN}1)${RESET} Install dependencies ${BLUE}+${RESET} copy configs"
   echo -e "  ${GREEN}2)${RESET} Only copy configs"
   echo -e "  ${GREEN}3)${RESET} Only install dependencies"
+  echo -e "  ${GREEN}4)${RESET} Remove Dependencies"
+  echo -e "  ${GREEN}5)${RESET} Remove Configs"
   echo -e "  ${GREEN}q)${RESET} Quit"
   echo ""
 }
@@ -123,6 +125,12 @@ main() {
       ;;
     3)
       install_deps || exit 1
+      ;;
+    4)
+      remove_dependencies || exit 1
+      ;;
+    5)
+      remove_files || exit 1
       ;;
     q | Q)
       echo -e "${YELLOW}==> Aborted.${RESET}"

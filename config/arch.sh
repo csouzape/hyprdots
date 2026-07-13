@@ -60,3 +60,60 @@ copy_dotfiles() {
     return 1
   fi
 }
+
+remove_dependencies() {
+  local PACMAN=(
+    hyprland 
+    swaync 
+    swaybg 
+    grim 
+    slurp 
+    alacritty 
+    rofi 
+    thunar 
+    waybar 
+    wl-clipboard 
+    xdg-desktop-portal-hyprland 
+    xdg-desktop-portal-gtk 
+    pavucontrol
+  )
+
+  echo "==> Removing pacman packages..."
+  sudo pacman -Rns "${PACMAN[@]}" || return 1
+}
+
+remove_files() {
+  local SRC="$SCRIPT_DIR"
+  local DEST="$HOME/.config"
+
+  echo -e "${BLUE}==> Removing configs from $DEST${RESET}"
+
+  local errors=0
+  local count=0
+  for dir in "$SRC"/*/; do
+    [[ -d "$dir" ]] || continue
+    local name
+    name="$(basename "$dir")"
+    local target="$DEST/$name"
+
+    if [[ ! -e "$target" ]]; then
+      echo -e "${YELLOW}  [skip]   ~/.config/$name (dont exist)${RESET}"
+      continue
+    fi
+
+    if rm -rf "$target"; then
+      echo -e "${GREEN}  [ok]     ~/.config/$name removed${RESET}"
+      ((count++))
+    else
+      echo -e "${RED}  [fail]   ~/.config/$name${RESET}"
+      ((errors++))
+    fi
+  done
+
+  if [[ $errors -eq 0 ]]; then
+    echo -e "${GREEN}==> Done. $count pasta(s) remooved(s).${RESET}"
+  else
+    echo -e "${RED}==> Finished with $errors error(s).${RESET}"
+    return 1
+  fi
+}
