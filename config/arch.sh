@@ -4,18 +4,20 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 install_pacman_dependences() {
   local PACMAN=(
-    hyprland 
-    swaync 
-    swaybg 
-    grim 
-    slurp 
-    alacritty 
-    rofi 
-    thunar 
-    waybar 
-    wl-clipboard 
-    xdg-desktop-portal-hyprland 
-    xdg-desktop-portal-gtk 
+    hyprland
+    swaync
+    swaybg
+    grim
+    slurp
+    alacritty
+    rofi
+    thunar
+    gvfs
+    thunar-volman
+    waybar
+    wl-clipboard
+    xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk
     pavucontrol
 
   )
@@ -63,19 +65,21 @@ copy_dotfiles() {
 
 remove_dependencies() {
   local PACMAN=(
-    hyprland 
-    swaync 
-    swaybg 
-    grim 
-    slurp 
-    alacritty 
-    rofi 
-    thunar 
-    waybar 
-    wl-clipboard 
-    xdg-desktop-portal-hyprland 
-    xdg-desktop-portal-gtk 
+    hyprland
+    swaync
+    swaybg
+    grim
+    slurp
+    alacritty
+    rofi
+    thunar
+    gvfs
+    thunar-volman
+    waybar
+    wl-clipboard
+    xdg-desktop-portal-hyprland
     pavucontrol
+
   )
 
   echo "==> Removing pacman packages..."
