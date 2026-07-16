@@ -17,13 +17,6 @@ fi
 
 source "$CONFIG_DIR/arch.sh"
 
-check_root(){
-  if [[ $EUID -eq 0 ]]; then
-    echo -e "${RED}==> This script should not be run as root.${RESET}"
-    exit 1
-  fi
-}
-
 check_arch_base() {
   if [[ ! -f /etc/os-release ]]; then
     echo -e "${RED}==> Cannot detect the distribution (/etc/os-release missing).${RESET}"
@@ -109,7 +102,6 @@ install_deps() {
 main() {
   clear
   show_banner
-  check_root
 
   show_menu
   read -rp "==> Option: " choice
