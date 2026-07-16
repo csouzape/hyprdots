@@ -17,9 +17,9 @@ fi
 
 source "$CONFIG_DIR/arch.sh"
 
-check_root() {
+check_root(){
   if [[ $EUID -eq 0 ]]; then
-    echo -e "${RED}==> Do not run this script as root. Run it as a normal user; sudo is used when needed.${RESET}"
+    echo -e "${RED}==> This script should not be run as root.${RESET}"
     exit 1
   fi
 }
