@@ -1,8 +1,65 @@
+# ~/.config/alacritty/alacritty.toml
+
 [window]
-opacity = 0.6 
+opacity = 0.85
+padding = { x = 10, y = 10 }
+decorations = "full"
+dynamic_padding = false
 
 [font]
-size = 12.0 
+size = 11.5
+
 normal = { family = "JetBrains Mono", style = "Regular" }
+bold = { family = "JetBrains Mono", style = "Bold" }
+italic = { family = "JetBrains Mono", style = "Italic" }
+bold_italic = { family = "JetBrains Mono", style = "Bold Italic" }
+
+[font.offset]
+x = 0
+y = 1
+
 [colors.primary]
 background = "#0f0f0f"
+foreground = "#f1f1f1"
+dim_foreground = "#a1a1a1"
+bright_foreground = "#ffffff"
+
+[colors.cursor]
+text = "#0f0f0f"
+cursor = "#f1f1f1"
+
+[colors.selection]
+text = "#0f0f0f"
+background = "#f1f1f1"
+
+[colors.normal]
+black   = "#1e1e1e"
+red     = "#e06c75"
+green   = "#98c379"
+yellow  = "#e5c07b"
+blue    = "#61afef"
+magenta = "#c678dd"
+cyan    = "#56b6c2"
+white   = "#d4d4d4"
+
+[colors.bright]
+black   = "#5c6370"
+red     = "#f06c75"
+green   = "#a8e28c"
+yellow  = "#f0c674"
+blue    = "#7ec1ff"
+magenta = "#d7a3e8"
+cyan    = "#6dd0dc"
+white   = "#ffffff"
+
+[cursor]
+style = { shape = "Beam", blinking = "On" }
+blink_interval = 500
+unfocused_hollow = true
+
+[scrolling]
+history = 10000
+multiplier = 3
+
+[selection]
+save_to_clipboard = true
