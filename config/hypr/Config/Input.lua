@@ -1,5 +1,3 @@
-
--- Configurações de entrada e dispositivos
 hl.config({
 	input = {
 		kb_layout = "br",
@@ -13,7 +11,6 @@ hl.config({
 	},
 })
 
--- Bindings do Hyprland usando identificadores globais
 local ids = require("Config.Identifiers")
 local mainMod = ids.mainMod
 local terminal = ids.terminal
@@ -22,21 +19,17 @@ local menu = ids.menu
 local browser = ids.browser
 local markdown = ids.markdown
 
--- aplicações
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(markdown))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd("zed"))
--- janelas
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-
--- mídia / utilitários
 hl.bind("KP_Prior", hl.dsp.exec_cmd("bash -c 'ID=$(wpctl status | sed -n \"/Sources:/,/Filters:/p\" | grep SHEM-BOY | grep -oP \"^[^0-9]*\\K\\d+(?=\\.\\s)\" | head -1); wpctl set-mute $ID toggle; wpctl get-volume $ID | grep -q MUTED && notify-send -u low Microfone \"Mutado\" || notify-send -u low Microfone \"Ativo\"'"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
@@ -45,13 +38,11 @@ hl.bind(mainMod .. " + SHIFT + W", function()
 	ids.set_random_wallpaper({ kill = true })
 end)
 
--- desligar / sair
 hl.bind(
 	mainMod .. " + SHIFT + M",
 	hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'")
 )
 
--- capturas de tela
 hl.bind(
 	"Insert",
 	hl.dsp.exec_cmd(
@@ -65,7 +56,6 @@ hl.bind(
 	)
 )
 
--- foco e movimentação
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
@@ -85,7 +75,6 @@ for i = 1, 10 do
 	hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
 end
 
--- mouse
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
 hl.bind(mainMod .. " + mouse_up", hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
