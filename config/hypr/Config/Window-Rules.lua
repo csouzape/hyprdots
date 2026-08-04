@@ -1,6 +1,11 @@
--- Regras de janelas e configurações Xwayland
+-- =============================================
+-- Window Rules
+-- =============================================
+
+-- Global Hyprland config
 hl.config({ xwayland = { force_zero_scaling = true } })
 
+-- General rules -----------------------------------------------------------
 hl.window_rule({
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
@@ -27,14 +32,14 @@ hl.window_rule({
 	float = true,
 })
 
--- [ SCREENSHARE ]
+-- Exclusions --------------------------------------------------------------
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
 	match = { class = "^(discord|vivaldi-stable|steam)$" },
 })
 
--- [ GAMES ]
+-- Workspace rules ---------------------------------------------------------
 hl.window_rule({
 	name = "GAMES",
 	workspace = "9 silent",
@@ -49,7 +54,7 @@ hl.window_rule({
 	match = { class = "^.*(steam_app_|cs2|RimWorldLinux|osu!|Sober|gamescope).*$" },
 })
 
--- [ FLOAT RULES ]
+-- Floating window rules --------------------------------------------------
 hl.window_rule({
 	name = "FLOAT ONLY",
 	float = true,
@@ -83,6 +88,14 @@ hl.window_rule({
 })
 
 hl.window_rule({
+	name = "LOCALSEND",
+	float = true,
+	center = true,
+	size = "monitor_w*0.5 monitor_h*0.7",
+	match = { class = "^(localsend|LocalSend)$" },
+})
+
+hl.window_rule({
 	name = "MPV",
 	float = true,
 	center = true,
@@ -99,11 +112,11 @@ hl.window_rule({
 })
 
 hl.window_rule({
-	name = "LOCALSEND",
+	name = "BITWARDEN",
 	float = true,
 	center = true,
-	size = "monitor_w*0.5 monitor_h*0.7",
-	match = { class = "^(localsend|LocalSend)$" },
+	size = "monitor_w*0.25 monitor_h*0.6",
+	match = { class = "^brave-nngceckbapebfimnlniiiahkandclblb-Default$" },
 })
 
 hl.window_rule({
@@ -111,15 +124,29 @@ hl.window_rule({
 	float = true,
 	center = true,
 	size = "monitor_w*0.7 monitor_h*0.7",
-	match = {
-		class = "com.github.th-ch.youtube-music",
-	},
+	match = { class = "com.github.th-ch.youtube-music" },
 })
 
 hl.window_rule({
-	name = "BITWARDEN",
+	name = "STEAM-FRIENDS",
 	float = true,
 	center = true,
-	size = "monitor_w*0.25 monitor_h*0.6",
-	match = { class = "^brave-nngceckbapebfimnlniiiahkandclblb-Default$" },
+	size = "monitor_w*0.2 monitor_h*0.7",
+	match = { class = "^steam$", title = "^Lista de amigos$" },
+})
+
+hl.window_rule({
+	name = "STEAM-SETTINGS",
+	float = true,
+	center = true,
+	size = "monitor_w*0.5 monitor_h*0.8",
+	match = { class = "^steam$", title = "^Steam — Configurações$" },
+})
+
+hl.window_rule({
+	name = "STEAM-DEFAULT",
+	float = true,
+	center = true,
+	size = "monitor_w*0.8 monitor_h*0.8",
+	match = { class = "^steam$", title = "^Steam$" },
 })
