@@ -14,6 +14,8 @@ install_pacman_dependences() {
     thunar
     gvfs
     thunar-volman
+    tumbler
+    ffmpegthumbnailer
     waybar
     wl-clipboard
     xdg-desktop-portal-hyprland
@@ -77,12 +79,14 @@ remove_dependencies() {
     thunar
     gvfs
     thunar-volman
+    tumbler
+    ffmpegthumbnailer
     waybar
     wl-clipboard
     xdg-desktop-portal-hyprland
-    xdg-desktop-portal-gtk # Adicionado para alinhar com a instalação
+    xdg-desktop-portal-gtk
     pavucontrol
-    hyprpolkitagent # Adicionado para alinhar com a instalação
+    hyprpolkitagent
     qt5-wayland
     qt6-wayland
   )
