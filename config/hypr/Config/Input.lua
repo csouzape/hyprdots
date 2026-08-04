@@ -1,3 +1,4 @@
+
 -- Configurações de entrada e dispositivos
 hl.config({
 	input = {
@@ -27,7 +28,7 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(markdown))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-
+hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd("zed"))
 -- janelas
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -36,7 +37,7 @@ hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 
 -- mídia / utilitários
-hl.bind("KP_Prior", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ toggle"))
+hl.bind("KP_Prior", hl.dsp.exec_cmd("bash -c 'ID=$(wpctl status | sed -n \"/Sources:/,/Filters:/p\" | grep SHEM-BOY | grep -oP \"^[^0-9]*\\K\\d+(?=\\.\\s)\" | head -1); wpctl set-mute $ID toggle; wpctl get-volume $ID | grep -q MUTED && notify-send -u low Microfone \"Mutado\" || notify-send -u low Microfone \"Ativo\"'"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
