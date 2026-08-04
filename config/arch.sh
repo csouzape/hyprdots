@@ -19,7 +19,9 @@ install_pacman_dependences() {
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     pavucontrol
-
+    hyprpolkitagent
+    qt5-wayland
+    qt6-wayland
   )
 
   echo "==> Installing pacman packages..."
@@ -71,15 +73,18 @@ remove_dependencies() {
     grim
     slurp
     alacritty
-    rofi
+    rofi-wayland
     thunar
     gvfs
     thunar-volman
     waybar
     wl-clipboard
     xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk # Adicionado para alinhar com a instalação
     pavucontrol
-
+    hyprpolkitagent # Adicionado para alinhar com a instalação
+    qt5-wayland
+    qt6-wayland
   )
 
   echo "==> Removing pacman packages..."
