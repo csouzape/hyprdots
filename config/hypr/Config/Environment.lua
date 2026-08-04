@@ -2,8 +2,6 @@
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
-
-
 hl.env("GTK_THEME", "Materia-dark") -- Force gtk theme to dark, since Hyprland doesn't support gtk4 yet and some apps look bad with light theme
 hl.env("QT_QPA_PLATFORMTHEME",                "qt6ct") -- Diz para aplicações Qt pegarem tema e aparência do qt6ct.
 hl.env("QT_QPA_PLATFORM",                     "wayland;xcb") -- Backend gráfico: tenta Wayland se falhar usa X11/XWayland
