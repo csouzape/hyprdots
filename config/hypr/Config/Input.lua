@@ -53,13 +53,13 @@ hl.bind(
 
 -- capturas de tela
 hl.bind(
-	"Print",
+	"Insert",
 	hl.dsp.exec_cmd(
 		"bash -c 'grim -g \"$(slurp -b 00000044 -c ffffff00)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
 	)
 )
 hl.bind(
-	"SHIFT + Print",
+	"SHIFT + Insert",
 	hl.dsp.exec_cmd(
 		"bash -c 'grim -g \"$(slurp -o)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
 	)
