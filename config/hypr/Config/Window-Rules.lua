@@ -115,3 +115,11 @@ hl.window_rule({
 		class = "com.github.th-ch.youtube-music",
 	},
 })
+
+hl.window_rule({
+	name = "BITWARDEN",
+	float = true,
+	center = true,
+	size = "monitor_w*0.25 monitor_h*0.6",
+	match = { class = "^brave-nngceckbapebfimnlniiiahkandclblb-Default$" },
+})
