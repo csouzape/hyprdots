@@ -1,12 +1,12 @@
 {
-    "layer": "top", 
+    "layer": "top",
     "position": "top",
-    "output": "HDMI-A-1",     
-    "height": 20, 
-    "spacing": 0, 
-    "modules-left": ["hyprland/workspaces"], 
-    "modules-center": ["hyprland/window"], 
-    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator","tray", "custom/separator" ,"custom/power"], 
+    "output": "HDMI-A-1",
+    "height": 20,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator","tray", "custom/separator" ,"custom/power"],
 
     "hyprland/workspaces": {
     "format": "{name}",
@@ -14,9 +14,9 @@
     "sort-by-number": true,
     "all-outputs": false
     },
-    
+
     "hyprland/window": {
-        "format": "{title}", 
+        "format": "{title}",
         "separate-outputs": true,
         "max-length": 50
     },
@@ -25,7 +25,7 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{capacity}% {icon}", 
+        "format": "{capacity}% {icon}",
         "format-icons": [],
         "tooltip-format": "{timeTo}"
     },
@@ -41,12 +41,16 @@
     "tooltip": false
     },
     "clock": {
-        "format": "{:%H:%M %p}",
-        "tooltip-format": "{:%Y-%m-%d | %H:%M}"
-    },
+	"format": "{:%H:%M %p}",
+	"format-alt": "{:%Y-%m-%d}",
+	"tooltip-format": "{:%Y-%m-%d | %H:%M}",
+	"actions": {
+		"on-click": "mode"
+	}
+},
     "tray": {
         "icon-size": 16,
-        "spacing": 8 
+        "spacing": 8
     },
 
     "custom/power": {
