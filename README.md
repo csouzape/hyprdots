@@ -69,4 +69,7 @@ and update the monitor names in the Waybar configuration.
 
 <img width="1920" height="1080" src="https://github.com/user-attachments/assets/3668958f-0810-445e-a11b-bd539c2af5a3">
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/86d7a2fe-85e2-4f25-a152-c50e45fac05b" />
+
 <img width="1920" height="1080" src="https://github.com/user-attachments/assets/46b228ee-a8e8-4595-bee2-31df9c159a05">
+
