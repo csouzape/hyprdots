@@ -1,11 +1,5 @@
--- =============================================
--- Window Rules
--- =============================================
-
--- Global Hyprland config
 hl.config({ xwayland = { force_zero_scaling = true } })
 
--- General rules -----------------------------------------------------------
 hl.window_rule({
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
@@ -32,14 +26,12 @@ hl.window_rule({
 	float = true,
 })
 
--- Exclusions --------------------------------------------------------------
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
 	match = { class = "^(discord|vivaldi-stable|steam)$" },
 })
 
--- Workspace rules ---------------------------------------------------------
 hl.window_rule({
 	name = "GAMES",
 	workspace = "9 silent",
@@ -54,7 +46,6 @@ hl.window_rule({
 	match = { class = "^.*(steam_app_|cs2|RimWorldLinux|osu!|Sober|gamescope).*$" },
 })
 
--- Floating window rules --------------------------------------------------
 hl.window_rule({
 	name = "FLOAT ONLY",
 	float = true,
@@ -149,4 +140,12 @@ hl.window_rule({
 	center = true,
 	size = "monitor_w*0.8 monitor_h*0.8",
 	match = { class = "^steam$", title = "^Steam$" },
+})
+
+hl.window_rule({
+	name = "STEAM-RECORDINGS",
+	float = true,
+	center = true,
+	size = "monitor_w*0.5 monitor_h*0.7",
+	match = { class = "^steam$", title = "^Gravações e capturas de tela$" },
 })
