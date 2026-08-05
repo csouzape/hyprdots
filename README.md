@@ -2,6 +2,7 @@
 Personal dotfiles for Hyprland on Arch Linux.
 
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3668958f-0810-445e-a11b-bd539c2af5a3" />
 
 <img width="1920" height="1080" alt="596782223-12eb9e44-c625-4a82-b52a-87db028f3848" src="https://github.com/user-attachments/assets/46b228ee-a8e8-4595-bee2-31df9c159a05" />
 
