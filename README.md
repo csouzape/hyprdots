@@ -73,3 +73,7 @@ and update the monitor names in the Waybar configuration.
 
 <img width="1920" height="1080" src="https://github.com/user-attachments/assets/46b228ee-a8e8-4595-bee2-31df9c159a05">
 
+## License
+
+This project is licensed under the GNU General Public License v2.0.
+See the `LICENSE` file for details.
