@@ -149,3 +149,14 @@ hl.window_rule({
 	size = "monitor_w*0.5 monitor_h*0.7",
 	match = { class = "^steam$", title = "^Gravações e capturas de tela$" },
 })
+
+
+hl.window_rule({
+    name = "PAVUCONTROL",
+    float = true,
+    center = true,
+    size = "monitor_w*0.7 monitor_h*0.7",
+    match = {
+        class = "org.pulseaudio.pavucontrol",
+    },
+})
