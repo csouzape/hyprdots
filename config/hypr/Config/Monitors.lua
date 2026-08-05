@@ -1,4 +1,3 @@
--- Configuração de monitores e regras de workspace
 local function setup_monitor(output, scale, mode)
     hl.monitor({
         output = output,
