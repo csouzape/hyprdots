@@ -24,6 +24,7 @@ install_pacman_dependences() {
     hyprpolkitagent
     qt5-wayland
     qt6-wayland
+    imv
   )
 
   echo "==> Installing pacman packages..."
@@ -89,6 +90,7 @@ remove_dependencies() {
     hyprpolkitagent
     qt5-wayland
     qt6-wayland
+    imv
   )
 
   echo "==> Removing pacman packages..."
