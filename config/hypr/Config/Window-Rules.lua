@@ -150,13 +150,34 @@ hl.window_rule({
 	match = { class = "^steam$", title = "^Gravações e capturas de tela$" },
 })
 
+hl.window_rule({
+	name = "STEAM CHATS",
+	float = true,
+	center = true,
+	size = "monitor_w*0.6 monitor_h*0.6",
+	match = {
+		class = "^steam$",
+		title = ".*",
+	},
+})
 
 hl.window_rule({
-    name = "PAVUCONTROL",
-    float = true,
-    center = true,
-    size = "monitor_w*0.7 monitor_h*0.7",
-    match = {
-        class = "org.pulseaudio.pavucontrol",
-    },
+	name = "PAVUCONTROL",
+	float = true,
+	center = true,
+	size = "monitor_w*0.7 monitor_h*0.7",
+	match = {
+		class = "org.pulseaudio.pavucontrol",
+	},
+})
+
+hl.window_rule({
+	name = "BRAVE LOGIN GOOGLE",
+	float = true,
+	center = true,
+	size = "monitor_w*0.45 monitor_h*0.5",
+	match = {
+		class = "^brave%-browser$",
+		title = "^Fazer login nas Contas do Google %- Brave$",
+	},
 })
