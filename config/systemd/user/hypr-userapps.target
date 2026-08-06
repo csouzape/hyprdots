@@ -1,0 +1,4 @@
+[Unit]
+Description=Aplicativos de usuário pós-login do Hyprland
+After=graphical-session.target
+Requires=graphical-session.target
