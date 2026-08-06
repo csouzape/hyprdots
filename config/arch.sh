@@ -68,6 +68,54 @@ copy_dotfiles() {
   fi
 }
 
+install_systemd_services() {
+  echo -e "${BLUE}==> Enabling systemd user services${RESET}"
+  systemctl --user daemon-reload || return 1
+
+  local SERVICES=(
+    discord.service
+    youtube-music.service
+    easyeffects.service
+  )
+
+  local errors=0
+  for svc in "${SERVICES[@]}"; do
+    if systemctl --user enable "$svc"; then
+      echo -e "${GREEN}  [ok]     $svc enabled${RESET}"
+    else
+      echo -e "${RED}  [fail]   $svc${RESET}"
+      ((errors++))
+    fi
+  done
+
+  if [[ $errors -eq 0 ]]; then
+    echo -e "${GREEN}==> Done. systemd services enabled.${RESET}"
+  else
+    echo -e "${RED}==> Finished with $errors error(s).${RESET}"
+    return 1
+  fi
+}
+
+remove_systemd_services() {
+  echo -e "${BLUE}==> Disabling systemd user services${RESET}"
+
+  local SERVICES=(
+    discord.service
+    youtube-music.service
+    easyeffects.service
+  )
+
+  for svc in "${SERVICES[@]}"; do
+    systemctl --user stop "$svc" 2>/dev/null
+    systemctl --user disable "$svc" 2>/dev/null
+    echo -e "${GREEN}  [ok]     $svc stopped/disabled${RESET}"
+  done
+
+  systemctl --user daemon-reload
+  echo -e "${GREEN}==> Done.${RESET}"
+}
+
+
 remove_dependencies() {
   local PACMAN=(
     hyprland
