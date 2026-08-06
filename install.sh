@@ -45,7 +45,7 @@ check_multilib() {
 }
 
 check_aur() {
-    if command -v yay &> /dev/null; then 
+    if command -v yay &> /dev/null; then
         echo -e "${BLUE}==> AUR helper detected.${RESET}"
     else
         read -rp "==> No AUR helper detected. Do you want to install one? (y/n): " install_aur
@@ -57,7 +57,7 @@ check_aur() {
             tmpdir=$(mktemp -d)
             trap 'rm -rf "$tmpdir"' RETURN
 
-            git clone https://aur.archlinux.org/yay.git "$tmpdir/yay" || return 1 
+            git clone https://aur.archlinux.org/yay.git "$tmpdir/yay" || return 1
             (cd "$tmpdir/yay" && makepkg -si) || return 1
 
             echo -e "${GREEN}==> yay installed successfully.${RESET}"
@@ -76,7 +76,7 @@ show_banner() {
 ███████║ ╚████╔╝ ██████╔╝██████╔╝██║  ██║██║   ██║   ██║   ███████╗
 ██╔══██║  ╚██╔╝  ██╔═══╝ ██╔══██╗██║  ██║██║   ██║   ██║   ╚════██║
 ██║  ██║   ██║   ██║     ██║  ██║██████╔╝╚██████╔╝   ██║   ███████║
-╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝   ╚══════╝                                                             
+╚═╝  ╚═╝   ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝   ╚══════╝
 EOF
   echo -e "${RESET}"
 }
@@ -111,17 +111,22 @@ main() {
     1)
       install_deps || exit 1
       copy_dotfiles || exit 1
+      install_systemd_services || exit 1
       ;;
     2)
       copy_dotfiles || exit 1
+      install_systemd_services || exit 1
       ;;
     3)
       install_deps || exit 1
       ;;
     4)
+      remove_systemd_services
+      remove_aur_dependences || exit 1
       remove_dependencies || exit 1
       ;;
     5)
+      remove_systemd_services
       remove_files || exit 1
       ;;
     q | Q)
@@ -136,5 +141,3 @@ main() {
 
   echo -e "${GREEN}==> All done!${RESET}"
 }
-
-main "$@"
