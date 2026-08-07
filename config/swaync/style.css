@@ -10,16 +10,12 @@
   --control-center-size: 360px;
 }
 
+
 .control-center {
   border-radius: 0;
   background: #121212;
-  width: var(--control-center-size);
-  height: var(--control-center-size);
-  max-height: var(--control-center-size);
-  overflow: hidden;
-  position: relative;
-  top: 0;
 }
+
 
 .widgets > .widget,
 .widget-mpris > carouselindicatordots,
@@ -65,4 +61,14 @@
 }
 .widget-mpris-player:only-child {
   margin: 0;
+}
+
+
+.floating-notifications .notification-row .notification-background {
+  background: #121212;
+  border-radius: 0;
+  border: none;
+}
+.floating-notifications .notification-row .notification-background .notification {
+  background: transparent;
 }
