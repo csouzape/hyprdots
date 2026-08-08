@@ -23,8 +23,8 @@ cd hyprdots
 Run the installer:
 
 ```bash
-chmod +x hyprdots.sh
-sudo ./hyprdots.sh
+chmod +x install.sh
+./install.sh
 ```
 
 The installer can either perform a full installation or individual

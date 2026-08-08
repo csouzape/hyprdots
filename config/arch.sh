@@ -124,7 +124,7 @@ remove_dependencies() {
     grim
     slurp
     alacritty
-    rofi-wayland
+    rofi
     thunar
     gvfs
     thunar-volman
@@ -133,7 +133,6 @@ remove_dependencies() {
     waybar
     wl-clipboard
     xdg-desktop-portal-hyprland
-    xdg-desktop-portal-gtk
     pavucontrol
     hyprpolkitagent
     qt5-wayland

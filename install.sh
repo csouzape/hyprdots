@@ -67,6 +67,11 @@ check_aur() {
     fi
 }
 
+remove_aur_dependences() {
+  echo -e "${YELLOW}==> Keeping yay installed. AUR helper removal is disabled for safety.${RESET}"
+  return 0
+}
+
 
 show_banner() {
   echo -e "${CYAN}"
@@ -141,3 +146,5 @@ main() {
 
   echo -e "${GREEN}==> All done!${RESET}"
 }
+
+main "$@"
