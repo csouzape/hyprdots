@@ -29,7 +29,7 @@ hl.window_rule({
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
-	match = { class = "^(discord|vivaldi-stable|steam)$" },
+	match = { class = "^(discord|steam)$" },
 })
 
 hl.window_rule({
@@ -43,7 +43,7 @@ hl.window_rule({
 	decorate = false,
 	no_shadow = true,
 	render_unfocused = true,
-	match = { class = "^.*(steam_app_|cs2|RimWorldLinux|osu!|Sober|gamescope).*$" },
+	match = { class = "^.*(steam_app_|cs2|RimWorldLinux|Sober|gamescope).*$" },
 })
 
 hl.window_rule({
@@ -169,4 +169,14 @@ hl.window_rule({
 		class = "^brave%-browser$",
 		title = "^Fazer login nas Contas do Google %- Brave$",
 	},
+})
+
+hl.window_rule({
+	name = "OBS",
+	match = {
+		class = "com.obsproject.Studio",
+	},
+	float = true,
+	center = true,
+	size = "monitor_w*0.75 monitor_h*0.80",
 })

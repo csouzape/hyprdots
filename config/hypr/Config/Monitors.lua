@@ -1,10 +1,11 @@
+-- Configuração de monitores e regras de workspace
 local function setup_monitor(output, scale, mode)
     hl.monitor({
         output = output,
         mode = mode or "1920x1080@60",
         position = "auto",
         scale = scale,
-        vrr = 3,
+        vrr = 2,
     })
 end
 
