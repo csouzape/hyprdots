@@ -1,4 +1,3 @@
--- Apps
 MOD = "SUPER"
 Terminal = "alacritty"
 Browser = "brave"
@@ -6,7 +5,6 @@ FileManager = "thunar"
 Menu = "rofi -show drun"
 Markdown = "obsidian"
 
--- Environment
 Polkit = "systemctl --user start hyprpolkitagent.service"
 Config = "[float;size 1800 1000] " .. Terminal .. " nvim ~/.config/hypr/hyprland.lua"
 XDPH = "/usr/lib/xdg-desktop-portal-hyprland"
@@ -22,8 +20,6 @@ local ids = {
 	wallpaperDir = "/home/carlos/Imagens/Backgrounds",
 }
 
--- Sorteia um wallpaper da pasta e aplica via swaybg.
--- opts.kill = true mata o swaybg atual antes (uso no bind de troca).
 function ids.set_random_wallpaper(opts)
 	opts = opts or {}
 	local handle = io.popen(
