@@ -5,10 +5,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 install_pacman_dependences() {
   local PACMAN=(
     hyprland
+    waybar
     swaync
     swaybg
-    grim
-    slurp
     alacritty
     rofi
     thunar
@@ -16,15 +15,20 @@ install_pacman_dependences() {
     thunar-volman
     tumbler
     ffmpegthumbnailer
-    waybar
+    imv
+    grim
+    slurp
     wl-clipboard
+    xdg-desktop-portal
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
     pavucontrol
     hyprpolkitagent
+    qt5-base
     qt5-wayland
+    qt6-base
     qt6-wayland
-    imv
+    qt6ct
   )
 
   echo "==> Installing pacman packages..."
