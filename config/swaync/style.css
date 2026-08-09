@@ -72,3 +72,104 @@
 .floating-notifications .notification-row .notification-background .notification {
   background: transparent;
 }
+
+:root {
+  --border-radius: 0px;
+  --cc-bg: #121212;
+
+  --widget-background: #121212;
+  --noti-bg-alpha: 1;
+
+  --padding: 2px;
+  --border: none;
+  --control-center-size: 360px;
+}
+
+
+.control-center {
+  border-radius: 0;
+  background: #121212;
+}
+
+
+.widgets > .widget,
+.widget-mpris > carouselindicatordots,
+.widget-mpris > box > button {
+  background: var(--widget-background);
+  border-radius: 0;
+  padding: 0;
+  border: none;
+}
+
+.control-center-list-placeholder {
+  padding: 0;
+}
+
+.notification-group {
+  border-radius: 0;
+  padding: 0;
+  background: #121212;
+  border: none;
+}
+
+.widget.widget-mpris {
+  background: #121212;
+  border-radius: 0;
+  padding: 0;
+  border: none;
+}
+.widget.widget-mpris > carouselindicatordots {
+  --dots-padding: 1px;
+  padding: var(--dots-padding);
+  padding-left: var(--dots-padding);
+  padding-right: calc(2px + var(--dots-padding));
+  margin: 0;
+  margin-top: 0;
+}
+.widget-mpris > box > button:hover {
+  background: rgba(255,255,255,0.05);
+}
+.widget-mpris-player {
+  box-shadow: none;
+  border: none;
+  margin: 0;
+}
+.widget-mpris-player:only-child {
+  margin: 0;
+}
+
+
+.floating-notifications .notification-row .notification-background {
+  background: #121212;
+  border-radius: 0;
+  border: none;
+}
+.floating-notifications .notification-row .notification-background .notification {
+  background: transparent;
+}
+
+/* Notificações flutuantes */
+.floating-notifications .notification-row {
+  padding: 0;
+  margin: 0;
+}
+
+.floating-notifications .notification-row .notification-background {
+  padding: 0;
+  margin: 0;
+}
+
+.floating-notifications .notification-row .notification-background .notification {
+  padding: 0;
+  margin: 0;
+}
+
+.floating-notifications .notification-content {
+  padding: 1px 4px;
+  margin: 0;
+}
+
+.floating-notifications .notification-default-action {
+  padding: 3px 8px;
+  margin: 0;
+}
