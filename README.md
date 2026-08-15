@@ -1,15 +1,9 @@
 <div  align="center">
     <h1>Hyprdots</h1>
 <p><strong>This is my personal Hyprland configuration for Arch Linux.</strong></p>
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/197479d5-8cd7-46b5-b326-9562e483d6b8" />
+<p>It is primarily intended for Arch Linux, although most Arch-based distributions should work too.</p>
 </div>
-
-
-The repository contains the configuration files I use every day together
-with an installation script that installs the required packages and
-copies everything into the appropriate locations.
-
-It is primarily intended for Arch Linux, although most Arch-based
-distributions should work too.
 
 ## Installation
 
