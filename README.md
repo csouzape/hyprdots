@@ -1,6 +1,8 @@
-# hyprdots
+<div  align="center">
+    <h1>Hyprdots</h1>
+<p><strong>This is my personal Hyprland configuration for Arch Linux.</strong></p>
+</div>
 
-This is my personal Hyprland configuration for Arch Linux.
 
 The repository contains the configuration files I use every day together
 with an installation script that installs the required packages and
