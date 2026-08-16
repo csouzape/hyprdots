@@ -30,7 +30,12 @@ hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind("KP_Prior", hl.dsp.exec_cmd("bash -c 'ID=$(wpctl status | sed -n \"/Sources:/,/Filters:/p\" | grep SHEM-BOY | grep -oP \"^[^0-9]*\\K\\d+(?=\\.\\s)\" | head -1); wpctl set-mute $ID toggle; wpctl get-volume $ID | grep -q MUTED && notify-send -u low Microfone \"Mutado\" || notify-send -u low Microfone \"Ativo\"'"))
+hl.bind(
+	"KP_Prior",
+	hl.dsp.exec_cmd(
+		'bash -c \'ID=$(wpctl status | sed -n "/Sources:/,/Filters:/p" | grep SHEM-BOY | grep -oP "^[^0-9]*\\K\\d+(?=\\.\\s)" | head -1); wpctl set-mute $ID toggle; wpctl get-volume $ID | grep -q MUTED && notify-send -u low Microfone "Mutado" || notify-send -u low Microfone "Ativo"\''
+	)
+)
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
@@ -46,13 +51,18 @@ hl.bind(
 hl.bind(
 	"Insert",
 	hl.dsp.exec_cmd(
-		"bash -c 'grim -g \"$(slurp -b 00000044 -c ffffff00)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
+		'bash -c \'file="/home/carlos/Imagens/Capturas de tela/$(date +%Y-%m-%d_%H-%M-%S).png"; '
+			.. 'grim -g "$(slurp -b 00000044 -c ffffff00)" - | tee "$file" | wl-copy; '
+			.. 'notify-send -i "$file" "Captura de tela" "Salva e copiada para a área de transferência"\''
 	)
 )
+
 hl.bind(
 	"SHIFT + Insert",
 	hl.dsp.exec_cmd(
-		"bash -c 'grim -g \"$(slurp -o)\" - | tee /home/carlos/Imagens/Capturas\\ de\\ tela/$(date +%Y-%m-%d_%H-%M-%S).png | wl-copy'"
+		'bash -c \'file="/home/carlos/Imagens/Capturas de tela/$(date +%Y-%m-%d_%H-%M-%S).png"; '
+			.. 'grim -o "$(hyprctl monitors -j | jq -r ".[] | select(.focused==true) | .name")" - | tee "$file" | wl-copy; '
+			.. 'notify-send -i "$file" "Captura de tela" "Salva e copiada para a área de transferência"\''
 	)
 )
 
