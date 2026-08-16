@@ -186,10 +186,10 @@ configure_autologin() {
   local session_dir="/usr/share/wayland-sessions"
   local session=""
 
-  if [[ -f "$session_dir/hyprland-uwsm.desktop" ]]; then
-    session="hyprland-uwsm"
-  elif [[ -f "$session_dir/hyprland.desktop" ]]; then
+  if [[ -f "$session_dir/hyprland.desktop" ]]; then
     session="hyprland"
+  elif [[ -f "$session_dir/hyprland-uwsm.desktop" ]]; then
+    session="hyprland-uwsm"
   else
     echo -e "${RED}==> No Hyprland session found in $session_dir.${RESET}"
     return 1
