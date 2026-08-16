@@ -256,3 +256,21 @@ EOF
     return 1
   fi
 }
+
+remove_autologin() {
+  local conf="/etc/sddm.conf.d/autologin.conf"
+
+  echo -e "${BLUE}==> Removing SDDM autologin${RESET}"
+
+  if [[ ! -f "$conf" ]]; then
+    echo -e "${YELLOW}  [skip]    autologin config not found ($conf)${RESET}"
+    return 0
+  fi
+
+  if sudo rm -f "$conf"; then
+    echo -e "${GREEN}  [ok]      autologin config removed${RESET}"
+  else
+    echo -e "${RED}  [fail]    could not remove $conf${RESET}"
+    return 1
+  fi
+}
