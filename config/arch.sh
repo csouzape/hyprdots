@@ -124,19 +124,44 @@ install_flatpak_apps() {
         com.github.zocker_160.SyncThingy
     )
 
+    echo -e "${BLUE}==> Checking flatpak installation${RESET}"
     if ! command -v flatpak &>/dev/null; then
-        echo "Flatpak não encontrado. Instalando..."
-        sudo pacman -S --needed flatpak
+        echo -e "${YELLOW}  [missing] flatpak not found, installing...${RESET}"
+        if sudo pacman -S --needed flatpak; then
+            echo -e "${GREEN}  [ok]      flatpak installed${RESET}"
+        else
+            echo -e "${RED}  [fail]    could not install flatpak${RESET}"
+            return 1
+        fi
+    else
+        echo -e "${GREEN}  [ok]      flatpak already installed${RESET}"
     fi
 
+    echo -e "${BLUE}==> Checking Flathub remote${RESET}"
     if ! flatpak remote-list | awk '{print $1}' | grep -qx "flathub"; then
-        echo "Adicionando Flathub..."
-        flatpak remote-add --if-not-exists \
-            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+        echo -e "${YELLOW}  [missing] flathub remote not found, adding...${RESET}"
+        if flatpak remote-add --if-not-exists \
+            flathub https://dl.flathub.org/repo/flathub.flatpakrepo; then
+            echo -e "${GREEN}  [ok]      flathub remote added${RESET}"
+        else
+            echo -e "${RED}  [fail]    could not add flathub remote${RESET}"
+            return 1
+        fi
+    else
+        echo -e "${GREEN}  [ok]      flathub remote already configured${RESET}"
     fi
 
+    echo -e "${BLUE}==> Installing flatpak apps${RESET}"
     if ((${#FLATPAK[@]} > 0)); then
-        flatpak install -y flathub "${FLATPAK[@]}"
+        echo -e "${CYAN}  apps: ${FLATPAK[*]}${RESET}"
+        if flatpak install -y flathub "${FLATPAK[@]}"; then
+            echo -e "${GREEN}  [ok]      ${#FLATPAK[@]} app(s) installed${RESET}"
+        else
+            echo -e "${RED}  [fail]    error installing flatpak apps${RESET}"
+            return 1
+        fi
+    else
+        echo -e "${YELLOW}  [skip]    no flatpak apps to install${RESET}"
     fi
 }
 
@@ -144,26 +169,44 @@ install_apps() {
     local PACMAN=(
         discord
     )
-
     local AUR=(
         pear-desktop-bin
         visual-studio-code-bin
     )
 
+    echo -e "${BLUE}==> Resolving browser package (brave)${RESET}"
     if grep -q '^\[cachyos\]' /etc/pacman.conf; then
+        echo -e "${CYAN}  [cachyos] repo detected, using pacman package${RESET}"
         PACMAN+=(
             brave
         )
     else
+        echo -e "${CYAN}  [aur]     cachyos repo not found, using AUR package${RESET}"
         AUR+=(
             brave-bin
         )
     fi
 
-    sudo pacman -S --needed "${PACMAN[@]}"
+    echo -e "${BLUE}==> Installing pacman apps${RESET}"
+    echo -e "${CYAN}  apps: ${PACMAN[*]}${RESET}"
+    if sudo pacman -S --needed "${PACMAN[@]}"; then
+        echo -e "${GREEN}  [ok]      pacman apps installed${RESET}"
+    else
+        echo -e "${RED}  [fail]    error installing pacman apps${RESET}"
+        return 1
+    fi
 
+    echo -e "${BLUE}==> Installing AUR apps${RESET}"
     if ((${#AUR[@]} > 0)); then
-        yay -S --needed "${AUR[@]}"
+        echo -e "${CYAN}  apps: ${AUR[*]}${RESET}"
+        if yay -S --needed "${AUR[@]}"; then
+            echo -e "${GREEN}  [ok]      AUR apps installed${RESET}"
+        else
+            echo -e "${RED}  [fail]    error installing AUR apps${RESET}"
+            return 1
+        fi
+    else
+        echo -e "${YELLOW}  [skip]    no AUR apps to install${RESET}"
     fi
 
     install_flatpak_apps
