@@ -168,3 +168,48 @@ install_apps() {
 
     install_flatpak_apps
 }
+
+configure_autologin() {
+  local user
+  user="${SUDO_USER:-$USER}"
+
+  if [[ -z "$user" || "$user" == "root" ]]; then
+    echo -e "${RED}==> Could not determine a non-root user for autologin.${RESET}"
+    return 1
+  fi
+
+  if ! command -v sddm &>/dev/null && [[ ! -d /etc/sddm.conf.d ]]; then
+    echo -e "${RED}==> SDDM not found on this system.${RESET}"
+    return 1
+  fi
+
+  local session_dir="/usr/share/wayland-sessions"
+  local session=""
+
+  if [[ -f "$session_dir/hyprland-uwsm.desktop" ]]; then
+    session="hyprland-uwsm"
+  elif [[ -f "$session_dir/hyprland.desktop" ]]; then
+    session="hyprland"
+  else
+    echo -e "${RED}==> No Hyprland session found in $session_dir.${RESET}"
+    return 1
+  fi
+
+  echo -e "${BLUE}==> Configuring SDDM autologin${RESET}"
+  echo -e "${CYAN}  user:    $user${RESET}"
+  echo -e "${CYAN}  session: $session${RESET}"
+
+  sudo mkdir -p /etc/sddm.conf.d || return 1
+
+  if sudo tee /etc/sddm.conf.d/autologin.conf >/dev/null <<EOF
+[Autologin]
+User=$user
+Session=$session
+EOF
+  then
+    echo -e "${GREEN}==> Autologin configured for '$user' on '$session'.${RESET}"
+  else
+    echo -e "${RED}==> Failed to write autologin config.${RESET}"
+    return 1
+  fi
+}
