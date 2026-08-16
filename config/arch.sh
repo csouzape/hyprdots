@@ -118,3 +118,53 @@ remove_files() {
     return 1
   fi
 }
+
+install_flatpak_apps() {
+    local FLATPAK=(
+        com.github.zocker_160.SyncThingy
+    )
+
+    if ! command -v flatpak &>/dev/null; then
+        echo "Flatpak não encontrado. Instalando..."
+        sudo pacman -S --needed flatpak
+    fi
+
+    if ! flatpak remote-list | awk '{print $1}' | grep -qx "flathub"; then
+        echo "Adicionando Flathub..."
+        flatpak remote-add --if-not-exists \
+            flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+    fi
+
+    if ((${#FLATPAK[@]} > 0)); then
+        flatpak install -y flathub "${FLATPAK[@]}"
+    fi
+}
+
+install_apps() {
+    local PACMAN=(
+        discord
+    )
+
+    local AUR=(
+        pear-desktop-bin
+        visual-studio-code-bin
+    )
+
+    if grep -q '^\[cachyos\]' /etc/pacman.conf; then
+        PACMAN+=(
+            brave
+        )
+    else
+        AUR+=(
+            brave-bin
+        )
+    fi
+
+    sudo pacman -S --needed "${PACMAN[@]}"
+
+    if ((${#AUR[@]} > 0)); then
+        yay -S --needed "${AUR[@]}"
+    fi
+
+    install_flatpak_apps
+}

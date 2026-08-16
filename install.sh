@@ -93,6 +93,7 @@ show_menu() {
   echo -e "  ${GREEN}3)${RESET} Only install dependencies"
   echo -e "  ${GREEN}4)${RESET} Remove Dependencies"
   echo -e "  ${GREEN}5)${RESET} Remove Configs"
+  echo -e "  ${GREEE}6)${RESET} Install Apps"
   echo -e "  ${GREEN}q)${RESET} Quit"
   echo ""
 }
@@ -133,6 +134,9 @@ main() {
     5)
       remove_systemd_services
       remove_files || exit 1
+      ;;
+    6)
+      install_apps || exit 1
       ;;
     q | Q)
       echo -e "${YELLOW}==> Aborted.${RESET}"
