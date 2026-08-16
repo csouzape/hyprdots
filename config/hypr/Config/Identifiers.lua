@@ -17,7 +17,7 @@ local ids = {
 	menu = "rofi -show drun",
 	browser = "brave",
 	markdown = "obsidian",
-	wallpaperDir = "/home/carlos/Imagens/wallpapers",
+	wallpaperDir = "/home/carlos/Imagens/wallpapers/",
 }
 
 function ids.set_random_wallpaper(opts)

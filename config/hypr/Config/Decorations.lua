@@ -1,4 +1,4 @@
--- Aparência, decoração e animações
+-- shadow, blur etc..
 hl.config({
 	general = {
 		gaps_in = 0,
@@ -20,6 +20,8 @@ hl.config({
 	animations = { enabled = true },
 })
 
+
+-- Animations
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
 hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
 hl.curve("almostLinear", { type = "bezier", points = { { 0.5, 0.5 }, { 0.75, 1 } } })

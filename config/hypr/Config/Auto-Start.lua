@@ -1,3 +1,4 @@
+-- This is my autostart config / autostart someone dependencies and apps
 local ids = require("Config.Identifiers")
 hl.on("hyprland.start", function()
 	---@diagnostic disable: undefined-global
