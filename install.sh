@@ -95,6 +95,7 @@ show_menu() {
   echo -e "  ${GREEN}5)${RESET} Remove Configs"
   echo -e "  ${GREEN}6)${RESET} Install Apps"
   echo -e "  ${GREEN}7)${RESET} Setup Autologin"
+  echo -e "  ${GREEN}8)${RESET} Remove Autologin"
   echo -e "  ${GREEN}q)${RESET} Quit"
   echo ""
 }
@@ -141,6 +142,9 @@ main() {
       ;;
     7)
       configure_autologin || exit 1
+      ;;
+    8)
+      remove_autologin || exit 1
       ;;
     q | Q)
       echo -e "${YELLOW}==> Aborted.${RESET}"
