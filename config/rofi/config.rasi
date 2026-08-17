@@ -22,7 +22,7 @@ configuration {
     fg-col:       #D9D9D9;
     fg-col2:      #ff4f4f;
     width:        350;
-    font:         "JetBrainsMono Nerd Font 11";
+    font:         "JetBrainsMono Nerd Font 10.6";
     border-radius: 0px;
 }
 

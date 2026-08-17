@@ -29,7 +29,7 @@ hl.window_rule({
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
-	match = { class = "^(discord|steam)$" },
+	match = { class = "^(|steam)$" },
 })
 
 hl.window_rule({
@@ -179,4 +179,14 @@ hl.window_rule({
 	float = true,
 	center = true,
 	size = "monitor_w*0.75 monitor_h*0.80",
+})
+
+hl.window_rule({
+	name = "Waypaper",
+	match = {
+		class = "waypaper",
+	},
+	float = true,
+	center = true,
+	size = "monitor_w*0.4 monitor_h*0.6",
 })
