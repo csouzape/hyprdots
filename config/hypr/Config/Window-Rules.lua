@@ -80,10 +80,12 @@ hl.window_rule({
 
 hl.window_rule({
 	name = "LOCALSEND",
+	match = {
+		class = "org.localsend.localsend_app",
+	},
 	float = true,
 	center = true,
 	size = "monitor_w*0.5 monitor_h*0.7",
-	match = { class = "^(localsend|LocalSend)$" },
 })
 
 hl.window_rule({
