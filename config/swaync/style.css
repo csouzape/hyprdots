@@ -98,3 +98,15 @@
   padding: 3px 8px;
   margin: 0;
 }
+
+.floating-notifications .notification-content {
+  padding: 0px 2px;
+  min-height: 0;
+}
+.floating-notifications .notification-default-action {
+  padding: 1px 4px;
+  min-height: 0;
+}
+.floating-notifications .notification-content .body {
+  font-size: 1.0em;
+}
