@@ -29,7 +29,7 @@ hl.window_rule({
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
-	match = { class = "^(|steam)$" },
+	match = { class = "^(discord|steam)$" },
 })
 
 hl.window_rule({
@@ -150,6 +150,17 @@ hl.window_rule({
 	center = true,
 	size = "monitor_w*0.5 monitor_h*0.7",
 	match = { class = "^steam$", title = "^Gravações e capturas de tela$" },
+})
+
+hl.window_rule({
+	name = "HEROIC-DEFAULT",
+	float = true,
+	center = true,
+	size = "monitor_w*0.8 monitor_h*0.8",
+	match = {
+		class = "^heroic$",
+		title = "^Heroic Games Launcher$",
+	},
 })
 
 hl.window_rule({
