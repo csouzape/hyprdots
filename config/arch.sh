@@ -4,6 +4,7 @@ install_pacman_dependences() {
   local PACMAN=(
     hyprland
     waybar
+    sddm
     swaync
     swaybg
     alacritty
@@ -83,6 +84,10 @@ remove_dependencies() {
     hyprpolkitagent
     qt5-wayland
     qt6-wayland
+    qt6-svg
+    qt6-virtualkeyboard
+    qt6-multimedia-ffmpeg
+    qt6-imageformats
     imv
   )
   echo "==> Removing pacman packages..."
@@ -273,4 +278,52 @@ remove_autologin() {
     echo -e "${RED}  [fail]    could not remove $conf${RESET}"
     return 1
   fi
+}
+
+install_sddm_theme() {
+  local SRC_CONF="$SCRIPT_DIR/sddm/sddm.conf"
+  local SRC_THEME="$SCRIPT_DIR/sddm/silent"
+  local DEST_THEME="/usr/share/sddm/themes/silent"
+
+  if [[ ! -d "$SRC_THEME" ]]; then
+    echo -e "${RED}  [fail]    $SRC_THEME not found in dotfiles${RESET}"
+    return 1
+  fi
+  if [[ ! -f "$SRC_CONF" ]]; then
+    echo -e "${RED}  [fail]    $SRC_CONF not found in dotfiles${RESET}"
+    return 1
+  fi
+
+  echo -e "${BLUE}==> Installing SilentSDDM theme files${RESET}"
+  if sudo mkdir -p "$DEST_THEME" && sudo cp -r "$SRC_THEME"/. "$DEST_THEME"/; then
+    echo -e "${GREEN}  [ok]      theme files copied to $DEST_THEME${RESET}"
+  else
+    echo -e "${RED}  [fail]    could not copy theme files${RESET}"
+    return 1
+  fi
+
+  echo -e "${BLUE}==> Installing theme fonts${RESET}"
+  if [[ -d "$DEST_THEME/fonts/redhat" && -d "$DEST_THEME/fonts/redhat-vf" ]]; then
+    sudo cp -r "$DEST_THEME"/fonts/{redhat,redhat-vf} /usr/share/fonts/
+    sudo fc-cache -f >/dev/null
+    echo -e "${GREEN}  [ok]      fonts installed${RESET}"
+  else
+    echo -e "${YELLOW}  [skip]    redhat font dirs not found${RESET}"
+  fi
+
+  if [[ -f /etc/sddm.conf ]]; then
+    sudo cp /etc/sddm.conf /etc/sddm.conf.bak
+    echo -e "${YELLOW}  [backup]  /etc/sddm.conf -> /etc/sddm.conf.bak${RESET}"
+  fi
+
+  echo -e "${BLUE}==> Applying /etc/sddm.conf from dotfiles${RESET}"
+  if sudo cp "$SRC_CONF" /etc/sddm.conf; then
+    echo -e "${GREEN}==> SDDM theme 'silent' configured.${RESET}"
+  else
+    echo -e "${RED}==> Failed to apply /etc/sddm.conf${RESET}"
+    return 1
+  fi
+
+  echo -e "${BLUE}==> Enabling sddm.service${RESET}"
+  sudo systemctl enable sddm.service
 }
