@@ -18,13 +18,16 @@ local fileManager = ids.fileManager
 local menu = ids.menu
 local browser = ids.browser
 local markdown = ids.markdown
+local code_manager = ids.code_manager
+local wallpaper_front = ids.wallpaper_front
 
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd(browser))
 hl.bind(mainMod .. " + O", hl.dsp.exec_cmd(markdown))
 hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd("zeditor"))
+hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd(code_manager))
+hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(wallpaper_front))
 hl.bind(mainMod .. " + C", hl.dsp.window.close())
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))
@@ -36,7 +39,7 @@ hl.bind(
 		'bash -c \'ID=$(wpctl status | sed -n "/Sources:/,/Filters:/p" | grep SHEM-BOY | grep -oP "^[^0-9]*\\K\\d+(?=\\.\\s)" | head -1); wpctl set-mute $ID toggle; wpctl get-volume $ID | grep -q MUTED && notify-send -u low Microfone "Mutado" || notify-send -u low Microfone "Ativo"\''
 	)
 )
-hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t"))
+hl.bind("ALT + TAB", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
 hl.bind(mainMod .. " + SHIFT + W", function()

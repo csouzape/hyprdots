@@ -16,6 +16,8 @@ local ids = {
 	fileManager = "thunar",
 	menu = "rofi -show drun",
 	browser = "brave",
+	code_manager = "zeditor",
+	wallpaper_front = "waypaper",
 	markdown = "obsidian",
 	wallpaperDir = "/home/carlos/Imagens/wallpapers/",
 }

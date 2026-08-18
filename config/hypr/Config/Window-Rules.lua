@@ -203,3 +203,13 @@ hl.window_rule({
 	center = true,
 	size = "monitor_w*0.4 monitor_h*0.6",
 })
+
+hl.window_rule({
+	name = "IMV",
+	float = true,
+	center = true,
+	size = "monitor_w*0.7 monitor_h*0.7",
+	match = {
+		class = "^imv$",
+	},
+})
