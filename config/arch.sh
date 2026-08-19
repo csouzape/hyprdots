@@ -125,96 +125,96 @@ remove_files() {
 }
 
 install_flatpak_apps() {
-    local FLATPAK=(
-        com.github.zocker_160.SyncThingy
-    )
+  local FLATPAK=(
+    com.github.zocker_160.SyncThingy
+  )
 
-    echo -e "${BLUE}==> Checking flatpak installation${RESET}"
-    if ! command -v flatpak &>/dev/null; then
-        echo -e "${YELLOW}  [missing] flatpak not found, installing...${RESET}"
-        if sudo pacman -S --needed flatpak; then
-            echo -e "${GREEN}  [ok]      flatpak installed${RESET}"
-        else
-            echo -e "${RED}  [fail]    could not install flatpak${RESET}"
-            return 1
-        fi
+  echo -e "${BLUE}==> Checking flatpak installation${RESET}"
+  if ! command -v flatpak &>/dev/null; then
+    echo -e "${YELLOW}  [missing] flatpak not found, installing...${RESET}"
+    if sudo pacman -S --needed flatpak; then
+      echo -e "${GREEN}  [ok]      flatpak installed${RESET}"
     else
-        echo -e "${GREEN}  [ok]      flatpak already installed${RESET}"
+      echo -e "${RED}  [fail]    could not install flatpak${RESET}"
+      return 1
     fi
+  else
+    echo -e "${GREEN}  [ok]      flatpak already installed${RESET}"
+  fi
 
-    echo -e "${BLUE}==> Checking Flathub remote${RESET}"
-    if ! flatpak remote-list | awk '{print $1}' | grep -qx "flathub"; then
-        echo -e "${YELLOW}  [missing] flathub remote not found, adding...${RESET}"
-        if flatpak remote-add --if-not-exists \
-            flathub https://dl.flathub.org/repo/flathub.flatpakrepo; then
-            echo -e "${GREEN}  [ok]      flathub remote added${RESET}"
-        else
-            echo -e "${RED}  [fail]    could not add flathub remote${RESET}"
-            return 1
-        fi
+  echo -e "${BLUE}==> Checking Flathub remote${RESET}"
+  if ! flatpak remote-list | awk '{print $1}' | grep -qx "flathub"; then
+    echo -e "${YELLOW}  [missing] flathub remote not found, adding...${RESET}"
+    if flatpak remote-add --if-not-exists \
+      flathub https://dl.flathub.org/repo/flathub.flatpakrepo; then
+      echo -e "${GREEN}  [ok]      flathub remote added${RESET}"
     else
-        echo -e "${GREEN}  [ok]      flathub remote already configured${RESET}"
+      echo -e "${RED}  [fail]    could not add flathub remote${RESET}"
+      return 1
     fi
+  else
+    echo -e "${GREEN}  [ok]      flathub remote already configured${RESET}"
+  fi
 
-    echo -e "${BLUE}==> Installing flatpak apps${RESET}"
-    if ((${#FLATPAK[@]} > 0)); then
-        echo -e "${CYAN}  apps: ${FLATPAK[*]}${RESET}"
-        if flatpak install -y flathub "${FLATPAK[@]}"; then
-            echo -e "${GREEN}  [ok]      ${#FLATPAK[@]} app(s) installed${RESET}"
-        else
-            echo -e "${RED}  [fail]    error installing flatpak apps${RESET}"
-            return 1
-        fi
+  echo -e "${BLUE}==> Installing flatpak apps${RESET}"
+  if ((${#FLATPAK[@]} > 0)); then
+    echo -e "${CYAN}  apps: ${FLATPAK[*]}${RESET}"
+    if flatpak install -y flathub "${FLATPAK[@]}"; then
+      echo -e "${GREEN}  [ok]      ${#FLATPAK[@]} app(s) installed${RESET}"
     else
-        echo -e "${YELLOW}  [skip]    no flatpak apps to install${RESET}"
+      echo -e "${RED}  [fail]    error installing flatpak apps${RESET}"
+      return 1
     fi
+  else
+    echo -e "${YELLOW}  [skip]    no flatpak apps to install${RESET}"
+  fi
 }
 
 install_apps() {
-    local PACMAN=(
-        discord
+  local PACMAN=(
+    discord
+  )
+  local AUR=(
+    pear-desktop-bin
+    visual-studio-code-bin
+  )
+
+  echo -e "${BLUE}==> Resolving browser package (brave)${RESET}"
+  if grep -q '^\[cachyos\]' /etc/pacman.conf; then
+    echo -e "${CYAN}  [cachyos] repo detected, using pacman package${RESET}"
+    PACMAN+=(
+      brave
     )
-    local AUR=(
-        pear-desktop-bin
-        visual-studio-code-bin
+  else
+    echo -e "${CYAN}  [aur]     cachyos repo not found, using AUR package${RESET}"
+    AUR+=(
+      brave-bin
     )
+  fi
 
-    echo -e "${BLUE}==> Resolving browser package (brave)${RESET}"
-    if grep -q '^\[cachyos\]' /etc/pacman.conf; then
-        echo -e "${CYAN}  [cachyos] repo detected, using pacman package${RESET}"
-        PACMAN+=(
-            brave
-        )
+  echo -e "${BLUE}==> Installing pacman apps${RESET}"
+  echo -e "${CYAN}  apps: ${PACMAN[*]}${RESET}"
+  if sudo pacman -S --needed "${PACMAN[@]}"; then
+    echo -e "${GREEN}  [ok]      pacman apps installed${RESET}"
+  else
+    echo -e "${RED}  [fail]    error installing pacman apps${RESET}"
+    return 1
+  fi
+
+  echo -e "${BLUE}==> Installing AUR apps${RESET}"
+  if ((${#AUR[@]} > 0)); then
+    echo -e "${CYAN}  apps: ${AUR[*]}${RESET}"
+    if yay -S --needed "${AUR[@]}"; then
+      echo -e "${GREEN}  [ok]      AUR apps installed${RESET}"
     else
-        echo -e "${CYAN}  [aur]     cachyos repo not found, using AUR package${RESET}"
-        AUR+=(
-            brave-bin
-        )
+      echo -e "${RED}  [fail]    error installing AUR apps${RESET}"
+      return 1
     fi
+  else
+    echo -e "${YELLOW}  [skip]    no AUR apps to install${RESET}"
+  fi
 
-    echo -e "${BLUE}==> Installing pacman apps${RESET}"
-    echo -e "${CYAN}  apps: ${PACMAN[*]}${RESET}"
-    if sudo pacman -S --needed "${PACMAN[@]}"; then
-        echo -e "${GREEN}  [ok]      pacman apps installed${RESET}"
-    else
-        echo -e "${RED}  [fail]    error installing pacman apps${RESET}"
-        return 1
-    fi
-
-    echo -e "${BLUE}==> Installing AUR apps${RESET}"
-    if ((${#AUR[@]} > 0)); then
-        echo -e "${CYAN}  apps: ${AUR[*]}${RESET}"
-        if yay -S --needed "${AUR[@]}"; then
-            echo -e "${GREEN}  [ok]      AUR apps installed${RESET}"
-        else
-            echo -e "${RED}  [fail]    error installing AUR apps${RESET}"
-            return 1
-        fi
-    else
-        echo -e "${YELLOW}  [skip]    no AUR apps to install${RESET}"
-    fi
-
-    install_flatpak_apps
+  install_flatpak_apps
 }
 
 configure_autologin() {
@@ -249,12 +249,11 @@ configure_autologin() {
 
   sudo mkdir -p /etc/sddm.conf.d || return 1
 
-  if sudo tee /etc/sddm.conf.d/autologin.conf >/dev/null <<EOF
+  if sudo tee /etc/sddm.conf.d/autologin.conf >/dev/null <<EOF; then
 [Autologin]
 User=$user
 Session=$session
 EOF
-  then
     echo -e "${GREEN}==> Autologin configured for '$user' on '$session'.${RESET}"
   else
     echo -e "${RED}==> Failed to write autologin config.${RESET}"
@@ -282,8 +281,8 @@ remove_autologin() {
 
 install_sddm_theme() {
   local SRC_CONF="$SCRIPT_DIR/sddm/sddm.conf"
-  local SRC_THEME="$SCRIPT_DIR/sddm/silent"
-  local DEST_THEME="/usr/share/sddm/themes/silent"
+  local SRC_THEME="$SCRIPT_DIR/sddm/chili"
+  local DEST_THEME="/usr/share/sddm/themes/chili"
 
   if [[ ! -d "$SRC_THEME" ]]; then
     echo -e "${RED}  [fail]    $SRC_THEME not found in dotfiles${RESET}"
@@ -294,21 +293,12 @@ install_sddm_theme() {
     return 1
   fi
 
-  echo -e "${BLUE}==> Installing SilentSDDM theme files${RESET}"
+  echo -e "${BLUE}==> Installing Chili SDDM theme files${RESET}"
   if sudo mkdir -p "$DEST_THEME" && sudo cp -r "$SRC_THEME"/. "$DEST_THEME"/; then
     echo -e "${GREEN}  [ok]      theme files copied to $DEST_THEME${RESET}"
   else
     echo -e "${RED}  [fail]    could not copy theme files${RESET}"
     return 1
-  fi
-
-  echo -e "${BLUE}==> Installing theme fonts${RESET}"
-  if [[ -d "$DEST_THEME/fonts/redhat" && -d "$DEST_THEME/fonts/redhat-vf" ]]; then
-    sudo cp -r "$DEST_THEME"/fonts/{redhat,redhat-vf} /usr/share/fonts/
-    sudo fc-cache -f >/dev/null
-    echo -e "${GREEN}  [ok]      fonts installed${RESET}"
-  else
-    echo -e "${YELLOW}  [skip]    redhat font dirs not found${RESET}"
   fi
 
   if [[ -f /etc/sddm.conf ]]; then
@@ -318,7 +308,7 @@ install_sddm_theme() {
 
   echo -e "${BLUE}==> Applying /etc/sddm.conf from dotfiles${RESET}"
   if sudo cp "$SRC_CONF" /etc/sddm.conf; then
-    echo -e "${GREEN}==> SDDM theme 'silent' configured.${RESET}"
+    echo -e "${GREEN}==> SDDM theme 'chili' configured.${RESET}"
   else
     echo -e "${RED}==> Failed to apply /etc/sddm.conf${RESET}"
     return 1
