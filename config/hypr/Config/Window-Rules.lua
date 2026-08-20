@@ -29,7 +29,7 @@ hl.window_rule({
 hl.window_rule({
 	name = "SCREENSHARE",
 	no_screen_share = true,
-	match = { class = "^(discord|steam)$" },
+	match = { class = "^(|steam)$" },
 })
 
 hl.window_rule({
