@@ -121,22 +121,18 @@ main() {
     1)
       install_deps || exit 1
       copy_dotfiles || exit 1
-      install_systemd_services || exit 1
       ;;
     2)
       copy_dotfiles || exit 1
-      install_systemd_services || exit 1
       ;;
     3)
       install_deps || exit 1
       ;;
     4)
-      remove_systemd_services
       remove_aur_dependences || exit 1
       remove_dependencies || exit 1
       ;;
     5)
-      remove_systemd_services
       remove_files || exit 1
       ;;
     6)
