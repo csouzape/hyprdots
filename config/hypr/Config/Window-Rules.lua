@@ -26,11 +26,11 @@ hl.window_rule({
 	float = true,
 })
 
-hl.window_rule({
-	name = "SCREENSHARE",
-	no_screen_share = true,
-	match = { class = "^(|steam)$" },
-})
+-- hl.window_rule({
+--   	name = "SCREENSHARE",
+-- 	no_screen_share = true,
+-- 	match = { class = "^(|steam)$" },
+-- })
 
 hl.window_rule({
 	name = "GAMES",
