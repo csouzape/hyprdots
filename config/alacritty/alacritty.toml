@@ -132,14 +132,4 @@ mouse.enabled = true
 binding = { key = "U", mods = "Control|Shift" }
 regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"
 
-[keyboard]
-bindings = [
-  { key = "N", mods = "Control|Shift", action = "SpawnNewInstance" },
-  { key = "Equals", mods = "Control", action = "IncreaseFontSize" },
-  { key = "Minus", mods = "Control", action = "DecreaseFontSize" },
-  { key = "Key0", mods = "Control", action = "ResetFontSize" },
-  { key = "C", mods = "Control|Shift", action = "Copy" },
-  { key = "V", mods = "Control|Shift", action = "Paste" },
-  { key = "F", mods = "Control|Shift", action = "SearchForward" },
-  { key = "B", mods = "Control|Shift", action = "SearchBackward" },
-]
+
