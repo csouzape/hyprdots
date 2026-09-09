@@ -117,8 +117,35 @@ remove_dependencies() {
     qt6-imageformats
     imv
   )
+
+  local installed=()
+  local missing=()
+  local package
+
+  for package in "${PACMAN[@]}"; do
+    if pacman -Q "$package" &>/dev/null; then
+      installed+=("$package")
+    else
+      missing+=("$package")
+    fi
+  done
+
+  if ((${#missing[@]} > 0)); then
+    echo -e "${YELLOW}==> Packages not installed: ${missing[*]}${RESET}"
+    read -rp "==> Deseja passar mesmo assim? (y/n): " skip_missing
+    if [[ ! "$skip_missing" =~ ^[Yy]$ ]]; then
+      echo -e "${YELLOW}==> Removal cancelled.${RESET}"
+      return 1
+    fi
+  fi
+
+  if ((${#installed[@]} == 0)); then
+    echo -e "${YELLOW}==> No listed packages are installed. Skipping removal.${RESET}"
+    return 0
+  fi
+
   echo "==> Removing pacman packages..."
-  sudo pacman -Rns "${PACMAN[@]}" || return 1
+  sudo pacman -Rns "${installed[@]}" || return 1
 }
 remove_files() {
   local SRC="$SCRIPT_DIR"
