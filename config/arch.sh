@@ -85,37 +85,18 @@ copy_dotfiles() {
   fi
 }
 remove_dependencies() {
-  local PACMAN=(
+  local HYPRLAND_PACKAGES=(
     hyprland
-    network-manager-applet
+    hyprpolkitagent
+    xdg-desktop-portal-hyprland
+    waybar
     swaync
     swaybg
-    grim
-    slurp
     alacritty
     rofi
     waypaper
-    neovim
-    jq
-    libnotify
-    wireplumber
-    qt5ct
-    thunar
-    gvfs
-    thunar-volman
-    tumbler
-    ffmpegthumbnailer
-    waybar
-    wl-clipboard
-    xdg-desktop-portal-hyprland
-    pavucontrol
-    hyprpolkitagent
-    qt5-wayland
-    qt6-wayland
-    qt6-svg
-    qt6-virtualkeyboard
-    qt6-multimedia-ffmpeg
-    qt6-imageformats
+    grim
+    slurp
     imv
   )
 
@@ -123,7 +104,7 @@ remove_dependencies() {
   local missing=()
   local package
 
-  for package in "${PACMAN[@]}"; do
+  for package in "${HYPRLAND_PACKAGES[@]}"; do
     if pacman -Q "$package" &>/dev/null; then
       installed+=("$package")
     else
@@ -151,7 +132,8 @@ remove_dependencies() {
   fi
 
   local -A targets=()
-  local -A reverse_dependencies=()
+  local -A blocked=()
+  local -A dependents=()
   local dependent
 
   for package in "${installed[@]}"; do
@@ -162,28 +144,27 @@ remove_dependencies() {
     while read -r dependent; do
       [[ -z "$dependent" || "$dependent" == "$package" ]] && continue
       [[ -n "${targets[$dependent]+x}" ]] && continue
-      reverse_dependencies["$dependent"]="$package"
+      blocked["$package"]=1
+      dependents["$package"]+=" $dependent"
     done < <(pactree -r -u -l "$package" 2>/dev/null)
   done
 
-  if ((${#reverse_dependencies[@]} > 0)); then
-    echo -e "${YELLOW}==> Reverse dependencies found:${RESET}"
-    for dependent in "${!reverse_dependencies[@]}"; do
-      echo -e "${YELLOW}  $dependent (uses ${reverse_dependencies[$dependent]})${RESET}"
-    done
-    read -rp "==> Do you want to remove them anyway using pacman -Rdd? (y/n): " force_remove
-    if [[ ! "$force_remove" =~ ^[Yy]$ ]]; then
-      echo -e "${YELLOW}==> Removal cancelled.${RESET}"
-      return 1
+  local removable=()
+  for package in "${installed[@]}"; do
+    if [[ -n "${blocked[$package]+x}" ]]; then
+      echo -e "${YELLOW}  [skip]   $package is required by:${dependents[$package]}${RESET}"
+    else
+      removable+=("$package")
     fi
+  done
 
-    echo "==> Force-removing selected packages with pacman -Rdd..."
-    sudo pacman -Rdd "${installed[@]}" || return 1
+  if ((${#removable[@]} == 0)); then
+    echo -e "${YELLOW}==> No Hyprland packages can be removed without affecting other packages.${RESET}"
     return 0
   fi
 
-  echo "==> Removing pacman packages..."
-  sudo pacman -Rns "${installed[@]}" || return 1
+  echo -e "${BLUE}==> Removing Hyprland packages without breaking other packages...${RESET}"
+  sudo pacman -Rn "${removable[@]}" || return 1
 }
 remove_files() {
   local SRC="$SCRIPT_DIR"
