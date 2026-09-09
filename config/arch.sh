@@ -98,6 +98,8 @@ remove_dependencies() {
     grim
     slurp
     imv
+    thunar
+    thunar-volman
   )
 
   local installed=()
@@ -144,8 +146,25 @@ remove_dependencies() {
     while read -r dependent; do
       [[ -z "$dependent" || "$dependent" == "$package" ]] && continue
       [[ -n "${targets[$dependent]+x}" ]] && continue
-      blocked["$package"]=1
-      dependents["$package"]+=" $dependent"
+
+      if pacman -Qi "$dependent" 2>/dev/null | awk -v target="$package" '
+        /^Depends On/ {
+          in_depends = 1
+          sub(/^[^:]*:[[:space:]]*/, "")
+        }
+        /^Optional Deps/ { in_depends = 0 }
+        in_depends {
+          for (field_index = 1; field_index <= NF; field_index++) {
+            dependency = $field_index
+            sub(/[<>=].*$/, "", dependency)
+            if (dependency == target) found = 1
+          }
+        }
+        END { exit !found }
+      '; then
+        blocked["$package"]=1
+        dependents["$package"]+=" $dependent"
+      fi
     done < <(pactree -r -u -l "$package" 2>/dev/null)
   done
 
