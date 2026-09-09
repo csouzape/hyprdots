@@ -54,12 +54,14 @@ hl.bind(
 hl.bind(
 	"Insert",
 	hl.dsp.exec_cmd(
-		'bash -c \'file="/home/carlos/Imagens/Capturas de tela/$(date +%Y-%m-%d_%H-%M-%S).png"; '
-			.. 'grim -g "$(slurp -b 00000044 -c ffffff00)" - | tee "$file" | wl-copy; '
+		"bash -c 'geom=$(slurp -b 00000044 -c ffffff00) || exit 1; "
+			.. 'file="/home/carlos/Imagens/Capturas de tela/$(date +%Y-%m-%d_%H-%M-%S).png"; '
+			.. 'grim -g "$geom" - | tee "$file" | wl-copy; '
 			.. '(action=$(notify-send -w -i "$file" -A "default=Abrir pasta" "Captura de tela" "Salva e copiada para a área de transferência"); '
 			.. 'if [ "$action" = "default" ]; then thunar "$(dirname "$file")"; fi) & \''
 	)
 )
+
 hl.bind(
 	"SHIFT + Insert",
 	hl.dsp.exec_cmd(
