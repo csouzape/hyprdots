@@ -9,6 +9,10 @@ install_pacman_dependences() {
     swaybg
     alacritty
     rofi
+    jq
+    libnotify
+    wireplumber
+    qt5ct
     thunar
     gvfs
     thunar-volman
@@ -32,6 +36,22 @@ install_pacman_dependences() {
   echo "==> Installing pacman packages..."
   sudo pacman -S --needed "${PACMAN[@]}" || return 1
 }
+
+
+install_aur_dependences() {
+  local AUR=(
+    waypaper
+  )
+
+  if ! command -v yay &>/dev/null; then
+    echo -e "${RED}==> yay is required to install AUR packages.${RESET}"
+    return 1
+  fi
+
+  echo "==> Installing AUR packages..."
+  yay -S --needed "${AUR[@]}" || return 1
+}
+
 copy_dotfiles() {
   local SRC="$SCRIPT_DIR"
   local DEST="$HOME/.config"
@@ -66,12 +86,19 @@ copy_dotfiles() {
 remove_dependencies() {
   local PACMAN=(
     hyprland
+    network-manager-applet
     swaync
     swaybg
     grim
     slurp
     alacritty
     rofi
+    waypaper
+    neovim
+    jq
+    libnotify
+    wireplumber
+    qt5ct
     thunar
     gvfs
     thunar-volman
@@ -177,6 +204,9 @@ install_apps() {
   local AUR=(
     pear-desktop-bin
     visual-studio-code-bin
+    obsidian
+    youtube-music-bin
+    zed
   )
 
   echo -e "${BLUE}==> Resolving browser package (brave)${RESET}"

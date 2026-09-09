@@ -105,8 +105,15 @@ show_menu() {
 install_deps() {
   check_arch_base
   check_multilib
-  check_aur || return 1
   install_pacman_dependences || return 1
+
+  read -rp "==> Do you want to install AUR packages? (y/n): " install_aur
+  if [[ "$install_aur" =~ ^[Yy]$ ]]; then
+    check_aur || return 1
+    install_aur_dependences || return 1
+  else
+    echo -e "${YELLOW}==> Skipping AUR packages.${RESET}"
+  fi
 }
 
 main() {
