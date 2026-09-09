@@ -72,6 +72,8 @@ hl.bind(
 	)
 )
 
+hl.bind("ALT + L", hl.dsp.exec_cmd("systemctl suspend"))
+
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up", hl.dsp.focus({ direction = "up" }))
@@ -82,7 +84,7 @@ hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" 
 hl.bind(mainMod .. " + SHIFT + up", hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + down", hl.dsp.window.move({ direction = "down" }))
 
-hl.bind(mainMod .. " + L", hl.dsp.layout("splitratio 0.05"), { repeating = true })
+hl.bind(mainMod .. " + L", hl.dsp.layout("splitratio .wdawaw05"), { repeating = true })
 hl.bind(mainMod .. " + H", hl.dsp.layout("splitratio -0.05"), { repeating = true })
 
 for i = 1, 10 do
