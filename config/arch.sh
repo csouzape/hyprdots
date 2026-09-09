@@ -32,6 +32,7 @@ install_pacman_dependences() {
     qt6-base
     qt6-wayland
     qt6ct
+    pacman-contrib
   )
   echo "==> Installing pacman packages..."
   sudo pacman -S --needed "${PACMAN[@]}" || return 1
@@ -132,7 +133,7 @@ remove_dependencies() {
 
   if ((${#missing[@]} > 0)); then
     echo -e "${YELLOW}==> Packages not installed: ${missing[*]}${RESET}"
-    read -rp "==> Deseja passar mesmo assim? (y/n): " skip_missing
+    read -rp "==> Do you want to continue anyway? (y/n): " skip_missing
     if [[ ! "$skip_missing" =~ ^[Yy]$ ]]; then
       echo -e "${YELLOW}==> Removal cancelled.${RESET}"
       return 1
@@ -141,6 +142,43 @@ remove_dependencies() {
 
   if ((${#installed[@]} == 0)); then
     echo -e "${YELLOW}==> No listed packages are installed. Skipping removal.${RESET}"
+    return 0
+  fi
+
+  if ! command -v pactree &>/dev/null; then
+    echo -e "${RED}==> pactree was not found. Install pacman-contrib first.${RESET}"
+    return 1
+  fi
+
+  local -A targets=()
+  local -A reverse_dependencies=()
+  local dependent
+
+  for package in "${installed[@]}"; do
+    targets["$package"]=1
+  done
+
+  for package in "${installed[@]}"; do
+    while read -r dependent; do
+      [[ -z "$dependent" || "$dependent" == "$package" ]] && continue
+      [[ -n "${targets[$dependent]+x}" ]] && continue
+      reverse_dependencies["$dependent"]="$package"
+    done < <(pactree -r -u -l "$package" 2>/dev/null)
+  done
+
+  if ((${#reverse_dependencies[@]} > 0)); then
+    echo -e "${YELLOW}==> Reverse dependencies found:${RESET}"
+    for dependent in "${!reverse_dependencies[@]}"; do
+      echo -e "${YELLOW}  $dependent (uses ${reverse_dependencies[$dependent]})${RESET}"
+    done
+    read -rp "==> Do you want to remove them anyway using pacman -Rdd? (y/n): " force_remove
+    if [[ ! "$force_remove" =~ ^[Yy]$ ]]; then
+      echo -e "${YELLOW}==> Removal cancelled.${RESET}"
+      return 1
+    fi
+
+    echo "==> Force-removing selected packages with pacman -Rdd..."
+    sudo pacman -Rdd "${installed[@]}" || return 1
     return 0
   fi
 
@@ -171,7 +209,7 @@ remove_files() {
     fi
   done
   if [[ $errors -eq 0 ]]; then
-    echo -e "${GREEN}==> Done. $count pasta(s) remooved(s).${RESET}"
+    echo -e "${GREEN}==> Done. $count folder(s) removed.${RESET}"
   else
     echo -e "${RED}==> Finished with $errors error(s).${RESET}"
     return 1
