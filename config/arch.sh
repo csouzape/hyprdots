@@ -19,6 +19,7 @@ install_pacman_dependences() {
     tumbler
     ffmpegthumbnailer
     imv
+    mpv
     grim
     slurp
     wl-clipboard
