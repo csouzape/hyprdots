@@ -7,7 +7,7 @@ configuration {
     location: 0;
     disable-history: false;
     hide-scrollbar: true;
-    display-drun: "   Apps ";
+    display-drun: "  apps ";
     sidebar-mode: false;
 }
 
@@ -22,7 +22,7 @@ configuration {
     fg-col:       #D9D9D9;
     fg-col2:      #ff4f4f;
     width:        350;
-    font:         "JetBrainsMono Nerd Font  10.6";
+    font:         "JetBrains Mono 10.3";
     border-radius: 0px;
 }
 
