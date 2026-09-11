@@ -9,7 +9,6 @@ local vscode = ids.vscode
 local code_manager = ids.code_manager
 local wallpaper_front = ids.wallpaper_front
 
-
 hl.config({
 	input = {
 		kb_layout = "br",
@@ -30,7 +29,7 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd(code_manager))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(wallpaper_front))
-hl.bind("ALT + V", hl.dsp.exec_cmd(vscode))
+hl.bind(mainMod .. " + X", hl.dsp.exec_cmd(vscode))
 hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("bash -c 'killall waybar && waybar'"))
 hl.bind("ALT + TAB", hl.dsp.exec_cmd("swaync-client -t"))
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -r"))
@@ -74,7 +73,6 @@ hl.bind(
 			.. 'if [ "$action" = "default" ]; then thunar "$(dirname "$file")"; fi) & \''
 	)
 )
-
 
 hl.bind(mainMod .. " + left", hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))

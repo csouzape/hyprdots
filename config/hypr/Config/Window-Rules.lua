@@ -213,3 +213,14 @@ hl.window_rule({
 		class = "^imv$",
 	},
 })
+
+hl.window_rule({
+	name = "ZED-SETTINGS",
+	float = true,
+	center = true,
+	size = "monitor_w*0.7 monitor_h*0.7",
+	match = {
+		class = "^dev.zed.Zed$",
+		title = "^Zed — Settings$",
+	},
+})
