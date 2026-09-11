@@ -40,10 +40,10 @@ hl.window_rule({
 	no_dim = true,
 	no_anim = true,
 	no_blur = true,
-	no_shadow = true,
 	decorate = false,
-	immediate = false,
-	match = { class = "(steam_app_|Sober|gamescope|lutris|heroic)" },
+	no_shadow = true,
+	render_unfocused = true,
+	match = { class = "^.*(steam_app_|Sober|gamescope|Lutris|Heroic).*$" },
 })
 
 hl.window_rule({
