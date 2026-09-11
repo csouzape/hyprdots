@@ -34,16 +34,16 @@ hl.window_rule({
 
 hl.window_rule({
 	name = "GAMES",
-	workspace = "9 silent",
+	workspace = "9",
 	idle_inhibit = "always",
 	opaque = true,
 	no_dim = true,
 	no_anim = true,
 	no_blur = true,
-	decorate = false,
 	no_shadow = true,
-	render_unfocused = true,
-	match = { class = "^.*(steam_app_|cs2|RimWorldLinux|Sober|gamescope).*$" },
+	decorate = false,
+	immediate = false,
+	match = { class = "(steam_app_|Sober|gamescope|lutris|heroic)" },
 })
 
 hl.window_rule({
