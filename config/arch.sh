@@ -34,6 +34,8 @@ install_pacman_dependences() {
     qt6-wayland
     qt6ct
     pacman-contrib
+    nwg-look
+    materia-gtk-theme
   )
   echo "==> Installing pacman packages..."
   sudo pacman -S --needed "${PACMAN[@]}" || return 1
