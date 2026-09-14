@@ -132,8 +132,8 @@ hl.window_rule({
 	name = "STEAM-SETTINGS",
 	float = true,
 	center = true,
-	size = "monitor_w*0.5 monitor_h*0.8",
-	match = { class = "^steam$", title = "^Steam — Configurações$" },
+	size = "50% 80%",
+	match = { class = "^steam$", title = "^Steam Settings$" },
 })
 
 hl.window_rule({
