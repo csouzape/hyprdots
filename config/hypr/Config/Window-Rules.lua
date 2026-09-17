@@ -113,11 +113,13 @@ hl.window_rule({
 })
 
 hl.window_rule({
-	name = "YOUTUBE MUSIC",
+	name = "SPOTIFY",
 	float = true,
 	center = true,
 	size = "monitor_w*0.7 monitor_h*0.7",
-	match = { class = "com.github.th-ch.youtube-music" },
+	match = {
+		class = "^Spotify$",
+	},
 })
 
 hl.window_rule({
