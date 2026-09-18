@@ -47,11 +47,10 @@ install_materia_gtk_theme() {
     sudo dnf install -y \
         git \
         sassc \
-        gtk-murrine-engine \
-        gtk2-engines \
-        autoconf \
-        automake \
-        libtool
+        meson \
+        sassc \
+        gtk3-devel \
+        gtk4-devel \
 
     if [[ -d "$repo_dir/.git" ]]; then
         echo "[OK] Repository found."
