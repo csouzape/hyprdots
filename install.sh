@@ -10,14 +10,22 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
+DISTRO=""
+
 if [[ ! -f "$CONFIG_DIR/arch.sh" ]]; then
   echo "==> Could not find $CONFIG_DIR/arch.sh"
   exit 1
 fi
 
-source "$CONFIG_DIR/arch.sh"
+if [[ ! -f "$CONFIG_DIR/fedora.sh" ]]; then
+  echo "==> Could not find $CONFIG_DIR/fedora.sh"
+  exit 1
+fi
 
-check_arch_base() {
+source "$CONFIG_DIR/arch.sh"
+source "$CONFIG_DIR/fedora.sh"
+
+detect_distro() {
   if [[ ! -f /etc/os-release ]]; then
     echo -e "${RED}==> Cannot detect the distribution (/etc/os-release missing).${RESET}"
     exit 1
@@ -26,14 +34,22 @@ check_arch_base() {
   source /etc/os-release
 
   if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
+    DISTRO="arch"
     echo -e "${GREEN}==> Arch-based system detected: ${PRETTY_NAME:-$ID}${RESET}"
+  elif [[ "$ID" == "fedora" || "$ID_LIKE" == *"fedora"* ]]; then
+    DISTRO="fedora"
+    echo -e "${GREEN}==> Fedora-based system detected: ${PRETTY_NAME:-$ID}${RESET}"
   else
-    echo -e "${RED}==> This script only supports Arch-based distributions. Detected: ${PRETTY_NAME:-$ID}${RESET}"
+    echo -e "${RED}==> Unsupported distribution. Detected: ${PRETTY_NAME:-$ID}${RESET}"
     exit 1
   fi
 }
 
 check_multilib() {
+    if [[ "$DISTRO" != "arch" ]]; then
+        return 0
+    fi
+
     if grep -q "^\[multilib\]" /etc/pacman.conf; then
         echo -e "${GREEN}==> Multilib already enabled.${RESET}"
         return 0
@@ -44,7 +60,27 @@ check_multilib() {
     sudo pacman -Sy
 }
 
+check_rpmfusion() {
+    if [[ "$DISTRO" != "fedora" ]]; then
+        return 0
+    fi
+
+    if rpm -q rpmfusion-free-release &> /dev/null && rpm -q rpmfusion-nonfree-release &> /dev/null; then
+        echo -e "${GREEN}==> RPM Fusion already enabled.${RESET}"
+        return 0
+    fi
+
+    echo -e "${YELLOW}==> Enabling RPM Fusion repositories...${RESET}"
+    sudo dnf install -y \
+        "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
+        "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
+}
+
 check_aur() {
+    if [[ "$DISTRO" != "arch" ]]; then
+        return 0
+    fi
+
     if command -v yay &> /dev/null; then
         echo -e "${BLUE}==> AUR helper detected.${RESET}"
     else
@@ -68,10 +104,12 @@ check_aur() {
 }
 
 remove_aur_dependences() {
+  if [[ "$DISTRO" != "arch" ]]; then
+    return 0
+  fi
   echo -e "${YELLOW}==> Keeping yay installed. AUR helper removal is disabled for safety.${RESET}"
   return 0
 }
-
 
 show_banner() {
   echo -e "${CYAN}"
@@ -101,16 +139,22 @@ show_menu() {
 }
 
 install_deps() {
-  check_arch_base
-  check_multilib
-  install_pacman_dependences || return 1
+  detect_distro
 
-  read -rp "==> Do you want to install AUR packages? (y/n): " install_aur
-  if [[ "$install_aur" =~ ^[Yy]$ ]]; then
-    check_aur || return 1
-    install_aur_dependences || return 1
-  else
-    echo -e "${YELLOW}==> Skipping AUR packages.${RESET}"
+  if [[ "$DISTRO" == "arch" ]]; then
+    check_multilib
+    install_pacman_dependences || return 1
+
+    read -rp "==> Do you want to install AUR packages? (y/n): " install_aur
+    if [[ "$install_aur" =~ ^[Yy]$ ]]; then
+      check_aur || return 1
+      install_aur_dependences || return 1
+    else
+      echo -e "${YELLOW}==> Skipping AUR packages.${RESET}"
+    fi
+  elif [[ "$DISTRO" == "fedora" ]]; then
+    check_rpmfusion
+    install_dnf_dependences || return 1
   fi
 }
 
@@ -128,25 +172,33 @@ main() {
       copy_dotfiles || exit 1
       ;;
     2)
+      detect_distro
       copy_dotfiles || exit 1
       ;;
     3)
       install_deps || exit 1
       ;;
     4)
-      remove_aur_dependences || exit 1
+      detect_distro
+      if [[ "$DISTRO" == "arch" ]]; then
+        remove_aur_dependences || exit 1
+      fi
       remove_dependencies || exit 1
       ;;
     5)
+      detect_distro
       remove_files || exit 1
       ;;
     6)
+      detect_distro
       install_apps || exit 1
       ;;
     7)
+      detect_distro
       configure_autologin || exit 1
       ;;
     8)
+      detect_distro
       remove_autologin || exit 1
       ;;
     q | Q)
