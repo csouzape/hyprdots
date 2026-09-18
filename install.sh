@@ -12,19 +12,6 @@ RESET='\033[0m'
 
 DISTRO=""
 
-if [[ ! -f "$CONFIG_DIR/arch.sh" ]]; then
-  echo "==> Could not find $CONFIG_DIR/arch.sh"
-  exit 1
-fi
-
-if [[ ! -f "$CONFIG_DIR/fedora.sh" ]]; then
-  echo "==> Could not find $CONFIG_DIR/fedora.sh"
-  exit 1
-fi
-
-source "$CONFIG_DIR/arch.sh"
-source "$CONFIG_DIR/fedora.sh"
-
 detect_distro() {
   if [[ ! -f /etc/os-release ]]; then
     echo -e "${RED}==> Cannot detect the distribution (/etc/os-release missing).${RESET}"
@@ -36,79 +23,27 @@ detect_distro() {
   if [[ "$ID" == "arch" || "$ID_LIKE" == *"arch"* ]]; then
     DISTRO="arch"
     echo -e "${GREEN}==> Arch-based system detected: ${PRETTY_NAME:-$ID}${RESET}"
+
+    if [[ ! -f "$CONFIG_DIR/arch/arch.sh" ]]; then
+      echo -e "${RED}==> Could not find $CONFIG_DIR/arch/arch.sh${RESET}"
+      exit 1
+    fi
+    source "$CONFIG_DIR/arch/arch.sh"
+
   elif [[ "$ID" == "fedora" || "$ID_LIKE" == *"fedora"* ]]; then
     DISTRO="fedora"
     echo -e "${GREEN}==> Fedora-based system detected: ${PRETTY_NAME:-$ID}${RESET}"
+
+    if [[ ! -f "$CONFIG_DIR/fedora/fedora.sh" ]]; then
+      echo -e "${RED}==> Could not find $CONFIG_DIR/fedora/fedora.sh${RESET}"
+      exit 1
+    fi
+    source "$CONFIG_DIR/fedora/fedora.sh"
+
   else
     echo -e "${RED}==> Unsupported distribution. Detected: ${PRETTY_NAME:-$ID}${RESET}"
     exit 1
   fi
-}
-
-check_multilib() {
-    if [[ "$DISTRO" != "arch" ]]; then
-        return 0
-    fi
-
-    if grep -q "^\[multilib\]" /etc/pacman.conf; then
-        echo -e "${GREEN}==> Multilib already enabled.${RESET}"
-        return 0
-    fi
-
-    echo -e "${YELLOW}==> Enabling multilib repository...${RESET}"
-    sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf
-    sudo pacman -Sy
-}
-
-check_rpmfusion() {
-    if [[ "$DISTRO" != "fedora" ]]; then
-        return 0
-    fi
-
-    if rpm -q rpmfusion-free-release &> /dev/null && rpm -q rpmfusion-nonfree-release &> /dev/null; then
-        echo -e "${GREEN}==> RPM Fusion already enabled.${RESET}"
-        return 0
-    fi
-
-    echo -e "${YELLOW}==> Enabling RPM Fusion repositories...${RESET}"
-    sudo dnf install -y \
-        "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
-        "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
-}
-
-check_aur() {
-    if [[ "$DISTRO" != "arch" ]]; then
-        return 0
-    fi
-
-    if command -v yay &> /dev/null; then
-        echo -e "${BLUE}==> AUR helper detected.${RESET}"
-    else
-        read -rp "==> No AUR helper detected. Do you want to install one? (y/n): " install_aur
-        if [[ "$install_aur" =~ ^[Yy]$ ]]; then
-            echo -e "${CYAN}==> Installing yay AUR helper...${RESET}"
-            sudo pacman -S --needed git base-devel || return 1
-
-            local tmpdir
-            tmpdir=$(mktemp -d)
-            trap 'rm -rf "$tmpdir"' RETURN
-
-            git clone https://aur.archlinux.org/yay.git "$tmpdir/yay" || return 1
-            (cd "$tmpdir/yay" && makepkg -si) || return 1
-
-            echo -e "${GREEN}==> yay installed successfully.${RESET}"
-        else
-            echo -e "${YELLOW}==> Skipping AUR helper installation.${RESET}"
-        fi
-    fi
-}
-
-remove_aur_dependences() {
-  if [[ "$DISTRO" != "arch" ]]; then
-    return 0
-  fi
-  echo -e "${YELLOW}==> Keeping yay installed. AUR helper removal is disabled for safety.${RESET}"
-  return 0
 }
 
 show_banner() {
@@ -129,79 +64,35 @@ show_menu() {
   echo -e "  ${GREEN}1)${RESET} Install dependencies ${BLUE}+${RESET} copy configs"
   echo -e "  ${GREEN}2)${RESET} Only copy configs"
   echo -e "  ${GREEN}3)${RESET} Only install dependencies"
-  echo -e "  ${GREEN}4)${RESET} Remove Dependencies"
-  echo -e "  ${GREEN}5)${RESET} Remove Configs"
-  echo -e "  ${GREEN}6)${RESET} Install Apps"
-  echo -e "  ${GREEN}7)${RESET} Setup Autologin"
-  echo -e "  ${GREEN}8)${RESET} Remove Autologin"
+  echo -e "  ${GREEN}4)${RESET} Remove dependencies"
+  echo -e "  ${GREEN}5)${RESET} Remove configs"
+  echo -e "  ${GREEN}6)${RESET} Install apps"
+  echo -e "  ${GREEN}7)${RESET} Setup autologin"
+  echo -e "  ${GREEN}8)${RESET} Remove autologin"
   echo -e "  ${GREEN}q)${RESET} Quit"
   echo ""
-}
-
-install_deps() {
-  detect_distro
-
-  if [[ "$DISTRO" == "arch" ]]; then
-    check_multilib
-    install_pacman_dependences || return 1
-
-    read -rp "==> Do you want to install AUR packages? (y/n): " install_aur
-    if [[ "$install_aur" =~ ^[Yy]$ ]]; then
-      check_aur || return 1
-      install_aur_dependences || return 1
-    else
-      echo -e "${YELLOW}==> Skipping AUR packages.${RESET}"
-    fi
-  elif [[ "$DISTRO" == "fedora" ]]; then
-    check_rpmfusion
-    install_dnf_dependences || return 1
-  fi
 }
 
 main() {
   clear
   show_banner
+  detect_distro
+  echo ""
 
   show_menu
   read -rp "==> Option: " choice
   echo ""
 
   case "$choice" in
-    1)
-      install_deps || exit 1
-      copy_dotfiles || exit 1
-      ;;
-    2)
-      detect_distro
-      copy_dotfiles || exit 1
-      ;;
-    3)
-      install_deps || exit 1
-      ;;
-    4)
-      detect_distro
-      if [[ "$DISTRO" == "arch" ]]; then
-        remove_aur_dependences || exit 1
-      fi
-      remove_dependencies || exit 1
-      ;;
-    5)
-      detect_distro
-      remove_files || exit 1
-      ;;
-    6)
-      detect_distro
-      install_apps || exit 1
-      ;;
-    7)
-      detect_distro
-      configure_autologin || exit 1
-      ;;
-    8)
-      detect_distro
-      remove_autologin || exit 1
-      ;;
-    q | Q)
+    1) install_deps  || exit 1; copy_dotfiles   || exit 1 ;;
+    2) copy_dotfiles || exit 1 ;;
+    3) install_deps  || exit 1 ;;
+    4) remove_dependencies || exit 1 ;;
+    5) remove_files  || exit 1 ;;
+    6) install_apps  || exit 1 ;;
+    7) configure_autologin || exit 1 ;;
+    8) remove_autologin    || exit 1 ;;
+    q|Q)
       echo -e "${YELLOW}==> Aborted.${RESET}"
       exit 0
       ;;
