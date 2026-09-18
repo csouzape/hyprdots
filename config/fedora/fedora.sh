@@ -1,6 +1,4 @@
 #!/bin/bash
-# config/fedora/fedora.sh
-
 FEDORA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 RED='\033[0;31m'
@@ -14,14 +12,15 @@ _DNF_BASE=(
   hyprland
   waybar
   sddm
-  swaync
+  SwayNotificationCenter
   swaybg
   alacritty
   rofi
   jq
   libnotify
   wireplumber
-  thunar
+  Thunar
+  tumbler
   imv
   mpv
   grim
@@ -33,14 +32,14 @@ _DNF_BASE=(
   pavucontrol
   nwg-look
   fzf
+  jetbrains-mono-fonts-all
+  google-roboto-fonts
   git
   meson
   sassc
   gtk3-devel
   gtk4-devel
 )
-
-# ── Apps opcionais (selecionados via fzf) ──────────────────────────────────────
 
 _DNF_APPS=(
   discord
@@ -53,8 +52,6 @@ _FLATPAK_APPS=(
   com.visualstudio.code
   io.github.zen_browser.zen
 )
-
-# ── COPRs necessários ───────────────────────────────────────────────────────────
 
 enable_hyprland_stack() {
   local repos=(
@@ -73,8 +70,6 @@ enable_hyprland_stack() {
   done
 }
 
-# ── RPM Fusion ──────────────────────────────────────────────────────────────────
-
 check_rpmfusion() {
   if rpm -q rpmfusion-free-release &>/dev/null && rpm -q rpmfusion-nonfree-release &>/dev/null; then
     echo -e "${GREEN}==> RPM Fusion already enabled.${RESET}"
@@ -86,8 +81,6 @@ check_rpmfusion() {
     "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
     "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
 }
-
-# ── Seleção de pacotes com fzf ─────────────────────────────────────────────────
 
 _fzf_select() {
   local header="$1"; shift
@@ -108,8 +101,6 @@ _fzf_select() {
           --preview-window=right:40%
 }
 
-# ── Instalação de dependências ──────────────────────────────────────────────────
-
 install_dnf_dependences() {
   echo -e "${BLUE}==> Enabling COPRs...${RESET}"
   enable_hyprland_stack || return 1
@@ -120,11 +111,29 @@ install_dnf_dependences() {
 
 install_deps() {
   check_rpmfusion
-  install_dnf_dependences  || return 1
+  install_dnf_dependences   || return 1
+  install_waypaper          || return 1
   install_materia_gtk_theme || return 1
 }
 
-# ── Materia GTK Theme via Meson ─────────────────────────────────────────────────
+install_waypaper() {
+  if command -v waypaper &>/dev/null; then
+    echo -e "${GREEN}==> waypaper already installed ($(waypaper --version 2>/dev/null || true)).${RESET}"
+    return 0
+  fi
+
+  echo -e "${BLUE}==> Installing waypaper via pip...${RESET}"
+
+  if ! command -v pip3 &>/dev/null; then
+    sudo dnf install -y python3-pip || return 1
+  fi
+
+  pip3 install --user waypaper --break-system-packages || return 1
+
+  export PATH="$HOME/.local/bin:$PATH"
+
+  echo -e "${GREEN}  [ok]     waypaper installed.${RESET}"
+}
 
 install_materia_gtk_theme() {
   local repo_dir="$HOME/.local/src/materia-gtk-theme"
@@ -198,8 +207,6 @@ _ensure_flatpak() {
   fi
 }
 
-# ── Dotfiles ────────────────────────────────────────────────────────────────────
-
 copy_dotfiles() {
   local SRC="$FEDORA_DIR"
   local DEST="$HOME/.config"
@@ -233,12 +240,10 @@ copy_dotfiles() {
     || { echo -e "${RED}==> Finished with $errors error(s).${RESET}"; return 1; }
 }
 
-# ── Remoção ─────────────────────────────────────────────────────────────────────
-
 remove_dependencies() {
   local PACKAGES=(
-    hyprland waybar swaync swaybg alacritty rofi
-    grim slurp imv thunar
+    hyprland waybar SwayNotificationCenter swaybg alacritty rofi
+    grim slurp imv Thunar
   )
 
   local removable=()
@@ -283,8 +288,6 @@ remove_files() {
     && echo -e "${GREEN}==> Done. $count folder(s) removed.${RESET}" \
     || { echo -e "${RED}==> Finished with $errors error(s).${RESET}"; return 1; }
 }
-
-# ── SDDM autologin ──────────────────────────────────────────────────────────────
 
 configure_autologin() {
   local user="${SUDO_USER:-$USER}"
