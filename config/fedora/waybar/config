@@ -1,0 +1,61 @@
+{
+    "layer": "top",
+    "position": "top",
+    "output": "HDMI-A-1",
+    "height": 20,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": ["battery", "pulseaudio", "custom/separator", "clock", "custom/separator","tray", "custom/separator" ,"custom/power"],
+
+    "hyprland/workspaces": {
+    "format": "{name}",
+    "on-click": "activate",
+    "sort-by-number": true,
+    "all-outputs": false
+    },
+
+    "hyprland/window": {
+        "format": "{title}",
+        "separate-outputs": true,
+        "max-length": 50
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-icons": [],
+        "tooltip-format": "{timeTo}"
+    },
+    "pulseaudio": {
+    "format": "{volume}% {icon}",
+    "format-icons": ["󰕿", "󰖀", "󰕾"],
+    "format-muted": "󰝟 mudo",
+    "on-click": "pavucontrol"
+    },
+    "custom/separator": {
+    "format": "|",
+    "interval": "once",
+    "tooltip": false
+    },
+    "clock": {
+	"format": "{:%H:%M %p}",
+	"format-alt": "{:%Y-%m-%d}",
+	"tooltip-format": "{:%Y-%m-%d | %H:%M}",
+	"actions": {
+		"on-click": "mode"
+	}
+},
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    },
+
+    "custom/power": {
+        "format": "⏻",
+        "tooltip": false,
+        "on-click": "echo -e 'Desligar\nReiniciar\nSuspender\nSair' | rofi -dmenu -p 'Sistema:' -i | xargs -I{} bash -c 'case {} in Desligar) shutdown now;; Reiniciar) reboot;; Suspender) systemctl suspend;; Sair) hyprlandctl dispatch exit;; esac'"
+    }
+}
