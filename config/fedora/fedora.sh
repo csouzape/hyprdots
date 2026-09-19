@@ -111,12 +111,50 @@ _fzf_select() {
           --preview-window=right:40%
 }
 
+is_kde_plasma_installed() {
+  rpm -q plasma-desktop &>/dev/null
+}
+
+swap_identity_kde_to_basic() {
+  is_kde_plasma_installed || return 0
+
+  echo -e "${BLUE}==> KDE Plasma detected — swapping KDE identity for generic...${RESET}"
+
+  if rpm -q fedora-release-identity-kde &>/dev/null; then
+    sudo dnf5 swap -y fedora-release-identity-kde fedora-release-identity-basic \
+      --setopt=protected_packages=
+  fi
+
+  if rpm -q fedora-release-kde &>/dev/null; then
+    sudo dnf5 swap -y fedora-release-kde fedora-release-common \
+      --setopt=protected_packages=
+  fi
+}
+
+swap_identity_basic_to_kde() {
+  is_kde_plasma_installed || return 0
+
+  echo -e "${BLUE}==> KDE Plasma detected — restoring KDE identity...${RESET}"
+
+  if rpm -q fedora-release-identity-basic &>/dev/null; then
+    sudo dnf5 swap -y fedora-release-identity-basic fedora-release-identity-kde \
+      --setopt=protected_packages=
+  fi
+
+  if rpm -q fedora-release-common &>/dev/null; then
+    sudo dnf5 swap -y fedora-release-common fedora-release-kde \
+      --setopt=protected_packages=
+  fi
+}
+
 install_dnf_dependences() {
   echo -e "${BLUE}==> Enabling COPRs...${RESET}"
   enable_hyprland_stack || return 1
 
   echo -e "${BLUE}==> Installing base DNF packages...${RESET}"
   sudo dnf install "${DNF_OPTS[@]}" "${_DNF_BASE[@]}" || return 1
+
+  swap_identity_kde_to_basic
 }
 
 install_deps() {
@@ -151,8 +189,6 @@ install_materia_gtk_theme() {
 
   echo -e "${BLUE}==> Materia GTK Theme${RESET}"
 
-  # meson.build baixa/compila dart-sass via npm quando o binário "sass" não
-  # está no PATH — sem npm o "meson setup" falha em tempo de configuração.
   if ! command -v npm &>/dev/null; then
     echo -e "${CYAN}  [deps]    Installing npm (required by meson.build)...${RESET}"
     sudo dnf install "${DNF_OPTS[@]}" npm || return 1
@@ -169,11 +205,9 @@ install_materia_gtk_theme() {
 
   cd "$repo_dir" || return 1
 
-  # Remove build dir anterior se existir
   [[ -d build ]] && rm -rf build
 
   echo -e "${CYAN}  [meson]   Configuring...${RESET}"
-  # gnome_shell_version informado manualmente — não requer gnome-shell instalado
   meson setup build -Dgnome_shell_version=47 || return 1
 
   echo -e "${CYAN}  [compile] Building...${RESET}"
@@ -186,7 +220,7 @@ install_materia_gtk_theme() {
   cd - >/dev/null
 }
 
-# ── Instalação de apps opcionais ────────────────────────────────────────────────
+# ── Optional app installation ──────────────────────────────────────────────────
 
 install_apps() {
   local -a dnf_sel flatpak_sel
@@ -273,6 +307,8 @@ remove_dependencies() {
 
   echo -e "${BLUE}==> Removing: ${removable[*]}${RESET}"
   sudo dnf remove -y "${removable[@]}" || return 1
+
+  swap_identity_basic_to_kde
 }
 
 remove_files() {
