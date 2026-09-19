@@ -8,6 +8,16 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 RESET='\033[0m'
 
+LOCKFILE="/tmp/hyprdots-fedora.lock"
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+  echo -e "${RED}==>  There is already an instance of this script running.(lock: $LOCKFILE).${RESET}"
+  echo -e "${YELLOW}==>  If you are certain that no other instance is running: rm -f $LOCKFILE${RESET}"
+  exit 1
+fi
+
+DNF_OPTS=(-y --setopt=timeout=30)
+
 _DNF_BASE=(
   hyprland
   waybar
@@ -77,7 +87,7 @@ check_rpmfusion() {
   fi
 
   echo -e "${YELLOW}==> Enabling RPM Fusion...${RESET}"
-  sudo dnf install -y \
+  sudo dnf install "${DNF_OPTS[@]}" \
     "https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
     "https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm"
 }
@@ -88,7 +98,7 @@ _fzf_select() {
 
   if ! command -v fzf &>/dev/null; then
     echo -e "${YELLOW}==> fzf not found. Installing...${RESET}"
-    sudo dnf install -y fzf
+    sudo dnf install "${DNF_OPTS[@]}" fzf
   fi
 
   printf '%s\n' "${items[@]}" \
@@ -106,7 +116,7 @@ install_dnf_dependences() {
   enable_hyprland_stack || return 1
 
   echo -e "${BLUE}==> Installing base DNF packages...${RESET}"
-  sudo dnf install -y "${_DNF_BASE[@]}" || return 1
+  sudo dnf install "${DNF_OPTS[@]}" "${_DNF_BASE[@]}" || return 1
 }
 
 install_deps() {
@@ -125,7 +135,7 @@ install_waypaper() {
   echo -e "${BLUE}==> Installing waypaper via pip...${RESET}"
 
   if ! command -v pip3 &>/dev/null; then
-    sudo dnf install -y python3-pip || return 1
+    sudo dnf install "${DNF_OPTS[@]}" python3-pip || return 1
   fi
 
   pip3 install --user waypaper --break-system-packages || return 1
@@ -140,6 +150,13 @@ install_materia_gtk_theme() {
   local repo_url="https://github.com/nana-4/materia-theme.git"
 
   echo -e "${BLUE}==> Materia GTK Theme${RESET}"
+
+  # meson.build baixa/compila dart-sass via npm quando o binário "sass" não
+  # está no PATH — sem npm o "meson setup" falha em tempo de configuração.
+  if ! command -v npm &>/dev/null; then
+    echo -e "${CYAN}  [deps]    Installing npm (required by meson.build)...${RESET}"
+    sudo dnf install "${DNF_OPTS[@]}" npm || return 1
+  fi
 
   if [[ -d "$repo_dir/.git" ]]; then
     echo -e "${CYAN}  [update]  Pulling latest changes...${RESET}"
@@ -182,7 +199,7 @@ install_apps() {
 
   if ((${#dnf_sel[@]} > 0)); then
     echo -e "${BLUE}==> Installing DNF apps: ${dnf_sel[*]}${RESET}"
-    sudo dnf install -y "${dnf_sel[@]}" || return 1
+    sudo dnf install "${DNF_OPTS[@]}" "${dnf_sel[@]}" || return 1
   else
     echo -e "${YELLOW}==> No DNF apps selected.${RESET}"
   fi
@@ -199,7 +216,7 @@ install_apps() {
 _ensure_flatpak() {
   if ! command -v flatpak &>/dev/null; then
     echo -e "${YELLOW}==> Installing flatpak...${RESET}"
-    sudo dnf install -y flatpak || return 1
+    sudo dnf install "${DNF_OPTS[@]}" flatpak || return 1
   fi
   if ! flatpak remote-list | awk '{print $1}' | grep -qx "flathub"; then
     echo -e "${YELLOW}==> Adding flathub remote...${RESET}"
