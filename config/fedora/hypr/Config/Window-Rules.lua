@@ -1,5 +1,15 @@
 hl.config({ xwayland = { force_zero_scaling = true } })
 
+local function float_rule(name, size, match)
+	hl.window_rule({
+		name = name,
+		float = true,
+		center = true,
+		size = size,
+		match = match,
+	})
+end
+
 hl.window_rule({
 	name = "suppress-maximize-events",
 	match = { class = ".*" },
@@ -26,12 +36,6 @@ hl.window_rule({
 	float = true,
 })
 
--- hl.window_rule({
---   	name = "SCREENSHARE",
--- 	no_screen_share = true,
--- 	match = { class = "^(|steam)$" },
--- })
-
 hl.window_rule({
 	name = "GAMES",
 	workspace = "9",
@@ -46,194 +50,86 @@ hl.window_rule({
 	match = { class = "^.*(steam_app_|Sober|gamescope|Lutris|Heroic).*$" },
 })
 
-hl.window_rule({
-	name = "FLOAT ONLY",
-	float = true,
-	center = true,
-	match = { title = "^.*(Vivaldi Settings|OBS Studio Crash Detected|1659040).*$" },
-	max_size = "monitor_w*0.75 monitor_h*0.7",
+float_rule("FLOAT ONLY", "monitor_w*0.75 monitor_h*0.7", {
+	title = "^.*(Vivaldi Settings|OBS Studio Crash Detected|1659040).*$",
 })
 
-hl.window_rule({
-	name = "FLOAT SMALL",
-	float = true,
-	center = true,
-	size = "monitor_w*0.2 monitor_h*0.35",
-	match = { class = "^(blueman-manager|com.network.manager|.*pupgui2|.*share-picker|solaar)$" },
+float_rule("FLOAT SMALL", "monitor_w*0.2 monitor_h*0.35", {
+	class = "^(blueman-manager|com.network.manager|.*pupgui2|.*share-picker|solaar)$",
 })
 
-hl.window_rule({
-	name = "RENAME DIALOG",
-	float = true,
-	center = true,
-	size = "monitor_w*0.35 monitor_h*0.15",
-	match = { title = "^.*(Insira o novo nome).*$" },
+float_rule("RENAME DIALOG", "monitor_w*0.35 monitor_h*0.15", {
+	title = "^.*(Insira o novo nome).*$",
 })
 
-hl.window_rule({
-	name = "FLOAT MEDIUM",
-	float = true,
-	center = true,
-	size = "monitor_w*0.45 monitor_h*0.5",
-	match = { class = "^.*(pavucontrol-qt|lsfg-vk|xdg-|Update|org.kde.ark|easyeffects).*$" },
+float_rule("FLOAT MEDIUM", "monitor_w*0.45 monitor_h*0.5", {
+	class = "^.*(pavucontrol-qt|lsfg-vk|xdg-|Update|org.kde.ark|easyeffects).*$",
 })
 
-hl.window_rule({
-	name = "LOCALSEND",
-	match = {
-		class = "org.localsend.localsend_app",
-	},
-	float = true,
-	center = true,
-	size = "monitor_w*0.5 monitor_h*0.7",
+float_rule("FLOAT LARGE", "monitor_w*0.5 monitor_h*0.58", {
+	class = "^(.*dolphin.*|qimgv|timeshift-gtk)$",
 })
 
-hl.window_rule({
-	name = "MPV",
-	float = true,
-	center = true,
-	size = "monitor_w*0.7 monitor_h*0.58",
-	match = { class = "^mpv$" },
+float_rule("LOCALSEND", "monitor_w*0.5 monitor_h*0.7", {
+	class = "org.localsend.localsend_app",
 })
 
-hl.window_rule({
-	name = "FLOAT LARGE",
-	float = true,
-	center = true,
-	size = "monitor_w*0.5 monitor_h*0.58",
-	match = { class = "^(.*dolphin.*|qimgv|timeshift-gtk)$" },
+float_rule("MPV", "monitor_w*0.7 monitor_h*0.58", {
+	class = "^mpv$",
 })
 
-hl.window_rule({
-	name = "BITWARDEN",
-	float = true,
-	center = true,
-	size = "monitor_w*0.25 monitor_h*0.6",
-	match = { class = "^brave-nngceckbapebfimnlniiiahkandclblb-Default$" },
+float_rule("BITWARDEN", "monitor_w*0.25 monitor_h*0.6", {
+	class = "^brave-nngceckbapebfimnlniiiahkandclblb-Default$",
 })
 
-hl.window_rule({
-	name = "SPOTIFY",
-	match = {
-		class = "^spotify$",
-	},
-	size = "monitor_w*0.7 monitor_h*0.7",
-	center = true,
-	float = true,
+float_rule("FLOAT-0.7x0.7", "monitor_w*0.7 monitor_h*0.7", {
+	class = "^(spotify|imv|org.pulseaudio.pavucontrol)$",
 })
 
-hl.window_rule({
-	name = "STEAM-FRIENDS",
-	float = true,
-	center = true,
-	size = "monitor_w*0.2 monitor_h*0.7",
-	match = { class = "^steam$", title = "^Lista de amigos$" },
+float_rule("OBS", "monitor_w*0.75 monitor_h*0.80", {
+	class = "com.obsproject.Studio",
 })
 
-hl.window_rule({
-	name = "STEAM-SETTINGS",
-	float = true,
-	center = true,
-	size = "monitor_w*0.7 monitor_h*0.8",
-	match = { class = "^steam$", title = "^Steam — Configurações$" },
+float_rule("Waypaper", "monitor_w*0.4 monitor_h*0.6", {
+	class = "waypaper",
 })
 
-hl.window_rule({
-	name = "STEAM-DEFAULT",
-	float = true,
-	center = true,
-	size = "monitor_w*0.8 monitor_h*0.8",
-	match = { class = "^steam$", title = "^Steam$" },
+float_rule("ZED-SETTINGS", "monitor_w*0.7 monitor_h*0.7", {
+	class = "^dev.zed.Zed$",
+	title = "^Zed — Settings$",
 })
 
-hl.window_rule({
-	name = "STEAM-RECORDINGS",
-	float = true,
-	center = true,
-	size = "monitor_w*0.5 monitor_h*0.7",
-	match = { class = "^steam$", title = "^Gravações e capturas de tela$" },
+float_rule("OBSIDIAN-SETTINGS", "monitor_w*0.6 monitor_h*0.75", {
+	class = "^md.obsidian.Obsidian$",
+	title = "^Configurações.*Obsidian.*$",
 })
 
-hl.window_rule({
-	name = "HEROIC-DEFAULT",
-	float = true,
-	center = true,
-	size = "monitor_w*0.8 monitor_h*0.8",
-	match = {
-		class = "^heroic$",
-		title = "^Heroic Games Launcher$",
-	},
+float_rule("BRAVE LOGIN GOOGLE", "monitor_w*0.45 monitor_h*0.5", {
+	class = "^brave%-browser$",
+	title = "^Fazer login nas Contas do Google %- Brave$",
 })
 
-hl.window_rule({
-	name = "PAVUCONTROL",
-	float = true,
-	center = true,
-	size = "monitor_w*0.7 monitor_h*0.7",
-	match = {
-		class = "org.pulseaudio.pavucontrol",
-	},
+float_rule("HEROIC-DEFAULT", "monitor_w*0.8 monitor_h*0.8", {
+	class = "^(heroic|com.heroicgameslauncher.hgl)$",
+	title = "^Heroic Games Launcher$",
 })
 
-hl.window_rule({
-	name = "BRAVE LOGIN GOOGLE",
-	float = true,
-	center = true,
-	size = "monitor_w*0.45 monitor_h*0.5",
-	match = {
-		class = "^brave%-browser$",
-		title = "^Fazer login nas Contas do Google %- Brave$",
-	},
+float_rule("STEAM-FRIENDS", "monitor_w*0.2 monitor_h*0.7", {
+	class = "^steam$",
+	title = "^Lista de amigos$",
 })
 
-hl.window_rule({
-	name = "OBS",
-	match = {
-		class = "com.obsproject.Studio",
-	},
-	float = true,
-	center = true,
-	size = "monitor_w*0.75 monitor_h*0.80",
+float_rule("STEAM-SETTINGS", "monitor_w*0.7 monitor_h*0.8", {
+	class = "^steam$",
+	title = "^Steam — Configurações$",
 })
 
-hl.window_rule({
-	name = "Waypaper",
-	match = {
-		class = "waypaper",
-	},
-	float = true,
-	center = true,
-	size = "monitor_w*0.4 monitor_h*0.6",
+float_rule("STEAM-DEFAULT", "monitor_w*0.8 monitor_h*0.8", {
+	class = "^steam$",
+	title = "^Steam$",
 })
 
-hl.window_rule({
-	name = "IMV",
-	float = true,
-	center = true,
-	size = "monitor_w*0.7 monitor_h*0.7",
-	match = {
-		class = "^imv$",
-	},
-})
-
-hl.window_rule({
-	name = "ZED-SETTINGS",
-	float = true,
-	center = true,
-	size = "monitor_w*0.7 monitor_h*0.7",
-	match = {
-		class = "^dev.zed.Zed$",
-		title = "^Zed — Settings$",
-	},
-})
-
-hl.window_rule({
-	name = "OBSIDIAN-SETTINGS",
-	float = true,
-	center = true,
-	size = "monitor_w*0.6 monitor_h*0.75",
-	match = {
-		class = "^md.obsidian.Obsidian$",
-		title = "^Configurações.*Obsidian.*$",
-	},
+float_rule("STEAM-RECORDINGS", "monitor_w*0.5 monitor_h*0.7", {
+	class = "^steam$",
+	title = "^Gravações e capturas de tela$",
 })
