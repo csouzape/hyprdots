@@ -226,3 +226,14 @@ hl.window_rule({
 		title = "^Zed — Settings$",
 	},
 })
+
+hl.window_rule({
+	name = "OBSIDIAN-SETTINGS",
+	float = true,
+	center = true,
+	size = "monitor_w*0.6 monitor_h*0.75",
+	match = {
+		class = "^md.obsidian.Obsidian$",
+		title = "^Configurações.*Obsidian.*$",
+	},
+})
