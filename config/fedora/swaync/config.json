@@ -57,6 +57,7 @@
     "title",
     "dnd",
     "mpris",
+    "volume",
     "notifications"
   ],
   "widget-config": {
@@ -97,6 +98,10 @@
           "update-command": "sh -c '[[ $(nmcli radio wifi) == \"enabled\" ]] && echo true || echo false'"
         }
       ]
+    },
+    "volume": {
+      "label": "󰕾",
+      "show-per-app": true
     }
   }
 }
